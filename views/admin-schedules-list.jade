@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    h1.
+        User Schedules
+    ul
+        each sched, i in schedules
+            li
+                a(href="/admin/schedule/view/#{sched._id}")= sched.title

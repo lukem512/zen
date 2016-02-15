@@ -1,0 +1,16 @@
+extends layout
+
+block content
+    script(src='/javascripts/bcrypt.min.js')
+    script(src='/javascripts/auth/hash.js')
+    script(src='/javascripts/admin/users/new.js')
+    h1= title
+    form#formAddUser(name="adduser", method="post", action="/admin/users/new", onsubmit="validate()")
+        input#inputUserName(type="text", placeholder="Username", name="username")
+        input#inputUserEmail(type="text", placeholder="Email address", name="useremail")
+        input#inputUserPass(type="password", placeholder="Password", name="userpass")
+        each group, i in groups
+            label
+                input(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
+                = group.name
+        button#btnSubmit(type="submit") Create

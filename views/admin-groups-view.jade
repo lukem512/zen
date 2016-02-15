@@ -1,0 +1,14 @@
+extends layout
+
+block content
+	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/admin/groups/view.js')
+	h1.
+		Details for #{group.name}
+	p#groupId= group._id
+	form#formAddGroup(name="addgroup",method="post",action="/admin/groups/update")
+		input#inputGroupName(type="text", placeholder="Name", name="name", value="#{group.name}")
+		textarea#inputGroupDescription(placeholder="No description was given.", name="description")
+			| #{group.description}
+		button#btnUpdate(type="button", onclick="update();") Update
+		button#btnDelete(type="button", onclick="del();") Delete
