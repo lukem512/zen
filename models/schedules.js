@@ -54,7 +54,7 @@ module.exports.update = function(db, id, title, description, start_time, end_tim
         _id: sanitize(id)
     }, {
         $set: {
-            title: sanitize(name),
+            title: sanitize(title),
             description: sanitize(description),
             start_time: sanitize(start_time),
             end_time: sanitize(end_time)

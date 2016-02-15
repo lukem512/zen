@@ -8,7 +8,7 @@ block content
 	h1.
 		Details for #{user.username}
 	p#userId= user._id
-	form#formAddUser(name="adduser",method="post",action="/admin/users/new")
+	form#formViewUser(name="viewuser",method="post",action="/admin/users/update")
 		input#inputUserName(type="text", placeholder="Username", name="username", value="#{user.username}")
 		input#inputUserEmail(type="text", placeholder="Email address", name="useremail", value="#{user.email}")
 		input#inputUserPass(type="password", placeholder="Password", name="userpass", value="password")

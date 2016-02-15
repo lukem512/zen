@@ -216,14 +216,77 @@ router.get('/schedules/view/:id', function(req, res) {
             return res.render('404');
         }
         else {
-            res.render('admin-schedules-list', {
-                schedule: schedule
+            users.list(req.db, function(err, users) {
+                if (err) {
+                    console.error(err);
+                    res.send('There was a problem adding the information to the database.');
+                }
+                if (!users) {
+                    users = [];
+                }
+                res.render('admin-schedules-view', {
+                    schedule: schedule,
+                    users: users
+                });
             });
         }
     });
 });
 
-// TODO: new, update, delete
+/* GET new schedule page. */
+router.get('/schedules/new', function(req, res) {
+    users.list(req.db, function(err, users){
+        if (err) {
+            console.error(err);
+            return res.render('500');
+        } else {
+            return res.render('admin-schedules-new', { 
+                title: 'Add New Schedule',
+                users: users
+            });
+        }
+    });
+});
+
+/* POST to add schedule service */
+router.post('/schedules/new', function(req, res) {
+    schedules.add(req.db, req.body.title, req.body.description, req.body.start_time,
+        req.body.end_time, req.body.owner, function(err, doc) {
+        if (err) {
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.redirect('/admin/schedules/list');
+        }
+    });
+});
+
+/* POST to schedule update service */
+router.post('/schedules/update', function(req, res) {
+    schedules.update(req.db, req.body.id, req.body.title, req.body.description, req.body.start_time,
+        req.body.end_time, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
+});
+
+/* DELETE to schedule update service */
+router.delete('/schedules/update/:id', function(req, res) {
+    schedules.delete(req.db, req.params.id, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
+});
 
 /*
  * Pledges

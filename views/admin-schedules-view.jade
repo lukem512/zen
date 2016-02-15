@@ -1,0 +1,19 @@
+extends layout
+
+block content
+	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/admin/schedules/view.js')
+	h1.
+		Details for #{schedule.title}
+	p#scheduleId= schedule._id
+	form#formViewSchedule(name="viewschedule", method="post", action="/admin/schedules/update")
+		input#inputTitle(type="text", placeholder="Title", name="title", value="#{schedule.title}")
+		input#inputStartTime(type="text", placeholder="Start Time", name="start_time", value="#{schedule.start_time}")
+		input#inputEndTime(type="text", placeholder="End Time", name="end_time", value="#{schedule.end_time}")
+		textarea#inputDescription(placeholder="Optional description about the event", name="description")
+			| #{schedule.description}
+		select#inputOwner(name="owner")
+			for user in users
+				option(selected=schedule.owner == user.username) #{user.username}
+		button#btnUpdate(type="button", onclick="update();") Update
+		button#btnDelete(type="button", onclick="del();") Delete
