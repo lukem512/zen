@@ -3,6 +3,7 @@ extends layout
 block content
     script(src='/javascripts/bcrypt.min.js')
     script(src='/javascripts/auth/hash.js')
+    script(src='/javascripts/admin/generic.js')
     script(src='/javascripts/admin/users/new.js')
     h1= title
     form#formAddUser(name="adduser", method="post", action="/admin/users/new", onsubmit="validate()")

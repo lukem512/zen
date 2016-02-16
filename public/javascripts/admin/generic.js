@@ -1,3 +1,16 @@
+var _validate = function(validator, modifier) {
+	var validated = validator || function() { return true; };
+	var modifier = modifier || function() { return; };
+	if(validated()){
+		modifier();
+        document.form.submit();
+        return true;
+    }
+    else {
+    	return false;
+    }
+}
+
 var _update = function(updateApiUrl, nextUrl, params) {
 	console.log(params);
 	$.ajax({

@@ -1,8 +1,7 @@
 extends layout
 
 block content
-	h1.
-		Pledges
+	h1= title
 	ul
 		each pledge, i in pledges
 			li
@@ -10,4 +9,3 @@ block content
 					| #{pledge.username}
 					|  for 
 					| #{pledge.schedule}
-					| .

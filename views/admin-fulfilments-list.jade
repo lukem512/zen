@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	h1= title
+	ul
+		each fulfilment, i in fulfilments
+			li
+				a(href="/admin/fulfilments/view/#{fulfilment._id}")
+					= fulfilment.username
+					|  from 
+					= fulfilment.start_time
+					|  to 
+					= fulfilment.end_time

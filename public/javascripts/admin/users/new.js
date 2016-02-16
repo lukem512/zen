@@ -1,16 +1,11 @@
 var validate() = function() {
-	var validated = true;
-
-	// TODO
-
-	if(validated){
-		$('#inputUserPass').val(
+	return _validate(function(){
+        // TODO
+        return true;
+    }, function(){
+    	// Modify the password to return the hash
+    	$('#inputUserPass').val(
 			_hash($('#inputUserPass').val(), 10)
 		);
-        document.form.submit();
-        return true;
-    }
-    else {
-    	return false;
-    }
+    })
 }

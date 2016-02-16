@@ -1,6 +1,7 @@
 extends layout
 
 block content
+	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/schedules/new.js')
 	h1= title
 	form#formAddSchedule(name="addschedule", method="post", action="/admin/schedules/new", onsubmit="validate()")

@@ -5,7 +5,7 @@ var users = require('../models/users');
 var groups = require('../models/groups');
 var schedules = require('../models/schedules');
 var pledges = require('../models/pledges');
-// var fulfilments = require('../models/fulfilments');
+var fulfilments = require('../models/fulfilments');
 
 /*
  * Users.
@@ -391,14 +391,94 @@ router.delete('/pledges/update/:id', function(req, res) {
     });
 });
 
-// TODO
-
 /*
  * Fulfilments
  * Pledges are fulfilled with fulfilments.
 */
 
-// TODO
+/* GET list fulfilments page. */
+router.get('/fulfilments/list', function(req, res) {
+    fulfilments.list(req.db, function(err, fulfilments){
+        res.render('admin-fulfilments-list', {
+            title: 'Fulfilments',
+            fulfilments: fulfilments
+        });
+    });
+});
+
+/* GET new fulfilment page. */
+router.get('/fulfilments/new', function(req, res) {
+    users.list(req.db, function(err, users){
+        if (err) {
+            console.error(err);
+            res.render('500');
+        }
+        else {
+            res.render('admin-fulfilments-new', { 
+                title: 'Add New Fulfilment',
+                users: users
+            });  
+        }
+    });
+});
+
+/* GET fulfilment information */
+router.get('/fulfilments/view/:id', function(req, res) {
+    fulfilments.get(req.db, req.params.id, function(err, fulfilment){
+        if (err) {
+            console.error(err);
+            res.render('500');
+        }
+        else if (!fulfilment) {
+            res.render('404');
+        }
+        else {
+            res.render('admin-fulfilments-view', {
+                title: 'View Fulfilment',
+                fulfilment: fulfilment
+            });
+        }
+    });
+});
+
+/* POST to add fulfilment service */
+router.post('/fulfilments/new', function(req, res) {
+    fulfilments.add(req.db, req.body.username, req.body.start_time, req.body.end_time, function(err, doc) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.redirect('/admin/fulfilments/list');
+        }
+    });
+});
+
+/* POST to schedule update service */
+router.post('/fulfilments/update', function(req, res) {
+    fulfilments.update(req.db, req.body.id, req.body.start_time, req.body.end_time, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
+});
+
+/* DELETE to fulfilment update service */
+router.delete('/fulfilments/update/:id', function(req, res) {
+    fulfilments.delete(req.db, req.params.id, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
+});
 
 /*
  * Export the routes.

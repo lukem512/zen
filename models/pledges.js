@@ -1,18 +1,6 @@
 var sanitize = require('mongo-sanitize');
 
-/*
- * Private methods
-*/
-
-var usernameValid = function(owner) {
-    // TODO - is the owner real?
-    return true;
-}
-
-var scheduleValid = function(schedule) {
-    // TODO - is the schedule real?
-    return true;
-}
+var v = require('./validation');
 
 /*
  * Exports
@@ -35,8 +23,8 @@ module.exports.get = function(db, id, callback) {
 };
 
 module.exports.add = function(db, username, schedule, callback) {
-    if (!usernameValid(username)) return callback("Invalid username", null);
-    if (!scheduleValid(schedule)) return callback("Invalid schedule", null);
+    if (!v.usernameValid(username)) return callback("Invalid username", null);
+    if (!v.scheduleValid(schedule)) return callback("Invalid schedule", null);
     var collection = db.get('pledges');
     collection.insert({
         username: sanitize(username),

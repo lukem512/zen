@@ -1,24 +1,6 @@
 var sanitize = require('mongo-sanitize');
-var validator = require('validator');
 
-/*
- * Private methods
-*/
-
-var usernameValid = function(name) {
-    if (name == "") return false;
-    // TODO: is the username unique?
-    return true;
-}
-
-var emailValid = function(email) {
-    return validator.isEmail(email);
-}
-
-var groupsValid = function(groups) {
-    // TODO: do the groups exist?
-    return true;
-}
+var v = require('./validation');
 
 /*
  * Exports
@@ -30,7 +12,7 @@ module.exports.list = function(db, callback) {
 };
 
 module.exports.get = function(db, username, callback) {
-    if (!usernameValid(username)) return callback("Invalid username", null);
+    if (!v.usernameValid(username)) return callback("Invalid username", null);
 	var query = {
     	username: sanitize(username)
     };
@@ -42,9 +24,9 @@ module.exports.get = function(db, username, callback) {
 };
 
 module.exports.add = function(db, username, email, hash, groups, callback) {
-    if (!usernameValid(username)) return callback("Invalid username", null);
-    if (!emailValid(email)) return callback("Invalid email", null);
-    if (!groupsValid(groups)) return callback("Invalid groups", null);
+    if (!v.usernameValid(username)) return callback("Invalid username", null);
+    if (!v.emailValid(email)) return callback("Invalid email", null);
+    if (!v.groupsValid(groups)) return callback("Invalid groups", null);
     if (module.exports.get(db, username, function(err, returnedName) {
         if (err) {
             return callback(err, null);
@@ -63,9 +45,9 @@ module.exports.add = function(db, username, email, hash, groups, callback) {
 };
 
 module.exports.update = function(db, id, username, email, hash, groups, callback) {
-    if (!usernameValid(username)) return callback("Invalid username", null);
-    if (!emailValid(email)) return callback("Invalid email", null);
-    if (!groupsValid(groups)) return callback("Invalid groups", null);
+    if (!v.usernameValid(username)) return callback("Invalid username", null);
+    if (!v.emailValid(email)) return callback("Invalid email", null);
+    if (!v.groupsValid(groups)) return callback("Invalid groups", null);
     if (module.exports.get(db, username, function(err, returnedName) {
         if (err) {
             return callback(err, null);
@@ -88,7 +70,7 @@ module.exports.update = function(db, id, username, email, hash, groups, callback
 };
 
 module.exports.delete = function(db, username, callback) {
-    if (!usernameValid(username)) return callback("Invalid username", null);
+    if (!v.usernameValid(username)) return callback("Invalid username", null);
     var collection = db.get('users');
     collection.remove({
         username: sanitize(username)

@@ -1,20 +1,7 @@
 var sanitize = require('mongo-sanitize');
 
 var groups = require('./groups');
-
-/*
- * Private methods
-*/
-
-var ownerValid = function(owner) {
-    // TODO - is the owner real?
-    return true;
-}
-
-var timesValid = function(start_time, end_time) {
-    if (start_time >= end_time) return false;
-    return true;
-}
+var v = require('./validation');
 
 /*
  * Exports
@@ -37,8 +24,8 @@ module.exports.get = function(db, id, callback) {
 };
 
 module.exports.add = function(db, title, description, start_time, end_time, owner, callback) {
-    if (!ownerValid)                        return callback("Invalid owner", null);
-    if (!timesValid(start_time, end_time))  return callback("Invalid times", null);
+    if (!v.usernameValid(owner)) return callback("Invalid owner", null);
+    if (!v.timesValid(start_time, end_time)) return callback("Invalid times", null);
     var collection = db.get('schedules');
     collection.insert({
         title: sanitize(title),
@@ -50,7 +37,7 @@ module.exports.add = function(db, title, description, start_time, end_time, owne
 };
 
 module.exports.update = function(db, id, title, description, start_time, end_time, callback) {
-    if (!timesValid(start_time, end_time))  return callback("Invalid times", null);
+    if (!v.timesValid(start_time, end_time)) return callback("Invalid times", null);
     var collection = db.get('schedules');
     collection.update({
         _id: sanitize(id)

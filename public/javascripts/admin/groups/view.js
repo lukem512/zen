@@ -11,5 +11,5 @@ var update = function() {
 };
 
 var del = function() {
-	_update(updateApiUrl, listApiUrl, $('#inputGroupName').val());
+	_del(updateApiUrl, listApiUrl, $('#inputGroupName').val());
 };

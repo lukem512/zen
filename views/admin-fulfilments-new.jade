@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/admin/fulfilments/new.js')
+	h1= title
+	form#formAddFulfilment(name="addfulfilment",method="post",action="/admin/fulfilments/new", onsubmit="validate()")
+		select#inputUsername(name="username")
+			for user in users
+				option #{user.username}
+		input#inputStartTime(type="text", placeholder="Start time", name="start_time")
+		input#inputEndTime(type="text", placeholder="End time", name="end_time")
+		button#btnSubmit(type="submit") Create
