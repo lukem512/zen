@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	h1.
+		Pledges
+	ul
+		each pledge, i in pledges
+			li
+				a(href="/admin/pledges/view/#{pledge._id}")
+					| #{pledge.username}
+					|  for 
+					| #{pledge.schedule}
+					| .

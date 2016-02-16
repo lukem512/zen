@@ -96,3 +96,15 @@ module.exports.delete = function(db, username, callback) {
         justOne: true
     }, callback);
 };
+
+// TODO: DOESN'T WORK.
+module.exports.getInGroup = function(db, group, callback) {
+    var query = {
+        groups: sanitize(group)
+    };
+    var collection = db.get('users');
+    collection.find(query,{},function(e, users){
+        if (!users || users.length == 0) users = [];
+        callback(e, users);
+    });
+};

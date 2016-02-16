@@ -1,5 +1,7 @@
 var sanitize = require('mongo-sanitize');
 
+var users = require('./users');
+
 /*
  * Private methods
 */
@@ -34,23 +36,19 @@ module.exports.get = function(db, name, callback) {
 };
 
 module.exports.add = function(db, name, description, callback) {
-    if (!nameValid(name)) {
-        return callback("Invalid name", null);
-    } else {
-        if (module.exports.get(db, name, function(err, returnedName) {
-            if (err) {
-                return callback(err, null);
-            }
-            if (returnedName) {
-                return callback("Name is not unique", null);
-            }
-            var collection = db.get('groups');
-            collection.insert({
-                name: sanitize(name),
-                description: sanitize(description)
-            }, callback);
-        }));
-    }
+    module.exports.get(db, name, function(err, returnedName) {
+        if (err) {
+            return callback(err, null);
+        }
+        if (returnedName) {
+            return callback("Name is not unique", null);
+        }
+        var collection = db.get('groups');
+        collection.insert({
+            name: sanitize(name),
+            description: sanitize(description)
+        }, callback);
+    });
 };
 
 module.exports.update = function(db, id, name, description, callback) {
@@ -80,4 +78,8 @@ module.exports.delete = function(db, name, callback) {
             justOne: true
         }, callback);
     }
+};
+
+module.exports.members = function(db, name, callback) {
+    users.getInGroup(db, name, callback);
 };

@@ -1,5 +1,7 @@
 var sanitize = require('mongo-sanitize');
 
+var groups = require('./groups');
+
 /*
  * Private methods
 */
@@ -69,4 +71,37 @@ module.exports.delete = function(db, id, callback) {
     }, {
         justOne: true
     }, callback);
+};
+
+module.exports.getByOwner = function(db, owner, callback) {
+    var owner = sanitize(owner);
+    var query = {
+        owner: owner
+    };
+    var collection = db.get('schedules');
+    collection.find(query,{},function(e, schedules){
+        if (!schedules || schedules.length == 0) schedules = [];
+        callback(e, schedules);
+    });
+};
+
+module.exports.getByOwnerGroup = function(db, group, callback) {
+    groups.members(db, group, function(e, members){
+        if (e) {
+            callback(e, null);
+        }
+        else {
+            var query = {
+                owner: { $in: members.map(function(m){
+                    return m.username;
+                }) }
+            };
+            console.log(JSON.stringify(query));
+            var collection = db.get('schedules');
+            collection.find(query,{},function(e, schedules){
+                if (!schedules || schedules.length == 0) schedules = [];
+                callback(e, schedules);
+            });
+        }
+    })
 };

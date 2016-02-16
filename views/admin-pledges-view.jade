@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/admin/pledges/view.js')
+	h1.
+		Pledge Details
+	p#pledgeId= pledge._id
+	form#formViewPledge(name="viewpledge",method="post",action="/admin/pledges/update")
+		p
+			| User 
+			a(href="/admin/users/view/#{pledge.username}") #{pledge.username}
+			|  has pledged to attend schedule 
+			a(href="/admin/schedules/view/#{pledge.schedule}") #{pledge.schedule}
+			| .
+		button#btnDelete(type="button", onclick="del();") Delete

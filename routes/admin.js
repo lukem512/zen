@@ -1,11 +1,10 @@
 var express = require('express');
-var sanitize = require('mongo-sanitize');
 var router = express.Router();
 
 var users = require('../models/users');
 var groups = require('../models/groups');
 var schedules = require('../models/schedules');
-// var pledges = require('../models/pledges');
+var pledges = require('../models/pledges');
 // var fulfilments = require('../models/fulfilments');
 
 /*
@@ -18,9 +17,11 @@ router.get('/users/list', function(req, res) {
     users.list(req.db, function(err, users){
         if (err) {
             console.error(err);
-            return res.render('500');
-        } else {
-            return res.render('admin-users-list', {
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.render('admin-users-list', {
+                title: 'Users',
                 users: users
             });
         }
@@ -32,21 +33,22 @@ router.get('/users/view/:username', function(req, res) {
     groups.list(req. db, function(err, groups){
     	if (err) {
     		console.error(err);
-    		return res.render('500');
+    		res.send('There was a problem adding the information to the database.');
     	}
         users.get(req.db, req.params.username, function(err, user){
             if (err) {
                 console.error(err);
                 return res.render('500');
-            } else {
-                if (!user) {
-                    res.render('404');
-                } else {
-                    res.render('admin-users-view', {
-                        user: user,
-                        groups: groups
-                    });
-                }
+            }
+            else if (!user) {
+                res.render('404');
+            }
+            else {
+                res.render('admin-users-view', {
+                    title: 'View User',
+                    user: user,
+                    groups: groups
+                });
             }
         });
     });
@@ -54,15 +56,17 @@ router.get('/users/view/:username', function(req, res) {
 
 /* GET new user page. */
 router.get('/users/new', function(req, res) {
-	groups.list(db, function(err, groups){
+	groups.list(req.db, function(err, groups){
     	if (err) {
     		console.error(err);
-    		return res.render('500');
+    		res.render('500');
     	}
-    	res.render('admin-users-new', {
-	    	title: 'Add New User',
-	    	groups: groups
-	    });
+        else {
+        	res.render('admin-users-new', {
+    	    	title: 'Add New User',
+    	    	groups: groups
+    	    });
+        }
     });
 });
 
@@ -122,21 +126,30 @@ router.get('/groups/list', function(req, res) {
     groups.list(db, function(err, groups){
     	if (err) {
     		console.error(err);
-    		return res.render('500');
+    		res.render('500');
     	}
-        res.render('admin-groups-list', {
-            groups: groups
-        });
+        else {
+            res.render('admin-groups-list', {
+                title: 'User Groups',
+                groups: groups
+            });
+        }
     });
 });
 
 /* GET group information */
 router.get('/groups/view/:name', function(req, res) {
    	groups.get(req.db, req.params.name, function(err, group){
-    	if (!group) {
+        if (err) {
+            console.error(err);
+            res.render('500');
+        }
+    	else if (!group) {
     		res.render('404');
-    	} else {
+    	}
+        else {
         	res.render('admin-groups-view', {
+                title: 'View Group',
             	group: group
         	});
     	}
@@ -210,24 +223,27 @@ router.get('/schedules/view/:id', function(req, res) {
     schedules.get(req.db, req.params.id, function(err, schedule){
         if (err) {
             console.error(err);
-            res.send('There was a problem adding the information to the database.');
+            res.render('500');
         }
         else if (!schedule) {
-            return res.render('404');
+            res.render('404');
         }
         else {
             users.list(req.db, function(err, users) {
                 if (err) {
                     console.error(err);
-                    res.send('There was a problem adding the information to the database.');
+                    res.render('500');
                 }
-                if (!users) {
-                    users = [];
+                else {
+                    if (!users) {
+                        users = [];
+                    }
+                    res.render('admin-schedules-view', {
+                        title: 'View Schedule',
+                        schedule: schedule,
+                        users: users
+                    });
                 }
-                res.render('admin-schedules-view', {
-                    schedule: schedule,
-                    users: users
-                });
             });
         }
     });
@@ -238,9 +254,10 @@ router.get('/schedules/new', function(req, res) {
     users.list(req.db, function(err, users){
         if (err) {
             console.error(err);
-            return res.render('500');
-        } else {
-            return res.render('admin-schedules-new', { 
+            res.render('500');
+        }
+        else {
+            res.render('admin-schedules-new', { 
                 title: 'Add New Schedule',
                 users: users
             });
@@ -253,6 +270,7 @@ router.post('/schedules/new', function(req, res) {
     schedules.add(req.db, req.body.title, req.body.description, req.body.start_time,
         req.body.end_time, req.body.owner, function(err, doc) {
         if (err) {
+            console.error(err);
             res.send('There was a problem adding the information to the database.');
         }
         else {
@@ -292,6 +310,86 @@ router.delete('/schedules/update/:id', function(req, res) {
  * Pledges
  * Users can pledge to join a schedule.
 */
+
+/* GET pledge listing page. */
+router.get('/pledges/list', function(req, res) {
+    pledges.list(req.db, function(err, pledges){
+        res.render('admin-pledges-list', {
+            title: 'Pledges',
+            pledges: pledges
+        });
+    });
+});
+
+/* GET pledge information */
+router.get('/pledges/view/:id', function(req, res) {
+    pledges.get(req.db, req.params.id, function(err, pledge){
+        if (err) {
+            console.error(err);
+            res.render('500');
+        }
+        else if (!pledge) {
+            res.render('404');
+        }
+        else {
+            res.render('admin-pledges-view', {
+                title: 'View Pledge',
+                pledge: pledge
+            });
+        }
+    });
+});
+
+/* GET new pledge page. */
+router.get('/pledges/new', function(req, res) {
+    users.list(req.db, function(err, users){
+        if (err) {
+            console.error(err);
+            res.render('500');
+        }
+        else {
+            schedules.list(req.db, function(err, schedules){
+                if (err) {
+                    console.error(err);
+                    res.render('500');
+                } 
+                else {
+                    res.render('admin-pledges-new', { 
+                        title: 'Add New Pledge',
+                        users: users,
+                        schedules: schedules
+                    });
+                }
+            })   
+        }
+    });
+});
+
+/* POST to add pledge service */
+router.post('/pledges/new', function(req, res) {
+    pledges.add(req.db, req.body.username, req.body.schedule, function(err, doc) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.redirect('/admin/pledges/list');
+        }
+    });
+});
+
+/* DELETE to pledge update service */
+router.delete('/pledges/update/:id', function(req, res) {
+    pledges.delete(req.db, req.params.id, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
+});
 
 // TODO
 
