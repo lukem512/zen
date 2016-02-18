@@ -30,8 +30,8 @@ module.exports.add = function(db, title, description, start_time, end_time, owne
     collection.insert({
         title: sanitize(title),
         description: sanitize(description),
-        start_time: sanitize(start_time),
-        end_time: sanitize(end_time),
+        start_time: parseInt(sanitize(start_time)),
+        end_time: parseInt(sanitize(end_time)),
         owner: sanitize(owner)
     }, callback);
 };
@@ -45,8 +45,8 @@ module.exports.update = function(db, id, title, description, start_time, end_tim
         $set: {
             title: sanitize(title),
             description: sanitize(description),
-            start_time: sanitize(start_time),
-            end_time: sanitize(end_time)
+            start_time: parseInt(sanitize(start_time)),
+            end_time: parseInt(sanitize(end_time))
         }
     }, callback);
 };
@@ -74,16 +74,13 @@ module.exports.getByOwner = function(db, owner, callback) {
 
 module.exports.getByOwnerGroup = function(db, group, callback) {
     groups.members(db, group, function(e, members){
-        if (e) {
-            callback(e, null);
-        }
+        if (e) callback(e, null);
         else {
             var query = {
                 owner: { $in: members.map(function(m){
                     return m.username;
                 }) }
             };
-            console.log(JSON.stringify(query));
             var collection = db.get('schedules');
             collection.find(query,{},function(e, schedules){
                 if (!schedules || schedules.length == 0) schedules = [];
@@ -91,4 +88,24 @@ module.exports.getByOwnerGroup = function(db, group, callback) {
             });
         }
     })
+};  
+
+module.exports.getBetweenTimes = function(db, start_time, end_time, callback) {
+    var query = {
+        start_time: { $gte: parseInt(sanitize(start_time)) },
+        end_time: { $lte: parseInt(sanitize(end_time)) }
+    };
+    var collection = db.get('schedules');
+    collection.find(query,{},callback);
+};
+
+module.exports.getOverlapsTimes = function(db, start_time, end_time, callback) {
+    var query = {
+        $or: [
+            { start_time: { $gte: parseInt(sanitize(start_time)) } },
+            { end_time: { $lte: parseInt(sanitize(end_time)) } }
+        ]
+    };
+    var collection = db.get('schedules');
+    collection.find(query,{},callback);
 };

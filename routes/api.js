@@ -4,8 +4,8 @@ var router = express.Router();
 var users = require('../models/users');
 var groups = require('../models/groups');
 var schedules = require('../models/schedules');
-// var pledges = require('../models/pledges');
-// var fulfilments = require('../models/fulfilments');
+var pledges = require('../models/pledges');
+var fulfilments = require('../models/fulfilments');
 
 /*
  * Users.
@@ -147,6 +147,76 @@ router.get('/schedules/view/:id', function(req, res) {
         }
         else {
             res.json(schedule);
+        }
+    });
+});
+
+/*
+ * Fulfilments
+ * Users can create schedules, visible to their group.
+*/
+
+
+/* GET fulfilment listing page. */
+router.get('/fulfilments/list', function(req, res) {
+    fulfilments.list(req.db, function(err, fulfilments){
+        if (err) {
+            console.error(err);
+            res.status(500);
+        }
+        else {
+            res.json(fulfilments);
+        }
+    });
+});
+
+/* GET fulfilment information */
+router.get('/fulfilments/view/:id', function(req, res) {
+    fulfilments.get(req.db, req.params.id, function(err, fulfilment){
+        if (err) {
+            console.error(err);
+            res.status(500);
+        }
+        else if (!fulfilment) {
+            res.status(404);
+        }
+        else {
+            res.json(fulfilment);
+        }
+    });
+});
+
+/* GET pledges complete by fulfilment */
+router.get('/fulfilments/view/:id/completes', function(req, res) {
+    fulfilments.completes(req.db, req.params.id, function(err, pledges){
+        if (err) {
+            console.error(err);
+            res.status(500);
+        }
+        else if (!pledges) {
+            res.status(404);
+        }
+        else {
+            res.json(pledges);
+        }
+    });
+});
+
+/* GET pledges of specified completion status by fulfilment */
+router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
+    fulfilments.completes(req.db, req.params.id, function(err, pledges){
+        if (err) {
+            console.error(err);
+            res.status(500);
+        }
+        else if (!pledges) {
+            res.status(404);
+        }
+        else {
+            console.log(pledges);
+            res.json(pledges.filter(function(p){
+                return p.completion == req.params.status;
+            }));
         }
     });
 });
