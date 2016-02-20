@@ -1,5 +1,7 @@
 var mongoose = require('mongoose');
 
+var User = require('./users');
+
 var GroupSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,5 +12,16 @@ var GroupSchema = new mongoose.Schema({
     type: String,
   }
 });
+
+GroupSchema.statics.members = function(name, callback) {
+	this.findOne({
+		name: name
+	}, function(err, group){
+		if (err) callback(err);
+		User.find({
+			groups: group.name
+		}, callback);
+	});
+};
 
 module.exports = mongoose.model('Group', GroupSchema);
