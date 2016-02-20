@@ -2,9 +2,9 @@ extends layout
 
 block content
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/pledges/new.js')
-    h1= title
-    form#formAddGroup(name="addgroup",method="post",action="/admin/groups/new", onsubmit="validate()")
-        input#inputGroupName(type="text", placeholder="Name", name="name")
-        textarea#inputGroupDescription(placeholder="Optional description about the group", name="description")
-        button#btnSubmit(type="submit") Create
+	script(src='/javascripts/admin/groups/new.js')
+	h1= title
+	form#formAddGroup(name="addgroup",method="post",action="/admin/groups/new", onsubmit="return validate()")
+		input#inputGroupName(type="text", placeholder="Name", name="name")
+		textarea#inputGroupDescription(placeholder="Optional description about the group", name="description")
+		button#btnSubmit(type="submit") Create

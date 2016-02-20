@@ -1,92 +1,48 @@
-var sanitize = require('mongo-sanitize');
+var mongoose = require('mongoose');
+var bcrypt = require('bcrypt-nodejs');
 
-var v = require('./validation');
+var UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
+  },
+  groups: {
+    type: [String]
+  }
+});
 
-/*
- * Exports
-*/
+// Execute before each user.save() call
+UserSchema.pre('save', function(callback) {
+  var user = this;
 
-module.exports.list = function(db, callback) {
-	var collection = db.get('users');
-    collection.find({}, {}, callback);
-};
+  if (!user.isModified('password')) return callback();
 
-module.exports.get = function(db, username, callback) {
-    if (!v.usernameValid(username)) return callback("Invalid username", null);
-	var query = {
-    	username: sanitize(username)
-    };
-    var collection = db.get('users');
-    collection.find(query,{},function(e, users){
-    	if (!users || users.length == 0) users = [null];
-    	callback(e, users[0]);
+  // Password changed so we need to hash it
+  bcrypt.genSalt(10, function(err, salt) {
+    if (err) return callback(err);
+
+    bcrypt.hash(user.password, salt, null, function(err, hash) {
+      if (err) return callback(err);
+      user.password = hash;
+      callback();
     });
+  });
+});
+
+UserSchema.methods.verifyPassword = function(password, callback) {
+  bcrypt.compare(password, this.password, function(err, isMatch) {
+    if (err) return callback(err);
+    callback(null, isMatch);
+  });
 };
 
-module.exports.add = function(db, username, email, hash, groups, callback) {
-    if (!v.usernameValid(username)) return callback("Invalid username", null);
-    if (!v.emailValid(email)) return callback("Invalid email", null);
-    if (!v.groupsValid(groups)) return callback("Invalid groups", null);
-    if (module.exports.get(db, username, function(err, returnedName) {
-        if (err) {
-            return callback(err, null);
-        }
-        if (returnedName) {
-            return callback("Username is not unique", null);
-        }
-        var collection = db.get('users');
-        collection.insert({
-            username: sanitize(username),
-            email: sanitize(email),
-            password: hash,
-            groups: sanitize(groups)
-        }, callback);
-    }));
-};
-
-module.exports.update = function(db, id, username, email, hash, groups, callback) {
-    if (!v.usernameValid(username)) return callback("Invalid username", null);
-    if (!v.emailValid(email)) return callback("Invalid email", null);
-    if (!v.groupsValid(groups)) return callback("Invalid groups", null);
-    if (module.exports.get(db, username, function(err, returnedName) {
-        if (err) {
-            return callback(err, null);
-        }
-        if (returnedName && returnedName.id != id) {
-            return callback("Username is not unique", null);
-        }
-        var collection = db.get('users');
-        collection.update({
-            _id: sanitize(id)
-        }, {
-            $set: {
-                username: sanitize(username),
-                email: sanitize(email),
-                password: hash,
-                groups: sanitize(groups)
-            }
-        }, callback);
-    }));
-};
-
-module.exports.delete = function(db, username, callback) {
-    if (!v.usernameValid(username)) return callback("Invalid username", null);
-    var collection = db.get('users');
-    collection.remove({
-        username: sanitize(username)
-    }, {
-        justOne: true
-    }, callback);
-};
-
-// TODO: DOESN'T WORK.
-module.exports.getInGroup = function(db, group, callback) {
-    var query = {
-        groups: sanitize(group)
-    };
-    var collection = db.get('users');
-    collection.find(query,{},function(e, users){
-        if (!users || users.length == 0) users = [];
-        callback(e, users);
-    });
-};
+module.exports = mongoose.model('User', UserSchema);

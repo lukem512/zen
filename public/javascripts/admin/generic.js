@@ -3,7 +3,6 @@ var _validate = function(validator, modifier) {
 	var modifier = modifier || function() { return; };
 	if(validated()){
 		modifier();
-        document.form.submit();
         return true;
     }
     else {

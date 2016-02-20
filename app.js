@@ -9,10 +9,17 @@ var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
 
+var config = require('./config');
+
 // database connection
-var mongo = require('mongodb');
-var monk = require('monk');
-var db = monk('localhost:27017/zen');
+var mongoose = require('mongoose');
+mongoose.connect(config.database.uri);
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('Connection to database successful.')
+});
 
 // app initialisation
 var app = express();
@@ -28,12 +35,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// make the database accessible to the router
-app.use(function(req,res,next){
-    req.db = db;
-    next();
-});
 
 app.use('/', routes);
 app.use('/admin', admin);

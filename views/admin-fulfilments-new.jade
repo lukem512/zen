@@ -4,7 +4,7 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/fulfilments/new.js')
 	h1= title
-	form#formAddFulfilment(name="addfulfilment",method="post",action="/admin/fulfilments/new", onsubmit="validate()")
+	form#formAddFulfilment(name="addfulfilment",method="post",action="/admin/fulfilments/new", onsubmit="return validate();")
 		select#inputUsername(name="username")
 			for user in users
 				option #{user.username}

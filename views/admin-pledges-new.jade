@@ -4,7 +4,7 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/pledges/new.js')
 	h1= title
-	form#formAddPledge(name="addpledge", method="post", action="/admin/pledges/new", onsubmit="validate()")
+	form#formAddPledge(name="addpledge", method="post", action="/admin/pledges/new", onsubmit="return validate();")
 		select#inputUsername(name="username")
 			for user in users
 				option #{user.username}

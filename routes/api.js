@@ -1,11 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-var users = require('../models/users');
-var groups = require('../models/groups');
-var schedules = require('../models/schedules');
-var pledges = require('../models/pledges');
-var fulfilments = require('../models/fulfilments');
+var sanitize = require('mongo-sanitize');
+
+var User = require('../models/users');
+var Group = require('../models/groups');
+var Schedule = require('../models/schedules');
+var Pledge = require('../models/pledges');
+var Fulfilment = require('../models/fulfilments');
 
 /*
  * Users.
@@ -13,7 +15,7 @@ var fulfilments = require('../models/fulfilments');
 */
 
 router.get('/users/list', function(req, res) {
-    users.list(req.db, function(err, users){
+    User.find(function(err, users){
         if (err) {
             console.error(err);
             res.status(500);
@@ -25,7 +27,7 @@ router.get('/users/list', function(req, res) {
 });
 
 router.get('/users/view/:username', function(req, res) {
-    users.get(req.db, req.params.username, function(err, user){
+    User.find({ username: sanitize(req.params.username) }, function(err, user){
         if (err) {
             console.error(err);
             res.status(500);
@@ -47,8 +49,7 @@ router.get('/users/view/:username', function(req, res) {
 
 /* GET group listing page. */
 router.get('/groups/list', function(req, res) {
-    var db = req.db;
-    groups.list(db, function(err, groups){
+    Group.find(function(err, groups){
         if (err) {
             console.error(err);
             res.status(500);
@@ -61,7 +62,7 @@ router.get('/groups/list', function(req, res) {
 
 /* GET group information */
 router.get('/groups/view/:name', function(req, res) {
-    groups.get(req.db, req.params.name, function(err, group){
+    Group.find({ name: sanitize(req.params.name) }, function(err, group){
         if (err) {
             console.error(err);
             res.status(500);
@@ -77,18 +78,8 @@ router.get('/groups/view/:name', function(req, res) {
 
 /* GET group membership information */
 router.get('/groups/view/:name/users', function(req, res) {
-    groups.members(req.db, req.params.name, function(err, members){
-        if (err) {
-            console.error(err);
-            res.status(500);
-        }
-        else if (!members) {
-            res.status(404);
-        }
-        else {
-            res.json(members);
-        }
-    });
+    // TODO
+    res.json({message:"Not implemented"});
 });
 
 /*
@@ -98,7 +89,7 @@ router.get('/groups/view/:name/users', function(req, res) {
 
 /* GET schedule listing page. */
 router.get('/schedules/list', function(req, res) {
-    schedules.list(req.db, function(err, schedules){
+    Schedule.find(function(err, schedules){
         if (err) {
             console.error(err);
             res.status(500);
@@ -111,7 +102,7 @@ router.get('/schedules/list', function(req, res) {
 
 /* GET schedule by specified owner. */
 router.get('/schedules/list/owner/:owner', function(req, res) {
-    schedules.getByOwner(req.db, req.params.owner, function(err, schedules){
+    Schedule.find({ owner: sanitize(req.params.owner) }, function(err, schedules){
         if (err) {
             console.error(err);
             res.status(500);
@@ -124,20 +115,13 @@ router.get('/schedules/list/owner/:owner', function(req, res) {
 
 /* GET schedule by specified group of owner. */
 router.get('/schedules/list/group/:group', function(req, res) {
-    schedules.getByOwnerGroup(req.db, req.params.group, function(err, schedules){
-        if (err) {
-            console.error(err);
-            res.status(500);
-        }
-        else {
-            res.json(schedules);
-        }
-    });
+    // TODO
+    res.json({message:"Not implemented"});
 });
 
 /* GET schedule information */
 router.get('/schedules/view/:id', function(req, res) {
-    schedules.get(req.db, req.params.id, function(err, schedule){
+    Schedule.find({ _id: req.params.id }, function(err, schedule){
         if (err) {
             console.error(err);
             res.status(500);
@@ -159,7 +143,7 @@ router.get('/schedules/view/:id', function(req, res) {
 
 /* GET fulfilment listing page. */
 router.get('/fulfilments/list', function(req, res) {
-    fulfilments.list(req.db, function(err, fulfilments){
+    Fulfilment.find(function(err, fulfilments){
         if (err) {
             console.error(err);
             res.status(500);
@@ -172,7 +156,7 @@ router.get('/fulfilments/list', function(req, res) {
 
 /* GET fulfilment information */
 router.get('/fulfilments/view/:id', function(req, res) {
-    fulfilments.get(req.db, req.params.id, function(err, fulfilment){
+    Fulfilment.find({ _id: req.params.id }, function(err, fulfilment){
         if (err) {
             console.error(err);
             res.status(500);
@@ -188,37 +172,35 @@ router.get('/fulfilments/view/:id', function(req, res) {
 
 /* GET pledges complete by fulfilment */
 router.get('/fulfilments/view/:id/completes', function(req, res) {
-    fulfilments.completes(req.db, req.params.id, function(err, pledges){
+    Fulfilment.find({ _id: req.params.id }, function(err, fulfilment){
         if (err) {
             console.error(err);
             res.status(500);
         }
-        else if (!pledges) {
+        else if (!fulfilment) {
             res.status(404);
         }
         else {
-            res.json(pledges);
+            fulfilment.completes(function(err, pledges){
+               if (err) {
+                    console.error(err);
+                    res.status(500);
+                }
+                else if (!pledges) {
+                    res.status(404);
+                }
+                else {
+                    res.json(pledges);
+                } 
+            });
         }
     });
 });
 
 /* GET pledges of specified completion status by fulfilment */
 router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
-    fulfilments.completes(req.db, req.params.id, function(err, pledges){
-        if (err) {
-            console.error(err);
-            res.status(500);
-        }
-        else if (!pledges) {
-            res.status(404);
-        }
-        else {
-            console.log(pledges);
-            res.json(pledges.filter(function(p){
-                return p.completion == req.params.status;
-            }));
-        }
-    });
+    // TODO
+    res.json({message:"Not implemented"});
 });
 
 /*

@@ -1,11 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-var users = require('../models/users');
-var groups = require('../models/groups');
-var schedules = require('../models/schedules');
-var pledges = require('../models/pledges');
-var fulfilments = require('../models/fulfilments');
+var sanitize = require('mongo-sanitize');
+
+var User = require('../models/users');
+var Group = require('../models/groups');
+var Schedule = require('../models/schedules');
+var Pledge = require('../models/pledges');
+var Fulfilment = require('../models/fulfilments');
 
 /*
  * Users.
@@ -14,7 +16,7 @@ var fulfilments = require('../models/fulfilments');
 
 /* GET user listing page. */
 router.get('/users/list', function(req, res) {
-    users.list(req.db, function(err, users){
+    User.find(function(err, users){
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -30,12 +32,12 @@ router.get('/users/list', function(req, res) {
 
 /* GET user information */
 router.get('/users/view/:username', function(req, res) {
-    groups.list(req. db, function(err, groups){
+    Group.find(function(err, groups){
     	if (err) {
     		console.error(err);
     		res.send('There was a problem adding the information to the database.');
     	}
-        users.get(req.db, req.params.username, function(err, user){
+        User.findOne({ username: sanitize(req.params.username) }, function(err, user){
             if (err) {
                 console.error(err);
                 return res.render('500');
@@ -44,6 +46,7 @@ router.get('/users/view/:username', function(req, res) {
                 res.render('404');
             }
             else {
+                console.log(user);
                 res.render('admin-users-view', {
                     title: 'View User',
                     user: user,
@@ -56,7 +59,7 @@ router.get('/users/view/:username', function(req, res) {
 
 /* GET new user page. */
 router.get('/users/new', function(req, res) {
-	groups.list(req.db, function(err, groups){
+	Group.find(function(err, groups){
     	if (err) {
     		console.error(err);
     		res.render('500');
@@ -72,15 +75,21 @@ router.get('/users/new', function(req, res) {
 
 /* POST to add user service */
 router.post('/users/new', function(req, res) {
-    users.add(req.db, req.body.username, req.body.useremail, req.body.userpass, req.body.usergroups,
-        function(err, result) {
-            if (err) {
-                res.send('There was a problem adding the information to the database.');
-            }
-            else {
-                res.redirect('/admin/users/list');
-            }
-        });
+    var user = new User({
+        username: sanitize(req.body.username),
+        email: sanitize(req.body.useremail),
+        password: sanitize(req.body.userpass),
+        groups: sanitize(req.body['usergroups'])
+    });
+    user.save(function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.redirect('/admin/users/list');
+        }
+    });
 });
 
 /* GET to user update service */
@@ -90,21 +99,27 @@ router.get('/users/update', function(req, res) {
 
 /* POST to user update service */
 router.post('/users/update', function(req, res) {
-	users.update(req.db, req.body.id, req.body.username, req.body.useremail, req.body.userpass, req.body.usergroups,
-        function(err, result) {
-            if (err) {
-                console.error(err);
-                res.send('There was a problem adding the information to the database.');
-            }
-            else {
-                res.status(200).send('OK');
-            }
-        });
+    User.findByIdAndUpdate(sanitize(req.body.id), {
+        username: sanitize(req.body.username),
+        email: sanitize(req.body.useremail),
+        password: sanitize(req.body.userpass),
+        groups: sanitize(req.body['usergroups[]'])
+    }, function(err, result) {
+        if (err) {
+            console.error(err);
+            res.send('There was a problem adding the information to the database.');
+        }
+        else {
+            res.status(200).send('OK');
+        }
+    });
 });
 
 /* DELETE to user update service */
 router.delete('/users/update/:username', function(req, res) {
-    users.delete(req.db, req.params.username, function(err, result) {
+    User.findOneAndRemove({
+        username: sanitize(req.params.username)
+    }, function(err, result){
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -117,13 +132,12 @@ router.delete('/users/update/:username', function(req, res) {
 
 /*
  * Groups
- * Users belong to one or more groups.
+ * Users belong to one or more Group.
 */
 
 /* GET group listing page. */
 router.get('/groups/list', function(req, res) {
-    var db = req.db;
-    groups.list(db, function(err, groups){
+    Group.find(function(err, groups){
     	if (err) {
     		console.error(err);
     		res.render('500');
@@ -139,7 +153,7 @@ router.get('/groups/list', function(req, res) {
 
 /* GET group information */
 router.get('/groups/view/:name', function(req, res) {
-   	groups.get(req.db, req.params.name, function(err, group){
+   	Group.findOne({ name: sanitize(req.params.name) }, function(err, group){
         if (err) {
             console.error(err);
             res.render('500');
@@ -163,7 +177,12 @@ router.get('/groups/new', function(req, res) {
 
 /* POST to add group service */
 router.post('/groups/new', function(req, res) {
-    groups.add(req.db, req.body.name, req.body.description, function(err, doc) {
+    console.log('Adding a new group');
+    var group = new Group({
+        name: sanitize(req.body.name),
+        description: sanitize(req.body.description)
+    });
+    group.save(function(err, doc) {
         if (err) {
             res.send('There was a problem adding the information to the database.');
         }
@@ -180,7 +199,10 @@ router.get('/groups/update/:name', function(req, res) {
 
 /* POST to group update service */
 router.post('/groups/update', function(req, res) {
-	groups.update(req.db, req.body.id, req.body.name, req.body.description, function(err, result) {
+    Group.findByIdAndUpdate(sanitize(req.body.id), {
+        name: sanitize(req.body.name),
+        description: sanitize(req.body.description)
+    }, function(err, result) {
 		if (err) {
 			console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -193,7 +215,9 @@ router.post('/groups/update', function(req, res) {
 
 /* DELETE to group update service */
 router.delete('/groups/update/:name', function(req, res) {
-	groups.delete(req.db, req.params.name, function(err, result) {
+    Group.findOneAndRemove({
+        name: sanitize(req.params.name)
+    }, function(err, result) {
 		if (err) {
 			console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -211,7 +235,7 @@ router.delete('/groups/update/:name', function(req, res) {
 
 /* GET schedule listing page. */
 router.get('/schedules/list', function(req, res) {
-    schedules.list(req.db, function(err, schedules){
+    Schedule.find(function(err, schedules){
         res.render('admin-schedules-list', {
             schedules: schedules
         });
@@ -220,7 +244,7 @@ router.get('/schedules/list', function(req, res) {
 
 /* GET schedule information */
 router.get('/schedules/view/:id', function(req, res) {
-    schedules.get(req.db, req.params.id, function(err, schedule){
+    Schedule.findById(sanitize(req.params.id), function(err, schedule){
         if (err) {
             console.error(err);
             res.render('500');
@@ -229,7 +253,7 @@ router.get('/schedules/view/:id', function(req, res) {
             res.render('404');
         }
         else {
-            users.list(req.db, function(err, users) {
+            User.find(function(err, users) {
                 if (err) {
                     console.error(err);
                     res.render('500');
@@ -251,7 +275,7 @@ router.get('/schedules/view/:id', function(req, res) {
 
 /* GET new schedule page. */
 router.get('/schedules/new', function(req, res) {
-    users.list(req.db, function(err, users){
+    User.find(function(err, users){
         if (err) {
             console.error(err);
             res.render('500');
@@ -267,8 +291,14 @@ router.get('/schedules/new', function(req, res) {
 
 /* POST to add schedule service */
 router.post('/schedules/new', function(req, res) {
-    schedules.add(req.db, req.body.title, req.body.description, req.body.start_time,
-        req.body.end_time, req.body.owner, function(err, doc) {
+    var schedule = new Schedule({
+        title: sanitize(req.body.title),
+        description: sanitize(req.body.description),
+        start_time: new Date(req.body.start_time),
+        end_time: new Date(req.body.end_time),
+        owner: sanitize(req.body.owner)
+    });
+    schedule.save(function(err, doc) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -281,11 +311,19 @@ router.post('/schedules/new', function(req, res) {
 
 /* POST to schedule update service */
 router.post('/schedules/update', function(req, res) {
-    schedules.update(req.db, req.body.id, req.body.title, req.body.description, req.body.start_time,
-        req.body.end_time, function(err, result) {
+    Schedule.findByIdAndUpdate(sanitize(req.body.id), {
+        title: sanitize(req.body.title),
+        description: sanitize(req.body.description),
+        start_time: new Date(req.body.start_time),
+        end_time: new Date(req.body.end_time),
+        owner: sanitize(req.body.owner)
+    }, function(err, result) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
+        }
+        else if (!result) {
+            res.send(404);
         }
         else {
             res.status(200).send('OK');
@@ -295,10 +333,13 @@ router.post('/schedules/update', function(req, res) {
 
 /* DELETE to schedule update service */
 router.delete('/schedules/update/:id', function(req, res) {
-    schedules.delete(req.db, req.params.id, function(err, result) {
+    Schedule.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
+        }
+        else if (!result) {
+            res.send(404);
         }
         else {
             res.status(200).send('OK');
@@ -313,7 +354,7 @@ router.delete('/schedules/update/:id', function(req, res) {
 
 /* GET pledge listing page. */
 router.get('/pledges/list', function(req, res) {
-    pledges.list(req.db, function(err, pledges){
+    Pledge.find(function(err, pledges){
         res.render('admin-pledges-list', {
             title: 'Pledges',
             pledges: pledges
@@ -323,7 +364,7 @@ router.get('/pledges/list', function(req, res) {
 
 /* GET pledge information */
 router.get('/pledges/view/:id', function(req, res) {
-    pledges.get(req.db, req.params.id, function(err, pledge){
+    Pledge.findById(sanitize(req.params.id), function(err, pledge){
         if (err) {
             console.error(err);
             res.render('500');
@@ -342,13 +383,13 @@ router.get('/pledges/view/:id', function(req, res) {
 
 /* GET new pledge page. */
 router.get('/pledges/new', function(req, res) {
-    users.list(req.db, function(err, users){
+    User.find(function(err, users){
         if (err) {
             console.error(err);
             res.render('500');
         }
         else {
-            schedules.list(req.db, function(err, schedules){
+            Schedule.find(function(err, schedules){
                 if (err) {
                     console.error(err);
                     res.render('500');
@@ -367,7 +408,11 @@ router.get('/pledges/new', function(req, res) {
 
 /* POST to add pledge service */
 router.post('/pledges/new', function(req, res) {
-    pledges.add(req.db, req.body.username, req.body.schedule, function(err, doc) {
+    var pledge = new Pledge({
+        username: sanitize(req.body.username),
+        schedule: sanitize(req.body.schedule)
+    });
+    pledge.save(function(err, doc) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -380,7 +425,7 @@ router.post('/pledges/new', function(req, res) {
 
 /* DELETE to pledge update service */
 router.delete('/pledges/update/:id', function(req, res) {
-    pledges.delete(req.db, req.params.id, function(err, result) {
+    Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -393,12 +438,12 @@ router.delete('/pledges/update/:id', function(req, res) {
 
 /*
  * Fulfilments
- * Pledges are fulfilled with fulfilments.
+ * Pledges are completed by fulfilments.
 */
 
 /* GET list fulfilments page. */
 router.get('/fulfilments/list', function(req, res) {
-    fulfilments.list(req.db, function(err, fulfilments){
+    Fulfilment.find(function(err, fulfilments){
         res.render('admin-fulfilments-list', {
             title: 'Fulfilments',
             fulfilments: fulfilments
@@ -408,7 +453,7 @@ router.get('/fulfilments/list', function(req, res) {
 
 /* GET new fulfilment page. */
 router.get('/fulfilments/new', function(req, res) {
-    users.list(req.db, function(err, users){
+    User.find(function(err, users){
         if (err) {
             console.error(err);
             res.render('500');
@@ -424,7 +469,7 @@ router.get('/fulfilments/new', function(req, res) {
 
 /* GET fulfilment information */
 router.get('/fulfilments/view/:id', function(req, res) {
-    fulfilments.get(req.db, req.params.id, function(err, fulfilment){
+    Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment){
         if (err) {
             console.error(err);
             res.render('500');
@@ -443,7 +488,12 @@ router.get('/fulfilments/view/:id', function(req, res) {
 
 /* POST to add fulfilment service */
 router.post('/fulfilments/new', function(req, res) {
-    fulfilments.add(req.db, req.body.username, req.body.start_time, req.body.end_time, function(err, doc) {
+    var fulfilment = new Fulfilment({
+        username: sanitize(req.body.username),
+        start_time: new Date(req.body.start_time),
+        end_time: new Date(req.body.end_time)
+    })
+    fulfilment.save(function(err, doc) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -456,7 +506,11 @@ router.post('/fulfilments/new', function(req, res) {
 
 /* POST to schedule update service */
 router.post('/fulfilments/update', function(req, res) {
-    fulfilments.update(req.db, req.body.id, req.body.start_time, req.body.end_time, function(err, result) {
+    Fulfilment.findByIdAndUpdate(sanitize(req.body.id), {
+        username: sanitize(req.body.username),
+        start_time: new Date(req.body.start_time),
+        end_time: new Date(req.body.end_time)
+    }, function(err, result) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
@@ -469,7 +523,7 @@ router.post('/fulfilments/update', function(req, res) {
 
 /* DELETE to fulfilment update service */
 router.delete('/fulfilments/update/:id', function(req, res) {
-    fulfilments.delete(req.db, req.params.id, function(err, result) {
+    Fulfilment.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) {
             console.error(err);
             res.send('There was a problem adding the information to the database.');
