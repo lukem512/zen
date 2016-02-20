@@ -72,63 +72,6 @@ router.get('/users/new', function(req, res) {
     });
 });
 
-/* POST to add user service */
-router.post('/users/new', function(req, res) {
-    var user = new User({
-        username: sanitize(req.body.username),
-        email: sanitize(req.body.useremail),
-        password: sanitize(req.body.userpass),
-        groups: sanitize(req.body['usergroups'])
-    });
-    user.save(function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.redirect('/admin/users/list');
-        }
-    });
-});
-
-/* GET to user update service */
-router.get('/users/update', function(req, res) {
-	res.redirect('/admin/users/view/' + req.body.username);
-});
-
-/* POST to user update service */
-router.post('/users/update', function(req, res) {
-    User.findByIdAndUpdate(sanitize(req.body.id), {
-        username: sanitize(req.body.username),
-        email: sanitize(req.body.useremail),
-        password: sanitize(req.body.userpass),
-        groups: sanitize(req.body['usergroups[]'])
-    }, function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
-/* DELETE to user update service */
-router.delete('/users/update/:username', function(req, res) {
-    User.findOneAndRemove({
-        username: sanitize(req.params.username)
-    }, function(err, result){
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
 /*
  * Groups
  * Users belong to one or more Group.
@@ -172,59 +115,6 @@ router.get('/groups/view/:name', function(req, res) {
 /* GET new group page. */
 router.get('/groups/new', function(req, res) {
     res.render('admin-groups-new', { title: 'Add New Group' });
-});
-
-/* POST to add group service */
-router.post('/groups/new', function(req, res) {
-    console.log('Adding a new group');
-    var group = new Group({
-        name: sanitize(req.body.name),
-        description: sanitize(req.body.description)
-    });
-    group.save(function(err, doc) {
-        if (err) {
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.redirect('/admin/groups/list');
-        }
-    });
-});
-
-/* GET to group update service */
-router.get('/groups/update/:name', function(req, res) {
-	res.redirect('/admin/groups/view/' + req.params.name);
-});
-
-/* POST to group update service */
-router.post('/groups/update', function(req, res) {
-    Group.findByIdAndUpdate(sanitize(req.body.id), {
-        name: sanitize(req.body.name),
-        description: sanitize(req.body.description)
-    }, function(err, result) {
-		if (err) {
-			console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-        	res.status(200).send('OK');
-        }
-	});
-});
-
-/* DELETE to group update service */
-router.delete('/groups/update/:name', function(req, res) {
-    Group.findOneAndRemove({
-        name: sanitize(req.params.name)
-    }, function(err, result) {
-		if (err) {
-			console.error(err);
-            res.send('There was a problem adding the information to the database.');
-		}
-        else {
-        	res.status(200).send('OK');
-        }
-	});
 });
 
 /*
@@ -288,64 +178,6 @@ router.get('/schedules/new', function(req, res) {
     });
 });
 
-/* POST to add schedule service */
-router.post('/schedules/new', function(req, res) {
-    var schedule = new Schedule({
-        title: sanitize(req.body.title),
-        description: sanitize(req.body.description),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time),
-        owner: sanitize(req.body.owner)
-    });
-    schedule.save(function(err, doc) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.redirect('/admin/schedules/list');
-        }
-    });
-});
-
-/* POST to schedule update service */
-router.post('/schedules/update', function(req, res) {
-    Schedule.findByIdAndUpdate(sanitize(req.body.id), {
-        title: sanitize(req.body.title),
-        description: sanitize(req.body.description),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time),
-        owner: sanitize(req.body.owner)
-    }, function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else if (!result) {
-            res.send(404);
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
-/* DELETE to schedule update service */
-router.delete('/schedules/update/:id', function(req, res) {
-    Schedule.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else if (!result) {
-            res.send(404);
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
 /*
  * Pledges
  * Users can pledge to join a schedule.
@@ -405,36 +237,6 @@ router.get('/pledges/new', function(req, res) {
     });
 });
 
-/* POST to add pledge service */
-router.post('/pledges/new', function(req, res) {
-    var pledge = new Pledge({
-        username: sanitize(req.body.username),
-        schedule: sanitize(req.body.schedule)
-    });
-    pledge.save(function(err, doc) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.redirect('/admin/pledges/list');
-        }
-    });
-});
-
-/* DELETE to pledge update service */
-router.delete('/pledges/update/:id', function(req, res) {
-    Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
 /*
  * Fulfilments
  * Pledges are completed by fulfilments.
@@ -481,54 +283,6 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 title: 'View Fulfilment',
                 fulfilment: fulfilment
             });
-        }
-    });
-});
-
-/* POST to add fulfilment service */
-router.post('/fulfilments/new', function(req, res) {
-    var fulfilment = new Fulfilment({
-        username: sanitize(req.body.username),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time)
-    })
-    fulfilment.save(function(err, doc) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.redirect('/admin/fulfilments/list');
-        }
-    });
-});
-
-/* POST to schedule update service */
-router.post('/fulfilments/update', function(req, res) {
-    Fulfilment.findByIdAndUpdate(sanitize(req.body.id), {
-        username: sanitize(req.body.username),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time)
-    }, function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.status(200).send('OK');
-        }
-    });
-});
-
-/* DELETE to fulfilment update service */
-router.delete('/fulfilments/update/:id', function(req, res) {
-    Fulfilment.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
-        if (err) {
-            console.error(err);
-            res.send('There was a problem adding the information to the database.');
-        }
-        else {
-            res.status(200).send('OK');
         }
     });
 });

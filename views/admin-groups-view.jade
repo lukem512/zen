@@ -2,11 +2,11 @@ extends layout
 
 block content
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/groups/view.js')
+	script(src='/javascripts/admin/groups.js')
 	h1.
 		Details for #{group.name}
 	p#groupId= group._id
-	form#formAddGroup(name="addgroup",method="post",action="/admin/groups/update")
+	form#formAddGroup(name="addgroup",method="post",action="/api/groups/update")
 		input#inputGroupName(type="text", placeholder="Name", name="name", value="#{group.name}")
 		textarea#inputGroupDescription(placeholder="No description was given.", name="description")
 			| #{group.description}

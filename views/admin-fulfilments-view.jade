@@ -2,11 +2,11 @@ extends layout
 
 block content
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/fulfilments/view.js')
+	script(src='/javascripts/admin/fulfilments.js')
 	h1.
 		Fulfilment Details
 	p#fulfilmentId= fulfilment._id
-	form#formViewFulfilment(name="viewfulfilment",method="post",action="/admin/fulfilments/update")
+	form#formViewFulfilment(name="viewfulfilment",method="post",action="/api/fulfilments/update")
 		input#inputUsername(type="text", placeholder="Username", name="username", value="#{fulfilment.username}", disabled=true)
 		input#inputStartTime(type="text", placeholder="Start time", name="start_time", value="#{fulfilment.start_time}")
 		input#inputEndTime(type="text", placeholder="End time", name="end_time", value="#{fulfilment.end_time}")

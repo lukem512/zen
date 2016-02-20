@@ -4,9 +4,9 @@ block content
     script(src='/javascripts/bcrypt.min.js')
     script(src='/javascripts/auth/hash.js')
     script(src='/javascripts/admin/generic.js')
-    script(src='/javascripts/admin/users/new.js')
+    script(src='/javascripts/admin/users.js')
     h1= title
-    form#formAddUser(name="adduser", method="post", action="/admin/users/new", onsubmit="return validate();")
+    form#formAddUser(name="adduser", method="post", action="/api/users/new")
         input#inputUserName(type="text", placeholder="Username", name="username")
         input#inputUserEmail(type="text", placeholder="Email address", name="useremail")
         input#inputUserPass(type="password", placeholder="Password", name="userpass")
@@ -14,4 +14,4 @@ block content
             label
                 input(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
                 = group.name
-        button#btnSubmit(type="submit") Create
+        button#btnSubmit(type="button", onclick="add()") Create

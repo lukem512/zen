@@ -2,11 +2,11 @@ extends layout
 
 block content
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/schedules/view.js')
+	script(src='/javascripts/admin/schedules.js')
 	h1.
 		Details for #{schedule.title}
 	p#scheduleId= schedule._id
-	form#formViewSchedule(name="viewschedule", method="post", action="/admin/schedules/update")
+	form#formViewSchedule(name="viewschedule", method="post", action="/api/schedules/update")
 		input#inputTitle(type="text", placeholder="Title", name="title", value="#{schedule.title}")
 		input#inputStartTime(type="text", placeholder="Start Time", name="start_time", value="#{schedule.start_time}")
 		input#inputEndTime(type="text", placeholder="End Time", name="end_time", value="#{schedule.end_time}")

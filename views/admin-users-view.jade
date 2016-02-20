@@ -4,11 +4,11 @@ block content
 	script(src='/javascripts/bcrypt.min.js')
 	script(src='/javascripts/auth/hash.js')
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/users/view.js')
+	script(src='/javascripts/admin/users.js')
 	h1.
 		Details for #{user.username}
 	p#userId= user._id
-	form#formViewUser(name="viewuser",method="post",action="/admin/users/update")
+	form#formViewUser(name="viewuser",method="post",action="/api/users/update")
 		input#inputUserName(type="text", placeholder="Username", name="username", value="#{user.username}")
 		input#inputUserEmail(type="text", placeholder="Email address", name="useremail", value="#{user.email}")
 		input#inputUserPass(type="password", placeholder="Password", name="userpass", value="password")

@@ -2,11 +2,11 @@ extends layout
 
 block content
 	script(src='/javascripts/admin/generic.js')
-	script(src='/javascripts/admin/pledges/view.js')
+	script(src='/javascripts/admin/pledges.js')
 	h1.
 		Pledge Details
 	p#pledgeId= pledge._id
-	form#formViewPledge(name="viewpledge",method="post",action="/admin/pledges/update")
+	form#formViewPledge(name="viewpledge",method="post",action="/api/pledges/update")
 		p
 			| User 
 			a(href="/admin/users/view/#{pledge.username}") #{pledge.username}
