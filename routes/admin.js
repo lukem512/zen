@@ -46,7 +46,6 @@ router.get('/users/view/:username', function(req, res) {
                 res.render('404');
             }
             else {
-                console.log(user);
                 res.render('admin-users-view', {
                     title: 'View User',
                     user: user,
