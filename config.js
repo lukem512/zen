@@ -1,4 +1,8 @@
 var config = {
+	// The name of the application
+	name: 'Zen',
+	// The organisation running the application
+	organisation: 'Luke Mitchell',
 	database: {
 		// The URI used to connect to your mongo database.
 		uri: 'mongodb://localhost:27017/zen'
@@ -15,7 +19,18 @@ var config = {
 		username: 'admin',
 		password: 'change_me',
 		email: 'you@yourdomain.com'
-	}
+	},
+	// Pages to include in the navigation bar
+	pages: [
+  		{
+  			name: 'Home',
+  			href: '/'
+  		},
+  		{
+  			name: 'About',
+  			href: '#'
+  		}
+  	]
 };
 
 module.exports = config;

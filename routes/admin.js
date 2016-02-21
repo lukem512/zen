@@ -9,6 +9,8 @@ var Schedule = require('../models/schedules');
 var Pledge = require('../models/pledges');
 var Fulfilment = require('../models/fulfilments');
 
+var config = require('../config');
+
 /*
  * Users.
  * Users within the system.
@@ -19,12 +21,20 @@ router.get('/users/list', function(req, res) {
     User.find(function(err, users){
         if (err) {
             console.error(err);
-            res.send('There was a problem adding the information to the database.');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             res.render('admin-users-list', {
                 title: 'Users',
-                users: users
+                users: users,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });
         }
     });
@@ -40,16 +50,29 @@ router.get('/users/view/:username', function(req, res) {
         User.findOne({ username: sanitize(req.params.username) }, function(err, user){
             if (err) {
                 console.error(err);
-                return res.render('500');
+                res.render('500', {
+                    title: 'Error 500',
+                    name: config.name,
+                    organisation: config.organisation,
+                    pages: config.pages
+                });
             }
             else if (!user) {
-                res.render('404');
+                res.render('404', {
+                    title: 'Error 404',
+                    name: config.name,
+                    organisation: config.organisation,
+                    pages: config.pages
+                });
             }
             else {
                 res.render('admin-users-view', {
                     title: 'View User',
                     user: user,
-                    groups: groups
+                    groups: groups,
+                    name: config.name,
+                    organisation: config.organisation,
+                    pages: config.pages
                 });
             }
         });
@@ -61,12 +84,20 @@ router.get('/users/new', function(req, res) {
 	Group.find(function(err, groups){
     	if (err) {
     		console.error(err);
-    		res.render('500');
+    		res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
     	}
         else {
         	res.render('admin-users-new', {
     	    	title: 'Add New User',
-    	    	groups: groups
+    	    	groups: groups,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
     	    });
         }
     });
@@ -82,12 +113,20 @@ router.get('/groups/list', function(req, res) {
     Group.find(function(err, groups){
     	if (err) {
     		console.error(err);
-    		res.render('500');
+    		res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
     	}
         else {
             res.render('admin-groups-list', {
                 title: 'User Groups',
-                groups: groups
+                groups: groups,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });
         }
     });
@@ -98,15 +137,28 @@ router.get('/groups/view/:name', function(req, res) {
    	Group.findOne({ name: sanitize(req.params.name) }, function(err, group){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
     	else if (!group) {
-    		res.render('404');
+    		res.render('404', {
+                title: 'Error 404',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
     	}
         else {
         	res.render('admin-groups-view', {
                 title: 'View Group',
-            	group: group
+            	group: group,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
         	});
     	}
     });
@@ -114,7 +166,12 @@ router.get('/groups/view/:name', function(req, res) {
 
 /* GET new group page. */
 router.get('/groups/new', function(req, res) {
-    res.render('admin-groups-new', { title: 'Add New Group' });
+    res.render('admin-groups-new', {
+        title: 'Add New Group',
+        name: config.name,
+        organisation: config.organisation,
+        pages: config.pages
+    });
 });
 
 /*
@@ -126,7 +183,10 @@ router.get('/groups/new', function(req, res) {
 router.get('/schedules/list', function(req, res) {
     Schedule.find(function(err, schedules){
         res.render('admin-schedules-list', {
-            schedules: schedules
+            schedules: schedules,
+            name: config.name,
+            organisation: config.organisation,
+            pages: config.pages
         });
     });
 });
@@ -136,10 +196,20 @@ router.get('/schedules/view/:id', function(req, res) {
     Schedule.findById(sanitize(req.params.id), function(err, schedule){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else if (!schedule) {
-            res.render('404');
+            res.render('404', {
+                title: 'Error 404',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             User.find(function(err, users) {
@@ -154,7 +224,10 @@ router.get('/schedules/view/:id', function(req, res) {
                     res.render('admin-schedules-view', {
                         title: 'View Schedule',
                         schedule: schedule,
-                        users: users
+                        users: users,
+                        name: config.name,
+                        organisation: config.organisation,
+                        pages: config.pages
                     });
                 }
             });
@@ -167,12 +240,20 @@ router.get('/schedules/new', function(req, res) {
     User.find(function(err, users){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             res.render('admin-schedules-new', { 
                 title: 'Add New Schedule',
-                users: users
+                users: users,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });
         }
     });
@@ -188,7 +269,10 @@ router.get('/pledges/list', function(req, res) {
     Pledge.find(function(err, pledges){
         res.render('admin-pledges-list', {
             title: 'Pledges',
-            pledges: pledges
+            pledges: pledges,
+            name: config.name,
+            organisation: config.organisation,
+            pages: config.pages
         });
     });
 });
@@ -198,15 +282,28 @@ router.get('/pledges/view/:id', function(req, res) {
     Pledge.findById(sanitize(req.params.id), function(err, pledge){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else if (!pledge) {
-            res.render('404');
+            res.render('404', {
+                title: 'Error 404',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             res.render('admin-pledges-view', {
                 title: 'View Pledge',
-                pledge: pledge
+                pledge: pledge,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });
         }
     });
@@ -217,19 +314,32 @@ router.get('/pledges/new', function(req, res) {
     User.find(function(err, users){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             Schedule.find(function(err, schedules){
                 if (err) {
                     console.error(err);
-                    res.render('500');
+                    res.render('500', {
+                        title: 'Error 500',
+                        name: config.name,
+                        organisation: config.organisation,
+                        pages: config.pages
+                    });
                 } 
                 else {
                     res.render('admin-pledges-new', { 
                         title: 'Add New Pledge',
                         users: users,
-                        schedules: schedules
+                        schedules: schedules,
+                        name: config.name,
+                        organisation: config.organisation,
+                        pages: config.pages
                     });
                 }
             })   
@@ -247,7 +357,10 @@ router.get('/fulfilments/list', function(req, res) {
     Fulfilment.find(function(err, fulfilments){
         res.render('admin-fulfilments-list', {
             title: 'Fulfilments',
-            fulfilments: fulfilments
+            fulfilments: fulfilments,
+            name: config.name,
+            organisation: config.organisation,
+            pages: config.pages
         });
     });
 });
@@ -257,12 +370,20 @@ router.get('/fulfilments/new', function(req, res) {
     User.find(function(err, users){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             res.render('admin-fulfilments-new', { 
                 title: 'Add New Fulfilment',
-                users: users
+                users: users,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });  
         }
     });
@@ -273,15 +394,28 @@ router.get('/fulfilments/view/:id', function(req, res) {
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment){
         if (err) {
             console.error(err);
-            res.render('500');
+            res.render('500', {
+                title: 'Error 500',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else if (!fulfilment) {
-            res.render('404');
+            res.render('404', {
+                title: 'Error 404',
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
+            });
         }
         else {
             res.render('admin-fulfilments-view', {
                 title: 'View Fulfilment',
-                fulfilment: fulfilment
+                fulfilment: fulfilment,
+                name: config.name,
+                organisation: config.organisation,
+                pages: config.pages
             });
         }
     });
