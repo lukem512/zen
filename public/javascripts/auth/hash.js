@@ -1,5 +1,5 @@
 var bcrypt = dcodeIO.bcrypt;
 
 var _hash = function(plaintext) {
-	return bcrypt.hashSync(plaintext, 10);
+	return bcrypt.hashSync(plaintext);
 };

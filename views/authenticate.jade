@@ -1,0 +1,9 @@
+extends layout
+
+block content
+	script(src='/javascripts/ui/authenticate.js')
+	h1= title
+	form#formAuthenticate(name="authenticate",method="post",action="/api/authenticate")
+		input#inputUsername(type="text", placeholder="Username", name="username")
+		input#inputPassword(type="password", placeholder="Password", name="password")
+		button#btnAuthenticate(type="button", onclick="auth()") Sign in

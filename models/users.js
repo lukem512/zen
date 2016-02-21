@@ -17,6 +17,10 @@ var UserSchema = new mongoose.Schema({
   },
   groups: {
     type: [String]
+  },
+  admin: {
+    type: Boolean,
+    default: false
   }
 });
 
