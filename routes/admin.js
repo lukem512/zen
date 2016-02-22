@@ -29,7 +29,7 @@ router.get('/users/list', function(req, res) {
             });
         }
         else {
-            res.render('admin-users-list', {
+            res.render('admin/users/list', {
                 title: 'Users',
                 users: users,
                 name: config.name,
@@ -66,7 +66,7 @@ router.get('/users/view/:username', function(req, res) {
                 });
             }
             else {
-                res.render('admin-users-view', {
+                res.render('admin/users/view', {
                     title: 'View User',
                     user: user,
                     groups: groups,
@@ -92,7 +92,7 @@ router.get('/users/new', function(req, res) {
             });
     	}
         else {
-        	res.render('admin-users-new', {
+        	res.render('admin/users/new', {
     	    	title: 'Add New User',
     	    	groups: groups,
                 name: config.name,
@@ -121,7 +121,7 @@ router.get('/groups/list', function(req, res) {
             });
     	}
         else {
-            res.render('admin-groups-list', {
+            res.render('admin/groups/list', {
                 title: 'User Groups',
                 groups: groups,
                 name: config.name,
@@ -153,7 +153,7 @@ router.get('/groups/view/:name', function(req, res) {
             });
     	}
         else {
-        	res.render('admin-groups-view', {
+        	res.render('admin/groups/view', {
                 title: 'View Group',
             	group: group,
                 name: config.name,
@@ -166,7 +166,7 @@ router.get('/groups/view/:name', function(req, res) {
 
 /* GET new group page. */
 router.get('/groups/new', function(req, res) {
-    res.render('admin-groups-new', {
+    res.render('admin/groups/new', {
         title: 'Add New Group',
         name: config.name,
         organisation: config.organisation,
@@ -182,7 +182,7 @@ router.get('/groups/new', function(req, res) {
 /* GET schedule listing page. */
 router.get('/schedules/list', function(req, res) {
     Schedule.find(function(err, schedules){
-        res.render('admin-schedules-list', {
+        res.render('admin/schedules/list', {
             schedules: schedules,
             name: config.name,
             organisation: config.organisation,
@@ -221,7 +221,7 @@ router.get('/schedules/view/:id', function(req, res) {
                     if (!users) {
                         users = [];
                     }
-                    res.render('admin-schedules-view', {
+                    res.render('admin/schedules/view', {
                         title: 'View Schedule',
                         schedule: schedule,
                         users: users,
@@ -248,7 +248,7 @@ router.get('/schedules/new', function(req, res) {
             });
         }
         else {
-            res.render('admin-schedules-new', { 
+            res.render('admin/schedules/new', { 
                 title: 'Add New Schedule',
                 users: users,
                 name: config.name,
@@ -267,7 +267,7 @@ router.get('/schedules/new', function(req, res) {
 /* GET pledge listing page. */
 router.get('/pledges/list', function(req, res) {
     Pledge.find(function(err, pledges){
-        res.render('admin-pledges-list', {
+        res.render('admin/pledges/list', {
             title: 'Pledges',
             pledges: pledges,
             name: config.name,
@@ -298,7 +298,7 @@ router.get('/pledges/view/:id', function(req, res) {
             });
         }
         else {
-            res.render('admin-pledges-view', {
+            res.render('admin/pledges/view', {
                 title: 'View Pledge',
                 pledge: pledge,
                 name: config.name,
@@ -333,7 +333,7 @@ router.get('/pledges/new', function(req, res) {
                     });
                 } 
                 else {
-                    res.render('admin-pledges-new', { 
+                    res.render('admin/pledges/new', { 
                         title: 'Add New Pledge',
                         users: users,
                         schedules: schedules,
@@ -355,7 +355,7 @@ router.get('/pledges/new', function(req, res) {
 /* GET list fulfilments page. */
 router.get('/fulfilments/list', function(req, res) {
     Fulfilment.find(function(err, fulfilments){
-        res.render('admin-fulfilments-list', {
+        res.render('admin/fulfilments/list', {
             title: 'Fulfilments',
             fulfilments: fulfilments,
             name: config.name,
@@ -378,7 +378,7 @@ router.get('/fulfilments/new', function(req, res) {
             });
         }
         else {
-            res.render('admin-fulfilments-new', { 
+            res.render('admin/fulfilments/new', { 
                 title: 'Add New Fulfilment',
                 users: users,
                 name: config.name,
@@ -410,7 +410,7 @@ router.get('/fulfilments/view/:id', function(req, res) {
             });
         }
         else {
-            res.render('admin-fulfilments-view', {
+            res.render('admin/fulfilments/view', {
                 title: 'View Fulfilment',
                 fulfilment: fulfilment,
                 name: config.name,

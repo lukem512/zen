@@ -6,4 +6,4 @@ block content
 	form#formAuthenticate(name="authenticate",method="post",action="/api/authenticate")
 		input#inputUsername(type="text", placeholder="Username", name="username")
 		input#inputPassword(type="password", placeholder="Password", name="password")
-		button#btnAuthenticate(type="button", onclick="auth()") Sign in
+		button#btnAuthenticate.btn.btn-success(type="button", onclick="auth()") Sign in
