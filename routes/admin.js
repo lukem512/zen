@@ -25,7 +25,7 @@ router.get('/users/list', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -34,7 +34,7 @@ router.get('/users/list', function(req, res) {
                 users: users,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     });
@@ -54,7 +54,7 @@ router.get('/users/view/:username', function(req, res) {
                     title: 'Error 500',
                     name: config.name,
                     organisation: config.organisation,
-                    nav: config.nav
+                    nav: config.nav()
                 });
             }
             else if (!user) {
@@ -62,7 +62,7 @@ router.get('/users/view/:username', function(req, res) {
                     title: 'Error 404',
                     name: config.name,
                     organisation: config.organisation,
-                    nav: config.nav
+                    nav: config.nav()
                 });
             }
             else {
@@ -72,7 +72,7 @@ router.get('/users/view/:username', function(req, res) {
                     groups: groups,
                     name: config.name,
                     organisation: config.organisation,
-                    nav: config.nav
+                    nav: config.nav()
                 });
             }
         });
@@ -88,7 +88,7 @@ router.get('/users/new', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
     	}
         else {
@@ -97,7 +97,7 @@ router.get('/users/new', function(req, res) {
     	    	groups: groups,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
     	    });
         }
     });
@@ -117,7 +117,7 @@ router.get('/groups/list', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
     	}
         else {
@@ -126,7 +126,7 @@ router.get('/groups/list', function(req, res) {
                 groups: groups,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     });
@@ -141,7 +141,7 @@ router.get('/groups/view/:name', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     	else if (!group) {
@@ -149,7 +149,7 @@ router.get('/groups/view/:name', function(req, res) {
                 title: 'Error 404',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
     	}
         else {
@@ -158,7 +158,7 @@ router.get('/groups/view/:name', function(req, res) {
             	group: group,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
         	});
     	}
     });
@@ -170,7 +170,7 @@ router.get('/groups/new', function(req, res) {
         title: 'Add New Group',
         name: config.name,
         organisation: config.organisation,
-        nav: config.nav
+        nav: config.nav()
     });
 });
 
@@ -186,7 +186,7 @@ router.get('/schedules/list', function(req, res) {
             schedules: schedules,
             name: config.name,
             organisation: config.organisation,
-            nav: config.nav
+            nav: config.nav()
         });
     });
 });
@@ -200,7 +200,7 @@ router.get('/schedules/view/:id', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else if (!schedule) {
@@ -208,7 +208,7 @@ router.get('/schedules/view/:id', function(req, res) {
                 title: 'Error 404',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -227,7 +227,7 @@ router.get('/schedules/view/:id', function(req, res) {
                         users: users,
                         name: config.name,
                         organisation: config.organisation,
-                        nav: config.nav
+                        nav: config.nav()
                     });
                 }
             });
@@ -244,7 +244,7 @@ router.get('/schedules/new', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -253,7 +253,7 @@ router.get('/schedules/new', function(req, res) {
                 users: users,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     });
@@ -272,7 +272,7 @@ router.get('/pledges/list', function(req, res) {
             pledges: pledges,
             name: config.name,
             organisation: config.organisation,
-            nav: config.nav
+            nav: config.nav()
         });
     });
 });
@@ -286,7 +286,7 @@ router.get('/pledges/view/:id', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else if (!pledge) {
@@ -294,7 +294,7 @@ router.get('/pledges/view/:id', function(req, res) {
                 title: 'Error 404',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -303,7 +303,7 @@ router.get('/pledges/view/:id', function(req, res) {
                 pledge: pledge,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     });
@@ -318,7 +318,7 @@ router.get('/pledges/new', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -329,7 +329,7 @@ router.get('/pledges/new', function(req, res) {
                         title: 'Error 500',
                         name: config.name,
                         organisation: config.organisation,
-                        nav: config.nav
+                        nav: config.nav()
                     });
                 } 
                 else {
@@ -339,7 +339,7 @@ router.get('/pledges/new', function(req, res) {
                         schedules: schedules,
                         name: config.name,
                         organisation: config.organisation,
-                        nav: config.nav
+                        nav: config.nav()
                     });
                 }
             })   
@@ -360,7 +360,7 @@ router.get('/fulfilments/list', function(req, res) {
             fulfilments: fulfilments,
             name: config.name,
             organisation: config.organisation,
-            nav: config.nav
+            nav: config.nav()
         });
     });
 });
@@ -374,7 +374,7 @@ router.get('/fulfilments/new', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -383,7 +383,7 @@ router.get('/fulfilments/new', function(req, res) {
                 users: users,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });  
         }
     });
@@ -398,7 +398,7 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else if (!fulfilment) {
@@ -406,7 +406,7 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 title: 'Error 404',
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
         else {
@@ -415,7 +415,7 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 fulfilment: fulfilment,
                 name: config.name,
                 organisation: config.organisation,
-                nav: config.nav
+                nav: config.nav()
             });
         }
     });

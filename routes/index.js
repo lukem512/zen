@@ -56,7 +56,6 @@ fs.readdir(config.pages.directory, function(err, pages){
 
     // Create route
     console.log('Creating route ' + title + ' at ' + href);
-    console.log(config.nav());
     router.get(href, function(req, res, next){
       res.render('pages/' + page, {
         title: title,
