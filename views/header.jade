@@ -11,11 +11,17 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 		#page-list.collapse.navbar-collapse
 			ul.nav.navbar-nav.navbar-right
 				each page, i in nav
-					li.page-scroll
+					li
 						if page.popup
 							a(href="#{page.href}", target="_blank")= page.title
 						else
 							a(href="#{page.href}")= page.title
+				li
+					if user
+							a.active(href="#")
+								b.text-success= user.username
+					else
+						a(href="/auth") Sign in
 
 if header
 	header

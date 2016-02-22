@@ -42,7 +42,7 @@ var config = {
 	  		contact: {
 	  			title: 'Contact us',
 	  			href: '/contact',
-	  			nav: true
+	  			nav: false
 	  		}
   		}
   	},
@@ -55,9 +55,9 @@ var config = {
   			href: '/'
   		},
   		// This is a link to an off-site page.
-  		// This link also opens in a new window
+  		// This link also opens in a new window.
   		{
-  			title: 'Project',
+  			title: 'Code',
   			href: 'https://github.com/lukem512/zen',
   			popup: true
   		}
@@ -106,7 +106,10 @@ var config = {
     		page = views[page];
 
     		// Displaying a page in the navigation is the default behaviour
-    		var nav = page.nav || true;
+    		var nav = true;
+    		if (page.nav != null)
+    			nav = page.nav;
+
     		if (nav) {
     			pageLinks.push(page);
     		}

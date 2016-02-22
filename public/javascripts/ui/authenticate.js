@@ -17,3 +17,12 @@ var auth = function() {
 	    }
 	});
 };
+
+// Submit form on 'enter' keypress
+$('#formAuthenticate input').keydown(function(e) {
+	console.log('yo!');
+    if (e.keyCode == 13) {
+        event.preventDefault();
+        auth();
+    }
+});
