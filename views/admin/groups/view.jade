@@ -6,9 +6,13 @@ block content
 	h1.
 		Details for #{group.name}
 	p#groupId= group._id
-	form#formAddGroup(name="addgroup",method="post",action="/api/groups/update")
-		input#inputGroupName(type="text", placeholder="Name", name="name", value="#{group.name}")
-		textarea#inputGroupDescription(placeholder="No description was given.", name="description")
-			| #{group.description}
-		button#btnUpdate(type="button", onclick="update();") Update
-		button#btnDelete(type="button", onclick="del();") Delete
+	form#formAddGroup(name="addgroup",role="form",method="post",action="/api/groups/update")
+		.form-group
+			input#inputGroupName.form-control(type="text", placeholder="Name", name="name", value="#{group.name}")
+		.form-group
+			textarea#inputGroupDescription.form-control(placeholder="No description was given.", name="description")
+				| #{group.description}
+		.form-group
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			&nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

@@ -6,9 +6,14 @@ block content
 	h1.
 		Fulfilment Details
 	p#fulfilmentId= fulfilment._id
-	form#formViewFulfilment(name="viewfulfilment",method="post",action="/api/fulfilments/update")
-		input#inputUsername(type="text", placeholder="Username", name="username", value="#{fulfilment.username}", disabled=true)
-		input#inputStartTime(type="text", placeholder="Start time", name="start_time", value="#{fulfilment.start_time}")
-		input#inputEndTime(type="text", placeholder="End time", name="end_time", value="#{fulfilment.end_time}")
-		button#btnUpdate(type="button", onclick="update();") Update
-		button#btnDelete(type="button", onclick="del();") Delete
+	form#formViewFulfilment(name="viewfulfilment",role="form",method="post",action="/api/fulfilments/update")
+		.form-group
+			input#inputUsername.form-control(type="text", placeholder="Username", name="username", value="#{fulfilment.username}", disabled=true)
+		.form-group
+			input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time", value="#{fulfilment.start_time}")
+		.form-group
+			input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{fulfilment.end_time}")
+		.form-group
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			&nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

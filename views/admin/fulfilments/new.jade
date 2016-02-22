@@ -4,10 +4,14 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/fulfilments.js')
 	h1= title
-	form#formAddFulfilment(name="addfulfilment",method="post",action="/api/fulfilments/new")
-		select#inputUsername(name="username")
-			for user in users
-				option #{user.username}
-		input#inputStartTime(type="text", placeholder="Start time", name="start_time")
-		input#inputEndTime(type="text", placeholder="End time", name="end_time")
-		button#btnSubmit(type="button", onclick="add()") Create
+	form#formAddFulfilment(name="addfulfilment",role="form",method="post",action="/api/fulfilments/new")
+		.form-group
+			select#inputUsername.form-control(name="username")
+				for user in users
+					option #{user.username}
+		.form-group
+			input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time")
+		.form-group
+			input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time")
+		.form-group
+			button#btnSubmit.btn.btn-success(type="button", onclick="add()") Create

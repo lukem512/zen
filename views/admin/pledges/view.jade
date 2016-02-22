@@ -6,11 +6,12 @@ block content
 	h1.
 		Pledge Details
 	p#pledgeId= pledge._id
-	form#formViewPledge(name="viewpledge",method="post",action="/api/pledges/update")
+	form#formViewPledge(name="viewpledge",role="form",method="post",action="/api/pledges/update")
 		p
 			| User 
 			a(href="/admin/users/view/#{pledge.username}") #{pledge.username}
 			|  has pledged to attend schedule 
 			a(href="/admin/schedules/view/#{pledge.schedule}") #{pledge.schedule}
 			| .
-		button#btnDelete(type="button", onclick="del();") Delete
+		.form-group
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

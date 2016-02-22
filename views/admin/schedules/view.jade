@@ -6,14 +6,21 @@ block content
 	h1.
 		Details for #{schedule.title}
 	p#scheduleId= schedule._id
-	form#formViewSchedule(name="viewschedule", method="post", action="/api/schedules/update")
-		input#inputTitle(type="text", placeholder="Title", name="title", value="#{schedule.title}")
-		input#inputStartTime(type="text", placeholder="Start Time", name="start_time", value="#{schedule.start_time}")
-		input#inputEndTime(type="text", placeholder="End Time", name="end_time", value="#{schedule.end_time}")
-		textarea#inputDescription(placeholder="Optional description about the event", name="description")
-			| #{schedule.description}
-		select#inputOwner(name="owner")
-			for user in users
-				option(selected=schedule.owner == user.username) #{user.username}
-		button#btnUpdate(type="button", onclick="update();") Update
-		button#btnDelete(type="button", onclick="del();") Delete
+	form#formViewSchedule(name="viewschedule",role="form",method="post",action="/api/schedules/update")
+		.form-group
+			input#inputTitle.form-control(type="text", placeholder="Title", name="title", value="#{schedule.title}")
+		.form-group
+			input#inputStartTime.form-control(type="text", placeholder="Start Time", name="start_time", value="#{schedule.start_time}")
+		.form-group
+			input#inputEndTime.form-control(type="text", placeholder="End Time", name="end_time", value="#{schedule.end_time}")
+		.form-group
+			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
+				| #{schedule.description}
+		.form-group
+			select#inputOwner.form-control(name="owner")
+				for user in users
+					option(selected=schedule.owner == user.username) #{user.username}
+		.form-group
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			&nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

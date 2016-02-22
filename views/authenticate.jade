@@ -3,7 +3,10 @@ extends layout
 block content
 	script(src='/javascripts/ui/authenticate.js')
 	h1= title
-	form#formAuthenticate(name="authenticate",method="post",action="/api/authenticate")
-		input#inputUsername(type="text", placeholder="Username", name="username")
-		input#inputPassword(type="password", placeholder="Password", name="password")
-		button#btnAuthenticate.btn.btn-success(type="button", onclick="auth()") Sign in
+	form#formAuthenticate(name="authenticate",role="form",method="post",action="/api/authenticate")
+		.form-group
+			input#inputUsername.form-control(type="text", placeholder="Username", name="username")
+		.form-group
+			input#inputPassword.form-control(type="password", placeholder="Password", name="password")
+		.form-group
+			button#btnAuthenticate.btn.btn-success(type="button", onclick="auth()") Sign in

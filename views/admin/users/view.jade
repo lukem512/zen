@@ -8,16 +8,23 @@ block content
 	h1.
 		Details for #{user.username}
 	p#userId= user._id
-	form#formViewUser(name="viewuser",method="post",action="/api/users/update")
-		input#inputUserName(type="text", placeholder="Username", name="username", value="#{user.username}")
-		input#inputUserEmail(type="text", placeholder="Email address", name="useremail", value="#{user.email}")
-		input#inputUserPass(type="password", placeholder="Password", name="userpass", value="password")
-		each group, i in groups
-			label
-				if user.groups && user.groups.indexOf(group.name) > -1
-					input(type="checkbox", checked="checked", name="usergroups", value="#{group.name}")
-				else
-					input(type="checkbox", name="usergroups", value="#{group.name}")
-				= group.name
-		button#btnUpdate(type="button", onclick="update();") Update
-		button#btnDelete(type="button", onclick="del();") Delete
+	form#formViewUser(name="viewuser",role="form",method="post",action="/api/users/update")
+		.form-group
+			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{user.username}")
+		.form-group
+			input#inputUserEmail.form-control(type="text", placeholder="Email address", name="useremail", value="#{user.email}")
+		.form-group
+			input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", value="password")
+		.form-group
+			each group, i in groups
+				label
+					if user.groups && user.groups.indexOf(group.name) > -1
+						input.form-control(type="checkbox", checked="checked", name="usergroups", value="#{group.name}")
+					else
+						input.form-control(type="checkbox", name="usergroups", value="#{group.name}")
+					= group.name
+				&nbsp; &nbsp; &nbsp;
+		.form-group
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			&nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

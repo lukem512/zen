@@ -6,12 +6,17 @@ block content
     script(src='/javascripts/admin/generic.js')
     script(src='/javascripts/admin/users.js')
     h1= title
-    form#formAddUser(name="adduser", method="post", action="/api/users/new")
-        input#inputUserName(type="text", placeholder="Username", name="username")
-        input#inputUserEmail(type="text", placeholder="Email address", name="useremail")
-        input#inputUserPass(type="password", placeholder="Password", name="userpass")
-        each group, i in groups
-            label
-                input(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
-                = group.name
-        button#btnSubmit(type="button", onclick="add()") Create
+    form#formAddUser(name="adduser",role="form",method="post",action="/api/users/new")
+        .form-group
+            input#inputUserName.form-control(type="text", placeholder="Username", name="username")
+        .form-group
+            input#inputUserEmail.form-control(type="text", placeholder="Email address", name="useremail")
+        .form-group
+            input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass")
+        .form-group
+            each group, i in groups
+                label= group.name
+                    input.form-control(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
+                &nbsp; &nbsp; &nbsp;
+        .form-group
+            button#btnSubmit.btn.btn-success(type="button", onclick="add()") Create

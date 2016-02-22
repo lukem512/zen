@@ -4,11 +4,14 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/pledges.js')
 	h1= title
-	form#formAddPledge(name="addpledge", method="post", action="/api/pledges/new")
-		select#inputUsername(name="username")
-			for user in users
-				option #{user.username}
-		select#inputSchedule(name="schedule")
-			for sched in schedules
-				option #{sched._id}
-		button#btnSubmit(type="button", onclick="add()") Create
+	form#formAddPledge(name="addpledge",role="form",method="post",action="/api/pledges/new")
+		.form-group
+			select#inputUsername.form-control(name="username")
+				for user in users
+					option #{user.username}
+		.form-group
+			select#inputSchedule.form-control(name="schedule")
+				for sched in schedules
+					option #{sched._id}
+		.form-group
+			button#btnSubmit.btn.btn-success(type="button", onclick="add()") Create

@@ -4,12 +4,18 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/schedules.js')
 	h1= title
-	form#formAddSchedule(name="addschedule", method="post", action="/api/schedules/new")
-		input#inputTitle(type="text", placeholder="Title", name="title")
-		input#inputStartTime(type="text", placeholder="Start Time", name="start_time")
-		input#inputEndTime(type="text", placeholder="End Time", name="end_time")
-		textarea#inputDescription(placeholder="Optional description about the event", name="description")
-		select#inputOwner(name="owner")
-			for user in users
-				option #{user.username}
-		button#btnSubmit(type="button", onclick="add()") Create
+	form#formAddSchedule(name="addschedule",role="form",method="post",action="/api/schedules/new")
+		.form-group
+			input#inputTitle.form-control(type="text", placeholder="Title", name="title")
+		.form-group
+			input#inputStartTime.form-control(type="text", placeholder="Start Time", name="start_time")
+		.form-group
+			input#inputEndTime.form-control(type="text", placeholder="End Time", name="end_time")
+		.form-group
+			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
+		.form-group
+			select#inputOwner.form-control(name="owner")
+				for user in users
+					option #{user.username}
+		.form-group
+			button#btnSubmit(type="button", onclick="add()") Create
