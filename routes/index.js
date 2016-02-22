@@ -14,7 +14,8 @@ router.get('/', function(req, res, next) {
   	},
   	name: config.name,
   	organisation: config.organisation,
-  	nav: config.nav()
+  	nav: config.nav(),
+    user: req.user
   });
 });
 
@@ -24,7 +25,8 @@ router.get('/auth', function(req, res, next) {
   	title: 'Sign in',
   	name: config.name,
   	organisation: config.organisation,
-  	nav: config.nav()
+  	nav: config.nav(),
+    user: req.user
   });
 });
 
@@ -56,14 +58,16 @@ fs.readdir(config.pages.directory, function(err, pages){
 
     // Create route
     console.log('Creating route ' + title + ' at ' + href);
-    router.get(href, function(req, res, next){
+    
+    router.get(href, function(req, res){
       res.render('pages/' + page, {
         title: title,
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),
         email: config.email,
-        dictionary: config.dictionary
+        dictionary: config.dictionary,
+        user: req.user
       });
     });
   });

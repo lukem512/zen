@@ -9,8 +9,11 @@ var auth = function() {
 			"password": $('#inputPassword').val()
 		},
 	    type: 'POST',
-	    success: function() {
-	    	alert('success!');
+	    success: function(res) {
+	    	// Set a cookie with an expiry 1 day from now
+	    	$.cookie("token", res.token, { expires: 1 });
+
+	    	// TODO - success message!
 	    },
 	    error: function(e) {
 	    	alert(JSON.stringify(e));

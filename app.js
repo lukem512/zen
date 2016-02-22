@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+var auth = require('./routes/auth');
 var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
@@ -36,6 +37,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(auth);
 app.use('/', routes);
 app.use('/admin', admin);
 app.use('/api', api);
@@ -56,7 +58,8 @@ if (app.get('env') === 'development') {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
-      error: err
+      error: err,
+      nav: config.nav()
     });
   });
 }
@@ -67,7 +70,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
-    error: {}
+    error: {},
+    nav: config.nav()
   });
 });
 

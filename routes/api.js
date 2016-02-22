@@ -74,30 +74,16 @@ router.post('/authenticate', function(req, res){
     });
 });
 
+// Middleware to require authorisation for all API routes
 router.use(function(req, res, next){
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
-
-    if (token) {
-        jwt.verify(token, config.token.secret, function(err, decoded) {
-            if (err) {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Invalid token'
-                });    
-            } 
-            else {
-                req.decoded = decoded; 
-                console.log('Decoded');
-                console.log(decoded);   
-                next();
-            }
-        });
+    if (req.authentication.success) {
+        next();
     }
     else {
-        return res.status(403).json({
-            success: false,
-            message: 'no token provided'
-        })
+        return res.status(req.authentication.status).json({
+            success: req.authentication.success,
+            message: req.authentication.message
+        }); 
     }
 });
 
