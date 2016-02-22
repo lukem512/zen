@@ -1,18 +1,22 @@
 var config = {
 	// The name of the application
 	name: 'Zen',
+
 	// The organisation running the application
 	organisation: 'Luke Mitchell',
 	email: 'hi@lukemitchell.co',
+
 	database: {
 		// The URI used to connect to your mongo database.
 		uri: 'mongodb://localhost:27017/zen'
 	},
+
 	token: {
 		// This is used to encrypt client connections.
 		// Change this to something secure.
 		secret: 'super_secure_string_here'
 	},
+
 	admin: {
 		// The initial admin credentials.
 		// These should be changed as soon as possible
@@ -21,6 +25,7 @@ var config = {
 		password: 'change_me',
 		email: 'you@yourdomain.com'
 	},
+
   	// Pages to create. These are not included in the navigation
   	// unless specified above.
   	pages: {
@@ -41,6 +46,7 @@ var config = {
 	  		}
   		}
   	},
+
   	// Additional links to include in the navigation bar
 	links:
 	[
@@ -56,6 +62,7 @@ var config = {
   			popup: true
   		}
   	],
+
   	// Dictionary of vocabulary.
   	// These can be customised to suit the application.
   	dictionary: {
@@ -89,7 +96,9 @@ var config = {
 			}
 		}
     },
+
     // Function to create list of navigation items
+    // No need to modify this unless you know what you're doing!
     nav: function() {
     	var views = this.pages.views;
     	var pageLinks = [];
