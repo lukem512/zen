@@ -1,3 +1,6 @@
+// Authentication handler
+// This communicates with the API to sign in the user.
+
 var auth = function() {
 	$.ajax({
 	    url: '/api/authenticate',

@@ -6,13 +6,16 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 				span.icon-bar
 				span.icon-bar
 				span.icon-bar
-			a.navbar-brand(href="#page-top")= name
+			a.navbar-brand(href="/")= name
 
 		#page-list.collapse.navbar-collapse
 			ul.nav.navbar-nav.navbar-right
-				each page, i in pages
+				each page, i in nav
 					li.page-scroll
-						a(href="#{page.href}")= page.name
+						if page.popup
+							a(href="#{page.href}", target="_blank")= page.title
+						else
+							a(href="#{page.href}")= page.title
 
 if header
 	header
