@@ -3,6 +3,11 @@ Zen
 
 Zen is a framework for conducting user studies into gamification. It is not yet complete, so please bear with me.
 
+Acknowledgements
+----------------
+
+The [Bootstrap](https://getbootstrap.com/) theme that comes bundled with Zen is [Freelancer](http://startbootstrap.com/template-overviews/freelancer/) from [StartBootstrap](http://startbootstrap.com). This is released under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) license.
+
 License
 -------
 
