@@ -17,6 +17,10 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 						else
 							a(href="#{page.href}")= page.title
 				li
+					if user && user.admin
+							a.active(href="/admin")
+								b.text-warning Control Panel
+				li
 					if user
 							a.active(href="#")
 								b.text-success= user.username

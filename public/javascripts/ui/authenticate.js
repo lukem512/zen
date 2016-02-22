@@ -17,8 +17,16 @@ var auth = function() {
 	    },
 	    error: function(e) {
 	    	alert(JSON.stringify(e));
+
+	    	// TODO - proper error message
 	    }
 	});
+};
+
+var end = function() {
+	$.removeCookie("token");
+
+	// TODO - success message (and reload page)
 };
 
 // Submit form on 'enter' keypress

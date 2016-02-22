@@ -49,6 +49,8 @@ router.use(function(req, res, next){
       }
       next();
     });
+  } else {
+    next();
   }
 });
 

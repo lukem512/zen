@@ -30,6 +30,17 @@ router.get('/auth', function(req, res, next) {
   });
 });
 
+/* GET sign out page */
+router.get('/end', function(req, res, next) {
+  res.render('end', {
+    title: 'Sign out',
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
+    user: req.user
+  });
+});
+
 /*
  * User-defined pages
 */
