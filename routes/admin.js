@@ -82,7 +82,7 @@ router.get('/users/view/:username', function(req, res) {
             else {
                 res.render('admin/users/view', {
                     title: 'View User',
-                    user: user,
+                    _user: user,
                     groups: groups,
                     name: config.name,
                     organisation: config.organisation,

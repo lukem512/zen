@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+	h1= title
+	p Welcome to the control panel. From here you can manage users and their actions.
+	ul
+		li
+			a(href="/admin/users/list") Users
+		li
+			a(href="/admin/schedules/list") Schedules
+		li
+			a(href="/admin/pledges/list") Pledges
+		li
+			a(href="/admin/fulfilments/list") Fulfilments

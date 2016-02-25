@@ -6,19 +6,19 @@ block content
 	script(src='/javascripts/admin/generic.js')
 	script(src='/javascripts/admin/users.js')
 	h1.
-		Details for #{user.username}
-	p#userId= user._id
+		Details for #{_user.username}
+	p#userId= _user._id
 	form#formViewUser(name="viewuser",role="form",method="post",action="/api/users/update")
 		.form-group
-			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{user.username}")
+			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{_user.username}")
 		.form-group
-			input#inputUserEmail.form-control(type="text", placeholder="Email address", name="useremail", value="#{user.email}")
+			input#inputUserEmail.form-control(type="text", placeholder="Email address", name="useremail", value="#{_user.email}")
 		.form-group
 			input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", value="password")
 		.form-group
 			each group, i in groups
 				label
-					if user.groups && user.groups.indexOf(group.name) > -1
+					if _user.groups && _user.groups.indexOf(group.name) > -1
 						input.form-control(type="checkbox", checked="checked", name="usergroups", value="#{group.name}")
 					else
 						input.form-control(type="checkbox", name="usergroups", value="#{group.name}")
