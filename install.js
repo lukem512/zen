@@ -16,10 +16,10 @@ var lockFile = './install.lock';
 
 // Export the function
 var install = function() {
+
 	// Check for lock file
 	if (fs.existsSync(lockFile)) {
 		return console.log('Installation has already been performed! Please remove the file ' + lockFile + ' if you wish to run installation again.');
-		return console.log();
 	}
 
 	// Check for existing admin
@@ -31,7 +31,7 @@ var install = function() {
 		}
 
 		if (admin) {
-			return console.log('Installation has already been performed!');
+			return console.log('The user ' + admin.username + ' already exists.');
 		}
 
 		var hash = bcrypt.hashSync(config.admin.password);
