@@ -22,6 +22,10 @@ db.once('open', function() {
   console.log('Connection to database successful.')
 });
 
+// Check for installation and run
+var install = require('./install');
+install();
+
 // app initialisation
 var app = express();
 
