@@ -18,8 +18,8 @@ var lockFile = './install.lock';
 var install = function() {
 	// Check for lock file
 	if (fs.existsSync(lockFile)) {
-		console.log('You cannot run installation whilst the file ' + lockFile + ' exists. Please remove it if you wish to run the installation script again.');
-		process.exit();
+		return console.log('Installation has already been performed! Please remove the file ' + lockFile + ' if you wish to run installation again.');
+		return console.log();
 	}
 
 	// Check for existing admin
@@ -27,13 +27,11 @@ var install = function() {
 		username: config.admin.username
 	}, function(err, admin){
 		if (err) {
-			console.error(err);
-			process.exit(1);
+			return console.error(err);
 		}
 
 		if (admin) {
-			console.log('Installation has already been performed!')
-			process.exit();
+			return console.log('Installation has already been performed!');
 		}
 
 		var hash = bcrypt.hashSync(config.admin.password);
@@ -47,20 +45,17 @@ var install = function() {
 
 		admin.save(function(err, doc){
 			if (err) {
-				console.error(err);
-				process.exit(1);
+				return console.error(err);
 			}
 
 			// Create lock file
 			fs.writeFile(lockFile,
-				'Do not remove this file unless you wish to run the installation script again.',
+				'Do not remove this file unless you wish to run installation again.',
 				function(err) {
 					if (err) {
-						console.error(err);
-						process.exit(1);
+						return console.error(err);
 					}
-					console.log('Installation complete!');
-					process.exit();
+					return console.log('Installation complete!');
 				});
 		});
 	});
