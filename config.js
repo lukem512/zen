@@ -8,7 +8,7 @@ var config = {
 
 	database: {
 		// The URI used to connect to your mongo database.
-		uri: 'mongodb://localhost:27017/zen'
+		uri: 'mongodb://zen:password@ds031213.mongolab.com:31213/heroku_0zqsl9g7'
 	},
 
 	token: {
