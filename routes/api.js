@@ -52,7 +52,7 @@ router.post('/authenticate', function(req, res){
             });
         }
         else {
-            if (bcrypt.compareSync(req.body.password, user.password)) {
+            if (!bcrypt.compareSync(req.body.password, user.password)) {
                 console.log('Invalid password');
                 res.status(403).json({
                     success: false,
