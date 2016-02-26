@@ -3,6 +3,7 @@ extends layout
 block content
 	script(src='/javascripts/ui/authenticate.js')
 	h1= title
+	p#message.hidden Authentication status
 	form#formAuthenticate(name="authenticate",role="form",method="post",action="/api/authenticate")
 		.form-group
 			input#inputUsername.form-control(type="text", placeholder="Username", name="username")

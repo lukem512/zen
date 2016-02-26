@@ -45,18 +45,16 @@ router.post('/authenticate', function(req, res){
         if (err) return error.server(res);
 
         if (!user) {
-            console.log('User not found');
             res.status(403).json({
                 success: false,
-                message: 'Username was not found'
+                message: 'We couldn\'t find an account with that username.'
             });
         }
         else {
             if (!bcrypt.compareSync(req.body.password, user.password)) {
-                console.log('Invalid password');
                 res.status(403).json({
                     success: false,
-                    message: 'Invalid password'
+                    message: 'The password you entered is incorrect.'
                 });
             }
             else {
@@ -66,7 +64,7 @@ router.post('/authenticate', function(req, res){
                 });
                 res.json({
                     success: true,
-                    message: 'Signed in successfully',
+                    message: 'Signed in successfully!',
                     token: token
                 });
             }
