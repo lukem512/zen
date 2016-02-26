@@ -1,8 +1,0 @@
-extends ../../layout
-
-block content
-    h1= title
-    ul
-        each group, i in groups
-            li
-                a(href="/admin/groups/view/#{group.name}")= group.name

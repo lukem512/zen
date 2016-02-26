@@ -1,9 +1,0 @@
-extends ../../layout
-
-block content
-    h1.
-        Users
-    ul
-        each user, i in users
-            li
-                a(href="/admin/users/view/#{user.username}")= user.username

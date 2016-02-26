@@ -21,14 +21,9 @@ router.get('/', function(req, res) {
     });
 });
 
-/*
- * Users.
- * Users within the system.
-*/
-
-/* GET user listing page. */
-router.get('/users/list', function(req, res) {
-    User.find(function(err, users){
+// Generic list template
+var listModel = function(req, res, params) {
+    params.model.find(function(err, objs){
         if (err) {
             console.error(err);
             res.render('500', {
@@ -40,15 +35,42 @@ router.get('/users/list', function(req, res) {
             });
         }
         else {
-            res.render('admin/users/list', {
-                title: 'Users',
-                users: users,
+            res.render('admin/list', {
+                title: params.title,
+                objects: objs,
+                keys: {
+                    model: params.keys.model,
+                    link: {
+                        id: (params.keys.link) ? (params.keys.link.id || '_id') : '_id',
+                        text: (params.keys.link) ? (params.keys.link.text || '_id') : '_id'
+                    }
+                },
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
                 user: req.user
             });
         }
+    })
+};
+
+/*
+ * Users.
+ * Users within the system.
+*/
+
+/* GET user listing page. */
+router.get('/users/list', function(req, res) {
+    listModel(req, res, {
+        model: User,
+        title: 'Users',
+        keys: {
+            model: 'users',
+            link: {
+                id: 'username',
+                text: 'username'
+            }
+        } 
     });
 });
 
@@ -127,27 +149,16 @@ router.get('/users/new', function(req, res) {
 
 /* GET group listing page. */
 router.get('/groups/list', function(req, res) {
-    Group.find(function(err, groups){
-    	if (err) {
-    		console.error(err);
-    		res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-    	}
-        else {
-            res.render('admin/groups/list', {
-                title: 'User Groups',
-                groups: groups,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-        }
+    listModel(req, res, {
+        model: Group,
+        title: 'User Groups',
+        keys: {
+            model: 'groups',
+            link: {
+                id: 'name',
+                text: 'name'
+            }
+        } 
     });
 });
 
@@ -201,17 +212,16 @@ router.get('/groups/new', function(req, res) {
  * Schedules
  * Users can create schedules, visible to their group.
 */
-
-/* GET schedule listing page. */
 router.get('/schedules/list', function(req, res) {
-    Schedule.find(function(err, schedules){
-        res.render('admin/schedules/list', {
-            schedules: schedules,
-            name: config.name,
-            organisation: config.organisation,
-            nav: config.nav(),
-            user: req.user
-        });
+    listModel(req, res, {
+        model: Schedule,
+        title: 'Schedules',
+        keys: {
+            model: 'schedules',
+            link: {
+                text: 'title'
+            }
+        } 
     });
 });
 
@@ -295,15 +305,12 @@ router.get('/schedules/new', function(req, res) {
 
 /* GET pledge listing page. */
 router.get('/pledges/list', function(req, res) {
-    Pledge.find(function(err, pledges){
-        res.render('admin/pledges/list', {
-            title: 'Pledges',
-            pledges: pledges,
-            name: config.name,
-            organisation: config.organisation,
-            nav: config.nav(),
-            user: req.user
-        });
+    listModel(req, res, {
+        model: Pledge,
+        title: 'Pledges',
+        keys: {
+            model: 'pledges',
+        } 
     });
 });
 
@@ -390,15 +397,12 @@ router.get('/pledges/new', function(req, res) {
 
 /* GET list fulfilments page. */
 router.get('/fulfilments/list', function(req, res) {
-    Fulfilment.find(function(err, fulfilments){
-        res.render('admin/fulfilments/list', {
-            title: 'Fulfilments',
-            fulfilments: fulfilments,
-            name: config.name,
-            organisation: config.organisation,
-            nav: config.nav(),
-            user: req.user
-        });
+    listModel(req, res, {
+        model: Fulfilment,
+        title: 'Fulfilments',
+        keys: {
+            model: 'fulfilments',
+        } 
     });
 });
 
