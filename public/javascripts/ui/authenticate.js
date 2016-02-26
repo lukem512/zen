@@ -55,10 +55,11 @@ var end = function() {
 	window.location = '/';
 };
 
-// Submit form on 'enter' keypress
-$('#formAuthenticate input').keydown(function(e) {
-    if (e.keyCode == 13) {
-        event.preventDefault();
-        auth();
+$(document).keypress(function(e){
+	var keyCode = e.which || e.keyCode || 0;
+    if (keyCode == 13){
+        e.preventDefault();
+		auth();
+		return false;
     }
 });
