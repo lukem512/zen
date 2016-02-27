@@ -10,6 +10,17 @@ var _validate = function(validator, modifier) {
     }
 }
 
+var _get = function(getApiUrl, callback) {
+	$.ajax({
+	    url: getApiUrl,
+	    type: 'GET',
+	    success: callback,
+	    error: function(e) {
+	    	alert(JSON.stringify(e));
+	    }
+	});
+};
+
 var _update = function(updateApiUrl, nextUrl, params) {
 	$.ajax({
 	    url: updateApiUrl,
