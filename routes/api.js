@@ -385,6 +385,45 @@ router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
     });
 });
 
+// retrieve events for populating the schedules calendar
+router.get('/calendar', function(req, res) {
+
+    // TODO - retrieve events from group of user
+
+    // TODO - Only return values between req.query.start and req.query.end
+
+    console.log('Returning calendar events between ' + req.query.start + ' and ' + req.query.end);
+    res.json({
+        events: [{
+            title: 'TEST',
+            description: 'YOLO',
+            start: '2016-02-28T12:00:00Z',
+            end: '2016-02-29T16:00:01Z',
+            owner: 'admin',
+            url: '/schedules/'
+        }]
+    });
+
+    // Schedule.find({ owner: sanitize(req.user.username) }, function(err, schedules){
+    //     if (err) return error.server(res, err);
+
+    //     // Return in a format described by FullCalendar
+    //     // http://fullcalendar.io/docs/event_data/Event_Object/
+    //     res.json({
+    //         events: schedules.map(function(s){
+    //             return {
+    //                 title: s.title,
+    //                 description: s.description,
+    //                 start: s.start_time,
+    //                 end: s.end_time,
+    //                 owner: s.owner,
+    //                 url: '/schedules/' + s._id
+    //             }
+    //         })
+    //     });
+    // });
+});
+
 /*
  * Export the routes.
 */

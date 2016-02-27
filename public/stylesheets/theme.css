@@ -6,7 +6,7 @@
 
 body {
     overflow-x: hidden;
-    background: #233140;
+    background: #233140 !important;
 }
 
 p {

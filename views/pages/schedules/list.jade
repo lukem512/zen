@@ -4,9 +4,6 @@ block content
 	h1 #{dictionary.schedule.noun}s
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules-get.js')
-	p
-		| Display 
-		script.
-			document.write(user)
-		| 's schedules here.
-	
+	p These are your #{dictionary.schedule.noun}s.
+	hr
+	#calendar

@@ -48,7 +48,7 @@ var config = {
 	  		},
 	  		// Default UI pages.
 	  		// These are not included in the navigation bar.
-	  		'schedules/view': {
+	  		'schedules/list': {
 	  			href: '/schedules',
 	  		}
   		}
