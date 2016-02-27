@@ -1,0 +1,26 @@
+{
+  "name": "zen",
+  "description": "Zen is a framework for conducting user studies into social norms",
+  "main": "",
+  "authors": [
+    "lukem512 <lukem95@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/lukem512/zen",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fullcalendar": "^2.6.1",
+    "jquery": "^2.2.1",
+    "bootstrap": "^3.3.6",
+    "jquery.cookie": "jquery-cookie#^1.4.1",
+    "jquery-ui": "^1.11.4",
+    "jt.timepicker": "jquery-timepicker-jt#^1.8.9"
+  },
+  "private": true
+}

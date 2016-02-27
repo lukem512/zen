@@ -1,9 +1,11 @@
 {
   "name": "zen",
+  "description": "Zen is a framework for conducting user studies into social norms",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "install": "grunt"
   },
   "dependencies": {
     "bcryptjs": "^2.3.0",
@@ -18,5 +20,13 @@
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
     "validator": "^4.8.0"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-bower-concat": "^1.0.0",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^0.11.1",
+    "load-grunt-tasks": "^3.4.0"
   }
 }

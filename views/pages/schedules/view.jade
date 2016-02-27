@@ -2,5 +2,11 @@ extends ../../layout
 
 block content
 	h1 #{dictionary.schedule.noun}s
-	p Display the user's schedules here.
+	script(src='/javascripts/ui/generic.js')
+	script(src='/javascripts/ui/schedules-get.js')
+	p
+		| Display 
+		script.
+			document.write(user)
+		| 's schedules here.
 	

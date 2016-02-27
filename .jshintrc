@@ -1,0 +1,7 @@
+{
+	"maxerr": 50,
+	"nonbsp": true,
+	"freeze": true,
+	"undef":  true,
+	"unused": "vars"
+}

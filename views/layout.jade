@@ -6,11 +6,11 @@ html
     //
         Stylesheets
         theme.css is a Bootstrap theme and can be replaced.
-    link(rel='stylesheet', href='/stylesheets/font-awesome.min.css')
-    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/theme.css')
+    link(rel='stylesheet', href='/vendor/jt.timepicker/jquery.timepicker.css')
+
+    link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css')
-    link(rel='stylesheet', href='/stylesheets/jquery.timepicker.css')
 
     // Load custom web fonts
     link(href="https://fonts.googleapis.com/css?family=Montserrat:400,700",rel="stylesheet", type="text/css")
@@ -19,10 +19,16 @@ html
     //
         Other JavaScript is loaded in the footer
         (scroll down)
-    script(src='/javascripts/jquery-1.12.0.min.js')
-    script(src='//code.jquery.com/ui/1.11.4/jquery-ui.js')
-    script(src='/javascripts/jquery.cookie.js')
-    script(src='/javascripts/jquery.timepicker.min.js')
+    script(src='/vendor/jquery/jquery.js')
+    script(src='/vendor/jquery-ui/jquery-ui.js')
+    script(src='/vendor/jquery.cookie/jquery.cookie.js')
+    script(src='/vendor/jt.timepicker/jquery.timepicker.js')
+    script(src='/vendor/moment/moment.js')
+    script(src='/vendor/bootstrap/bootstrap.js')
+
+    if user
+        script.
+            var user = '#{user.username}';
 
     // Meta tags
     meta(charset="utf-8")
