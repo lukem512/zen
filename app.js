@@ -48,7 +48,12 @@ app.use('/api', api);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  res.status(404).render('404');
+  res.status(404).render('404', {
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
+    user: req.user
+  });
 });
 
 // error handlers
@@ -61,7 +66,10 @@ if (app.get('env') === 'development') {
     res.render('error', {
       message: err.message,
       error: err,
-      nav: config.nav()
+      name: config.name,
+      organisation: config.organisation,
+      nav: config.nav(),
+      user: req.user
     });
   });
 }

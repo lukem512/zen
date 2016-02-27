@@ -2,6 +2,12 @@ extends layout
 
 block content
   h1= message
-  if (error !== {})
+  h3.
+    Something went wrong. We're trying to fix this as quickly as possible.
+  p
+    | Please go 
+    a(href='#', onclick='window.history.back();') back
+    |  and try again.
+  if (error)
     h2= error.status
     pre #{error.stack}

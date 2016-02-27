@@ -27,7 +27,6 @@ var listModel = function(req, res, params) {
         if (err) {
             console.error(err);
             res.render('500', {
-                title: 'Error 500',
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
