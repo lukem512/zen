@@ -6,12 +6,7 @@ var validate = function() {
 	return _validate(function(){
         // TODO
         return true;
-    }, function(){
-    	// Modify the password to return the hash
-    	$('#inputUserPass').val(
-			_hash($('#inputUserPass').val(), 10)
-		);
-    })
+    });
 };
 
 var groups = function(){
@@ -25,7 +20,7 @@ var add = function() {
 		var params = {
 			"username": $('#inputUserName').val(),
 			"useremail": $('#inputUserEmail').val(),	
-			"userpass": _hash($('#inputUserPass').val()),
+			"userpass": $('#inputUserPass').val(),
 			"usergroups": groups()
 		};
 		_update(addApiUrl, listViewUrl, params);
@@ -38,7 +33,7 @@ var update = function() {
 			"id": $('#userId').text(),
 			"username": $('#inputUserName').val(),
 			"useremail": $('#inputUserEmail').val(),	
-			"userpass": _hash($('#inputUserPass').val()),
+			"userpass": $('#inputUserPass').val(),
 			"usergroups": groups()
 		};
 		_update(updateApiUrl, listViewUrl, params);

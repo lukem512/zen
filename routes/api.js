@@ -112,7 +112,7 @@ router.post('/users/new', function(req, res) {
     var user = new User({
         username: sanitize(req.body.username),
         email: sanitize(req.body.useremail),
-        password: sanitize(req.body.userpass),
+        password: bcrypt.hashSync(sanitize(req.body.userpass)),
         groups: sanitize(req.body['usergroups[]'])
     });
     user.save(function(err, result) {
@@ -125,7 +125,7 @@ router.post('/users/update', function(req, res) {
     User.findByIdAndUpdate(sanitize(req.body.id), {
         username: sanitize(req.body.username),
         email: sanitize(req.body.useremail),
-        password: sanitize(req.body.userpass),
+        password: bcrypt.hashSync(sanitize(req.body.userpass)),
         groups: sanitize(req.body['usergroups[]'])
     }, function(err, result) {
         if (err) return error.server(res, err);
