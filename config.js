@@ -43,6 +43,14 @@ var config = {
 	  			title: 'Contact us',
 	  			href: '/contact',
 	  			nav: false
+	  		},
+	  		// These are the default UI pages
+	  		'schedules/view': {
+	  			href: '/schedules',
+	  			nav: false
+	  		},
+	  		'schedules/new': {
+	  			nav: false
 	  		}
   		}
   	},

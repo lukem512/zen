@@ -45,7 +45,33 @@ router.get('/end', function(req, res, next) {
  * User-defined pages
 */
 
-fs.readdir(config.pages.directory, function(err, pages){
+// Recurse fs.readdir()
+// https://stackoverflow.com/questions/5827612/node-js-fs-readdir-recursive-directory-search
+var walk = function(dir, done) {
+  var results = [];
+  fs.readdir(dir, function(err, list) {
+    if (err) return done(err);
+    var i = 0;
+    (function next() {
+      var file = list[i++];
+      if (!file) return done(null, results);
+      file = dir + '/' + file;
+      fs.stat(file, function(err, stat) {
+        if (stat && stat.isDirectory()) {
+          walk(file, function(err, res) {
+            results = results.concat(res);
+            next();
+          });
+        } else {
+          results.push(file);
+          next();
+        }
+      });
+    })();
+  });
+};
+
+walk(config.pages.directory, function(err, pages){
   if (err) {
     console.error('Could not create user-defined pages');
     if (err.code == 'ENOENT') {
@@ -56,10 +82,10 @@ fs.readdir(config.pages.directory, function(err, pages){
     return;
   }
   pages.forEach(function(page){
-    if (page == '.' || page == '.') return;
+    if (page[0] == '.' || page.split('/').pop()[0] == '.') return;
 
     // Clean filename
-    page = page.replace('.jade', '');
+    page = page.replace('.jade', '').replace(config.pages.directory + '/', '');
 
     // Find URL slug
     var href = config.pages.views[page].href || '/' + page;
@@ -78,7 +104,8 @@ fs.readdir(config.pages.directory, function(err, pages){
         nav: config.nav(),
         email: config.email,
         dictionary: config.dictionary,
-        user: req.user
+        user: req.user,
+        pages: pages
       });
     });
   });
