@@ -9,20 +9,6 @@ var validate = function() {
     })
 };
 
-var get = function(next) {
-	var next = next || listViewUrl;
-	if (validate()){
-		var params = {
-			"title": $('#inputTitle').val(),
-			"description": $('#inputDescription').val(),
-			"start_time": $('#inputStartTime').val(),
-			"end_time": $('#inputEndTime').val(),
-			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
-		};
-		_update(addApiUrl, next, params);
-	}
-};
-
 var add = function(next) {
 	var next = next || listViewUrl;
 	if (validate()){
