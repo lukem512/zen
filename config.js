@@ -27,30 +27,29 @@ var config = {
 	},
 
   	// Pages to create. These are not included in the navigation
-  	// unless specified above.
+  	// unless specified.
   	pages: {
   		directory: 'views/pages',
   		views: {
-  			// These are the default values and can be omitted.
-	  		// They are included as an example
+  			// This describes the about page.
+  			// The page will be added to the navigation bar
+  			// with the link text 'About'.
 	  		about: {
 	  			title: 'About',
 	  			href: '/about',
 	  			nav: true
 	  		},
-	  		// The title has been changed here.
+	  		// The link text has been changed here from the default,
+	  		// which is 'contact'.
 	  		contact: {
 	  			title: 'Contact us',
 	  			href: '/contact',
-	  			nav: false
+	  			nav: true
 	  		},
-	  		// These are the default UI pages
+	  		// Default UI pages.
+	  		// These are not included in the navigation bar.
 	  		'schedules/view': {
 	  			href: '/schedules',
-	  			nav: false
-	  		},
-	  		'schedules/new': {
-	  			nav: false
 	  		}
   		}
   	},
@@ -63,7 +62,7 @@ var config = {
   			href: '/'
   		},
   		// This is a link to an off-site page.
-  		// This link also opens in a new window.
+  		// This link opens in a new window.
   		{
   			title: 'Code',
   			href: 'https://github.com/lukem512/zen',
@@ -113,8 +112,8 @@ var config = {
     	Object.keys(this.pages.views).forEach(function(page){
     		page = views[page];
 
-    		// Displaying a page in the navigation is the default behaviour
-    		var nav = true;
+    		// Not displaying a page in the navigation is the default behaviour
+    		var nav = false;
     		if (page.nav != null)
     			nav = page.nav;
 

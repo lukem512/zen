@@ -49,6 +49,7 @@ app.use('/api', api);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   res.status(404).render('404', {
+    title: 'Not found',
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),
@@ -64,6 +65,7 @@ if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
+      title: 'Error',
       message: err.message,
       error: err,
       name: config.name,
@@ -79,9 +81,13 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
+    title: 'Error',
     message: err.message,
     error: {},
-    nav: config.nav()
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
+    user: req.user
   });
 });
 

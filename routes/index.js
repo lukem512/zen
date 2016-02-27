@@ -81,24 +81,29 @@ walk(config.pages.directory, function(err, pages){
     }
     return;
   }
-  pages.forEach(function(page){
-    if (page[0] == '.' || page.split('/').pop()[0] == '.') return;
+  pages.forEach(function(filename){
+    if (filename[0] == '.' || filename.split('/').pop()[0] == '.') return;
 
     // Clean filename
-    page = page.replace('.jade', '').replace(config.pages.directory + '/', '');
+    filename = filename.replace('.jade', '').replace(config.pages.directory + '/', '');
 
-    // Find URL slug
-    var href = config.pages.views[page].href || '/' + page;
+    // Find the config object, if it exists
+    var page = config.pages.views[filename];
 
-    // Find title
-    var title = config.pages.views[page].title || page;
+    // Can't find it, use defaults
+    if (!page) {
+      page = {
+        href: '/' + filename,
+        title: filename
+      }
+    }
 
     // Create route
-    console.log('Creating route ' + title + ' at ' + href);
+    console.log('Creating route ' + filename + ' at ' + page.href);
     
-    router.get(href, function(req, res){
-      res.render('pages/' + page, {
-        title: title,
+    router.get(page.href, function(req, res){
+      res.render('pages/' + filename, {
+        title: page.title,
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),

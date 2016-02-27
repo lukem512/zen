@@ -9,20 +9,36 @@ var validate = function() {
     })
 };
 
-var add = function() {
+var get = function(next) {
+	var next = next || listViewUrl;
 	if (validate()){
 		var params = {
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
 			"start_time": $('#inputStartTime').val(),
 			"end_time": $('#inputEndTime').val(),
-			"owner": $('#inputOwner').find(":selected").text()
+			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
 		};
-		_update(addApiUrl, listViewUrl, params);
+		_update(addApiUrl, next, params);
 	}
 };
 
-var update = function() {
+var add = function(next) {
+	var next = next || listViewUrl;
+	if (validate()){
+		var params = {
+			"title": $('#inputTitle').val(),
+			"description": $('#inputDescription').val(),
+			"start_time": $('#inputStartTime').val(),
+			"end_time": $('#inputEndTime').val(),
+			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
+		};
+		_update(addApiUrl, next, params);
+	}
+};
+
+var update = function(next) {
+	var next = next || listViewUrl;
 	if (validate()){
 		var params = {
 			"id": $('#scheduleId').text(),
@@ -31,7 +47,7 @@ var update = function() {
 			"start_time": $('#inputStartTime').val(),
 			"end_time": $('#inputEndTime').val()
 		};
-		_update(updateApiUrl, listViewUrl, params);
+		_update(updateApiUrl, next, params);
 	}
 };
 
