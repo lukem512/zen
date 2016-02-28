@@ -250,6 +250,7 @@ router.post('/schedules/new', function(req, res) {
 });
 
 router.post('/schedules/update', function(req, res) {
+    console.log('Looking for id of ' + req.body.id);
     Schedule.findByIdAndUpdate(sanitize(req.body.id), {
         title: sanitize(req.body.title),
         description: sanitize(req.body.description),

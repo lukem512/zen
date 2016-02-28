@@ -26,29 +26,33 @@ var add = function(next) {
 	var next = next || listViewUrl;
 	var dates = makeDates();
 	if (validate() && dates.start.isValid() && dates.end.isValid()){
+			var owner = $('#inputOwner').find(":selected").text() || $('#inputOwner').val();
+
 		var params = {
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
 			"start_time": dates.start.format(),
 			"end_time": dates.end.format(),
-			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
+			"owner": owner
 		};
 		console.log(params);
 		_update(addApiUrl, next, params);
 	}
 };
 
-var update = function(next) {
+var update = function(next, id) {
 	var next = next || listViewUrl;
 	var dates = makeDates();
+	var id = id || $('#scheduleId').text();
+	var owner = $('#inputOwner').find(":selected").text() || $('#inputOwner').val();
 	if (validate() && dates.start.isValid() && dates.end.isValid()){
 		var params = {
-			"id": $('#scheduleId').text(),
+			"id": id,
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
 			"start_time": dates.start.format(),
 			"end_time": dates.end.format(),
-			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
+			"owner": owner
 		};
 		_update(updateApiUrl, next, params);
 	}
