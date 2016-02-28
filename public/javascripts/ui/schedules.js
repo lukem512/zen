@@ -11,14 +11,24 @@ var validate = function() {
 
 var add = function(next) {
 	var next = next || listViewUrl;
-	if (validate()){
+
+	// Make the dates
+	var startDateString = $('#inputStartDate').val() + ' ' + $('#inputStartTime').val();
+	var startDate = moment(startDateString, 'DD-MM-YYYY HH:mm');
+
+	var endDateString = $('#inputEndDate').val() + ' ' + $('#inputEndTime').val();
+	var endDate = moment(endDateString, 'DD-MM-YYYY HH:mm');
+
+	// Kick it across to the API
+	if (validate() && endDate.isValid() && startDate.isValid()){
 		var params = {
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
-			"start_time": $('#inputStartTime').val(),
-			"end_time": $('#inputEndTime').val(),
+			"start_time": startDate.format(),
+			"end_time": endDate.format(),
 			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
 		};
+		console.log(params);
 		_update(addApiUrl, next, params);
 	}
 };
