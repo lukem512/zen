@@ -9,6 +9,7 @@ var auth = require('./routes/auth');
 var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
+var schedules = require('./routes/schedules');
 
 var config = require('./config');
 
@@ -45,6 +46,9 @@ app.use(auth);
 app.use('/', routes);
 app.use('/admin', admin);
 app.use('/api', api);
+
+console.log('Setting schedule routes at /' + config.dictionary.schedule.noun);
+app.use('/' + config.dictionary.schedule.noun, schedules);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

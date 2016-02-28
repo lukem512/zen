@@ -9,10 +9,16 @@ block content
 	form#formViewSchedule(name="viewschedule",role="form",method="post",action="/api/schedules/update")
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title", value="#{schedule.title}")
-		.form-group
-			input#inputStartTime.form-control(type="text", placeholder="Start Time", name="start_time", value="#{schedule.start_time}")
-		.form-group
-			input#inputEndTime.form-control(type="text", placeholder="End Time", name="end_time", value="#{schedule.end_time}")
+		.row
+			.form-group.col-xs-6
+				input#inputStartDate.form-control(type="text", placeholder="Start date", name="start_date", value="#{start_date}")
+			.form-group.col-xs-6
+				input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time", value="#{start_time}")
+		.row
+			.form-group.col-xs-6
+				input#inputEndDate.form-control(type="text", placeholder="End date", name="end_date", value="#{end_date}")
+			.form-group.col-xs-6
+				input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{end_time}")
 		.form-group
 			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
 				| #{schedule.description}

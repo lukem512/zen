@@ -15,7 +15,8 @@ router.get('/', function(req, res, next) {
   	name: config.name,
   	organisation: config.organisation,
   	nav: config.nav(),
-    user: req.user
+    user: req.user,
+    dictionary: config.dictionary
   });
 });
 
@@ -26,7 +27,8 @@ router.get('/auth', function(req, res, next) {
   	name: config.name,
   	organisation: config.organisation,
   	nav: config.nav(),
-    user: req.user
+    user: req.user,
+    dictionary: config.dictionary
   });
 });
 
@@ -37,7 +39,8 @@ router.get('/end', function(req, res, next) {
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),
-    user: req.user
+    user: req.user,
+    dictionary: config.dictionary
   });
 });
 
@@ -89,14 +92,10 @@ walk(config.pages.directory, function(err, pages){
 
     // Find the config object, if it exists
     var page = config.pages.views[filename];
-
-    // Can't find it, use defaults
-    if (!page) {
-      page = {
-        href: '/' + filename,
-        title: filename
-      }
-    }
+    page = {
+      href: page.href || '/' + filename,
+      title: page.title || filename
+    };
 
     // Create route
     console.log('Creating route ' + filename + ' at ' + page.href);

@@ -36,20 +36,14 @@ var config = {
   			// with the link text 'About'.
 	  		about: {
 	  			title: 'About',
-	  			href: '/about',
-	  			nav: true
+	  			href: '/about'
 	  		},
 	  		// The link text has been changed here from the default,
-	  		// which is 'contact'.
+	  		// which is 'contact'. This link is not displayed.
 	  		contact: {
 	  			title: 'Contact us',
 	  			href: '/contact',
-	  			nav: true
-	  		},
-	  		// Default UI pages.
-	  		// These are not included in the navigation bar.
-	  		'schedules/list': {
-	  			href: '/schedules',
+	  			nav: false
 	  		}
   		}
   	},
@@ -112,8 +106,8 @@ var config = {
     	Object.keys(this.pages.views).forEach(function(page){
     		page = views[page];
 
-    		// Not displaying a page in the navigation is the default behaviour
-    		var nav = false;
+    		// Displaying a page in the navigation is the default behaviour
+    		var nav = true;
     		if (page.nav != null)
     			nav = page.nav;
 

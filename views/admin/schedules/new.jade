@@ -7,10 +7,16 @@ block content
 	form#formAddSchedule(name="addschedule",role="form",method="post",action="/api/schedules/new")
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title")
-		.form-group
-			input#inputStartTime.form-control(type="text", placeholder="Start Time", name="start_time")
-		.form-group
-			input#inputEndTime.form-control(type="text", placeholder="End Time", name="end_time")
+		.row
+			.form-group.col-xs-6
+				input#inputStartDate.form-control(type="text", placeholder="Start date", name="start_date")
+			.form-group.col-xs-6
+				input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time")
+		.row
+			.form-group.col-xs-6
+				input#inputEndDate.form-control(type="text", placeholder="End date", name="end_date")
+			.form-group.col-xs-6
+				input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time")
 		.form-group
 			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
 		.form-group
@@ -18,4 +24,4 @@ block content
 				for user in users
 					option #{user.username}
 		.form-group
-			button#btnSubmit(type="button", onclick="add()") Create
+			button#btnSubmit.btn.btn-success(type="button", onclick="add()") Create

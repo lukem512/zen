@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
+var moment = require('moment');
 
 var User = require('../models/users');
 var Group = require('../models/groups');
@@ -257,9 +258,18 @@ router.get('/schedules/view/:id', function(req, res) {
                     if (!users) {
                         users = [];
                     }
+
+                    // Format the schedule date
+                    var startDate = moment(schedule.start_time);
+                    var endDate = moment(schedule.end_time);
+
                     res.render('admin/schedules/view', {
                         title: 'View Schedule',
                         schedule: schedule,
+                        start_date: startDate.format('DD-MM-YYYY'),
+                        start_time: startDate.format('HH:mm'),
+                        end_date: schedule.end_date = endDate.format('DD-MM-YYYY'),
+                        end_time: schedule.end_time = endDate.format('HH:mm'),
                         users: users,
                         name: config.name,
                         organisation: config.organisation,

@@ -9,23 +9,28 @@ var validate = function() {
     })
 };
 
-var add = function(next) {
-	var next = next || listViewUrl;
-
-	// Make the dates
+var makeDates = function() {
 	var startDateString = $('#inputStartDate').val() + ' ' + $('#inputStartTime').val();
 	var startDate = moment(startDateString, 'DD-MM-YYYY HH:mm');
 
 	var endDateString = $('#inputEndDate').val() + ' ' + $('#inputEndTime').val();
 	var endDate = moment(endDateString, 'DD-MM-YYYY HH:mm');
 
-	// Kick it across to the API
-	if (validate() && endDate.isValid() && startDate.isValid()){
+	return {
+		start: startDate,
+		end: endDate
+	};
+}
+
+var add = function(next) {
+	var next = next || listViewUrl;
+	var dates = makeDates();
+	if (validate() && dates.start.isValid() && dates.end.isValid()){
 		var params = {
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
-			"start_time": startDate.format(),
-			"end_time": endDate.format(),
+			"start_time": dates.start.format(),
+			"end_time": dates.end.format(),
 			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
 		};
 		console.log(params);
@@ -35,13 +40,15 @@ var add = function(next) {
 
 var update = function(next) {
 	var next = next || listViewUrl;
-	if (validate()){
+	var dates = makeDates();
+	if (validate() && dates.start.isValid() && dates.end.isValid()){
 		var params = {
 			"id": $('#scheduleId').text(),
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),
-			"start_time": $('#inputStartTime').val(),
-			"end_time": $('#inputEndTime').val()
+			"start_time": dates.start.format(),
+			"end_time": dates.end.format(),
+			"owner": $('#inputOwner').find(":selected").text() || $('#inputOwner').val()
 		};
 		_update(updateApiUrl, next, params);
 	}

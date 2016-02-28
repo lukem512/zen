@@ -36,7 +36,7 @@ var response = {
     invalid: function(res) {
         res.json({message: 'Invalid'});
     }
-}
+};
 
 /*
  * Authentication functions.
@@ -409,9 +409,10 @@ router.get('/calendar', function(req, res) {
                 start: moment(s.start_time).format(),
                 end: moment(s.end_time).format(),
                 owner: s.owner,
-                url: '/schedules/' + s._id
+                url: '/' + config.dictionary.schedule.noun + '/view/' + s._id
             }
         });
+        console.log(json);
         res.json(json);
     });
 });

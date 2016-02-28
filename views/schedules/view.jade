@@ -1,0 +1,11 @@
+extends ../layout
+
+block content
+	h1= schedule.title
+	script(src='/javascripts/ui/generic.js')
+	if schedule.description
+		p= schedule.description
+	if schedule.owner == user.username
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location=#") Edit
+		&nbsp;
+		button#btnDelete.btn.btn-danger(type="button", onclick="window.location=#") Delete
