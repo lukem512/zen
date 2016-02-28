@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var async = require('async');
 
 var Group = require('./groups');
 
@@ -43,6 +44,24 @@ ScheduleSchema.statics.group = function(group, callback) {
     schedules.find({
       owner: { $in: usernames }
     }, callback);
+  });
+};
+
+ScheduleSchema.statics.groups = function(groups, callback) {
+  var schedules = this;
+  var results = [];
+  async.eachSeries(groups, function(group, next) {
+    schedules.group(group, function(err, items) {
+      if (err) {
+        return next(err);
+      }
+      else {
+        results = results.concat(items);
+        next();
+      }
+    });
+  }, function done(err) {
+    callback(err, results)
   });
 };
 

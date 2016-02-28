@@ -5,13 +5,21 @@ block content
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
 	p
-		| The user 
-		a#user(href="/users/#{schedule.owner}") #{schedule.owner}
-		|  has #{dictionary.schedule.verb.past} a #{dictionary.action.noun} session for 
+		a#user.text-capitalize(href="/users/#{schedule.owner}")
+			if schedule.owner != user.username
+				| #{schedule.owner} 
+			else
+				| you 
+		if schedule.owner != user.username
+			| has 
+		else
+			| have 
+		| #{dictionary.schedule.verb.past} a #{dictionary.action.noun} session for 
 		a#startDate(href="#")
 		| . 
 	if schedule.description
-		p= schedule.description
+		p
+			em= schedule.description
 	hr
 	if schedule.owner != user.username
 		button#btnJoin.btn.btn-success(type="button", onclick="window.location=#") Join

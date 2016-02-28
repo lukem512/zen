@@ -390,32 +390,30 @@ router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
 // retrieve events for populating the schedules calendar
 router.get('/calendar', function(req, res) {
 
-    // TODO - retrieve events from group of user
+        
+        // User-owned events are green, others are red.
+        // TODO - a better colouring scheme is needed
+        // TODO - if the user is admin, display ALL groups
 
-    // TODO - Only return values between req.query.start and req.query.end
+        // Set groups to be an empty array if its null
+        req.user.groups = req.user.groups || [];
 
-    console.log('Returning calendar events between ' + req.query.start + ' and ' + req.query.end);
-
-    Schedule.find({
-        owner: sanitize(req.user.username)
-    }, function(err, schedules){
-        if (err) return error.server(res, err);
-
-        // Return in a format described by FullCalendar
-        // http://fullcalendar.io/docs/event_data/Event_Object/
-        var json = schedules.map(function(s){
-            return {
-                title: s.title,
-                description: s.description,
-                start: moment(s.start_time).format(),
-                end: moment(s.end_time).format(),
-                owner: s.owner,
-                url: '/' + config.dictionary.schedule.noun + 's/view/' + s._id
-            }
-        });
-        console.log(json);
-        res.json(json);
-    });
+        // Retrieve all schedules for all groups the user
+        // is a member of.
+        Schedule.groups(req.user.groups, function(err, schedules) {
+            var json = schedules.map(function(s){
+                return {
+                    title: s.title,
+                    description: s.description,
+                    start: moment(s.start_time).format(),
+                    end: moment(s.end_time).format(),
+                    owner: s.owner,
+                    url: '/' + config.dictionary.schedule.noun + 's/view/' + s._id,
+                    className: (s.owner == req.user.username) ? 'bg-success' : 'bg-danger'
+                }
+            });
+            res.json(json);
+        })
 });
 
 /*

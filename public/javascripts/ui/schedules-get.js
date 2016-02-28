@@ -75,6 +75,8 @@ $(function() {
 		events: calendarApiUrl,
 		selectable: true,
 		nowIndicator: true,
+		eventBorderColor: 'rgba(0,0,0,0)',
+		timeFormat: 'HH:mm',
 		select: function(start, end, evt) {
 			// TODO - show a '+' popup
 		},
