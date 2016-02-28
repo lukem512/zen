@@ -2,8 +2,8 @@ extends ../layout
 
 block content
     h1= title
-    a(href="/admin/#{keys.model}/new") New
+    a(href="#{keys.route}/new") New
     ul
         each obj, i in objects
             li
-                a(href="/admin/#{keys.model}/view/#{obj[keys.link.id]}")= obj[keys.link.text]
+                a(href="#{keys.route}/view/#{obj[keys.link.id]}")= obj[keys.link.text]

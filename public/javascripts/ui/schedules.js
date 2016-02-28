@@ -54,8 +54,11 @@ var update = function(next) {
 	}
 };
 
-var del = function() {
-	_del(updateApiUrl, listViewUrl, $('#scheduleId').text());
+var del = function(next, id) {
+	var next = next || listViewUrl;
+	var id = id || $('#scheduleId').text();
+	console.log('DELETE schedule with ID ' + id)
+	_del(updateApiUrl, next, id);
 };
 
 // Set up date/timepicker components

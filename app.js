@@ -48,7 +48,7 @@ app.use('/admin', admin);
 app.use('/api', api);
 
 console.log('Setting schedule routes at /' + config.dictionary.schedule.noun);
-app.use('/' + config.dictionary.schedule.noun, schedules);
+app.use('/' + config.dictionary.schedule.noun + 's', schedules);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-	h1 Add a #{dictionary.schedule.noun}
+	h1= title
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
 	form#formAddSchedule(name="addschedule",role="form",method="post",action="/api/schedules/new")
@@ -19,7 +19,7 @@ block content
 				input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time")
 		.form-group
 			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
-		.form-group
+		.form-group.hidden
 			input#inputOwner.hidden(name="owner", value="#{user.username}")
 		.form-group
 			button#btnSubmit.btn.btn-success(type="button", onclick="add('/#{dictionary.schedule.noun}')") Create

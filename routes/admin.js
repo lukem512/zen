@@ -41,6 +41,7 @@ var listModel = function(req, res, params) {
                 objects: objs,
                 keys: {
                     model: params.keys.model,
+                    route: params.keys.route || '/admin/' + params.keys.model,
                     link: {
                         id: (params.keys.link) ? (params.keys.link.id || '_id') : '_id',
                         text: (params.keys.link) ? (params.keys.link.text || '_id') : '_id'
@@ -213,98 +214,19 @@ router.get('/groups/new', function(req, res) {
  * Schedules
  * Users can create schedules, visible to their group.
 */
+
+/* GET schedules listing page. */
 router.get('/schedules/list', function(req, res) {
     listModel(req, res, {
         model: Schedule,
         title: 'Schedules',
         keys: {
             model: 'schedules',
+            route: '/schedules',
             link: {
                 text: 'title'
             }
         } 
-    });
-});
-
-/* GET schedule information */
-router.get('/schedules/view/:id', function(req, res) {
-    Schedule.findById(sanitize(req.params.id), function(err, schedule){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-        }
-        else if (!schedule) {
-            res.render('404', {
-                title: 'Error 404',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-        }
-        else {
-            User.find(function(err, users) {
-                if (err) {
-                    console.error(err);
-                    res.render('500');
-                }
-                else {
-                    if (!users) {
-                        users = [];
-                    }
-
-                    // Format the schedule date
-                    var startDate = moment(schedule.start_time);
-                    var endDate = moment(schedule.end_time);
-
-                    res.render('admin/schedules/view', {
-                        title: 'View Schedule',
-                        schedule: schedule,
-                        start_date: startDate.format('DD-MM-YYYY'),
-                        start_time: startDate.format('HH:mm'),
-                        end_date: schedule.end_date = endDate.format('DD-MM-YYYY'),
-                        end_time: schedule.end_time = endDate.format('HH:mm'),
-                        users: users,
-                        name: config.name,
-                        organisation: config.organisation,
-                        nav: config.nav(),
-                        user: req.user
-                    });
-                }
-            });
-        }
-    });
-});
-
-/* GET new schedule page. */
-router.get('/schedules/new', function(req, res) {
-    User.find(function(err, users){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-        }
-        else {
-            res.render('admin/schedules/new', { 
-                title: 'Add New Schedule',
-                users: users,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user
-            });
-        }
     });
 });
 

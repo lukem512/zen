@@ -3,9 +3,25 @@ extends ../layout
 block content
 	h1= schedule.title
 	script(src='/javascripts/ui/generic.js')
+	script(src='/javascripts/ui/schedules.js')
+	p
+		| The user 
+		a#user(href="/users/#{schedule.owner}") #{schedule.owner}
+		|  has #{dictionary.schedule.verb.past} a #{dictionary.action.noun} session for 
+		a#startDate(href="#")
+		| . 
 	if schedule.description
 		p= schedule.description
-	if schedule.owner == user.username
-		button#btnEdit.btn.btn-primary(type="button", onclick="window.location=#") Edit
+	hr
+	if schedule.owner != user.username
+		button#btnJoin.btn.btn-success(type="button", onclick="window.location=#") Join
+	if schedule.owner == user.username || user.admin
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.schedule.noun}s/edit/#{schedule.id}'") Edit
 		&nbsp;
-		button#btnDelete.btn.btn-danger(type="button", onclick="window.location=#") Delete
+		button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun}s', '#{schedule.id}')") Delete
+	script.
+		$(function() {
+			var startDate = moment('#{schedule.start_time}');
+			$('#startDate').attr('href', '/#{dictionary.schedule.noun}s?date=' + startDate.format('YYYY-MM-DD') + '&view=day');
+			$('#startDate').text(startDate.calendar());
+		});

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
+var moment = require('moment');
 
 var config = require('../config');
 
@@ -19,7 +20,6 @@ router.get('/', function(req, res, next) {
   });
 });
 
-
 /* GET new schedule page */
 router.get('/new', function(req, res, next) {
   res.render('schedules/new', {
@@ -30,6 +30,49 @@ router.get('/new', function(req, res, next) {
       user: req.user,
       dictionary: config.dictionary
     });
+});
+
+/* GET edit schedule page */
+router.get('/edit/:id', function(req, res, next) {
+  Schedule.findById(sanitize(req.params.id), function(err, schedule){
+    if (err) {
+      console.error(err);
+      return res.render('500', {
+          title: 'Error 500',
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          user: req.user
+      });
+    }
+    else if (!schedule) {
+      return res.render('404', {
+          title: 'Error 404',
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          user: req.user
+      });
+    }
+
+    // Format the schedule date
+    var startDate = moment(schedule.start_time);
+    var endDate = moment(schedule.end_time);
+
+    res.render('schedules/edit', {
+        title: 'Edit a ' + config.dictionary.schedule.noun,
+        name: config.name,
+        organisation: config.organisation,
+        nav: config.nav(),
+        user: req.user,
+        dictionary: config.dictionary,
+        start_date: startDate.format('DD-MM-YYYY'),
+        start_time: startDate.format('HH:mm'),
+        end_date: schedule.end_date = endDate.format('DD-MM-YYYY'),
+        end_time: schedule.end_time = endDate.format('HH:mm'),
+        schedule: schedule
+    });
+  });
 });
 
 /* GET view schedule page */

@@ -1,12 +1,10 @@
-extends ../../layout
+extends ../layout
 
 block content
-	script(src='/javascripts/admin/generic.js')
+	h1= title
+	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
-	h1.
-		Details for #{schedule.title}
-	p#scheduleId= schedule._id
-	form#formViewSchedule(name="viewschedule",role="form",method="post",action="/api/schedules/update")
+	form#formEditSchedule(name="addschedule",role="form",method="post",action="/api/schedules/new")
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title", value="#{schedule.title}")
 		.row
@@ -20,13 +18,10 @@ block content
 			.form-group.col-xs-6
 				input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{end_time}")
 		.form-group
-			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description")
-				| #{schedule.description}
+			textarea#inputDescription.form-control(placeholder="Optional description about the event", name="description", value="#{schedule.description}")
+		.form-group.hidden
+			input#inputOwner.hidden(name="owner", value="#{user.username}")
 		.form-group
-			select#inputOwner.form-control(name="owner")
-				for user in users
-					option(selected=schedule.owner == user.username) #{user.username}
-		.form-group
-			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			button#btnEdit.btn.btn-success(type="button", onclick="')") Edit
 			&nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="") Delete
