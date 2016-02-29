@@ -36,14 +36,40 @@ var config = {
   			// with the link text 'About'.
 	  		about: {
 	  			title: 'About',
-	  			href: '/about'
+	  			href: '/about',
+	  			footer: {
+	  				display: true,
+	  				position: 'left'
+	  			}
 	  		},
 	  		// The link text has been changed here from the default,
 	  		// which is 'contact'. This link is not displayed.
 	  		contact: {
 	  			title: 'Contact us',
 	  			href: '/contact',
-	  			nav: false
+	  			nav: false,
+	  			footer: {
+	  				display: true,
+	  				position: 'left'
+	  			}
+	  		},
+	  		terms: {
+	  			title: 'Terms of Use',
+	  			href: '/terms',
+	  			nav: false,
+	  			footer: {
+	  				display: true,
+	  				position: 'right'
+	  			}
+	  		},
+	  		cookies: {
+	  			title: 'Cookie Policy',
+	  			href: '/cookies',
+	  			nav: false,
+	  			footer: {
+	  				display: true,
+	  				position: 'right'
+	  			}
 	  		}
   		}
   	},
@@ -55,12 +81,15 @@ var config = {
   			title: 'Home',
   			href: '/'
   		},
-  		// This is a link to an off-site page.
-  		// This link opens in a new window.
   		{
   			title: 'Code',
   			href: 'https://github.com/lukem512/zen',
-  			popup: true
+  			popup: true,
+  			nav: false,
+  			footer: {
+  				display: true,
+  				position: 'left'
+  			}
   		}
   	],
 
@@ -107,16 +136,19 @@ var config = {
     		page = views[page];
 
     		// Displaying a page in the navigation is the default behaviour
-    		var nav = true;
-    		if (page.nav != null)
-    			nav = page.nav;
+    		if (page.nav == null)
+    			page.nav = true;
 
-    		if (nav) {
+    		// Displaying a page in the footer is not default behaviour
+    		if (page.footer == null)
+    			page.footer = false;
+
+    		if (page.nav || page.footer) {
     			pageLinks.push(page);
     		}
     	});
     	return this.links.concat(pageLinks);
-    }
+    },
 };
 
 module.exports = config;

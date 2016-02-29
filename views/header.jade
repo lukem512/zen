@@ -11,20 +11,29 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 		#page-list.collapse.navbar-collapse
 			ul.nav.navbar-nav.navbar-right
 				each page, i in nav
+					if page.nav == null || page.nav
+						li
+							if page.popup
+								a(href="#{page.href}", target="_blank")= page.title
+							else
+								a(href="#{page.href}")= page.title
+				if user
 					li
-						if page.popup
-							a(href="#{page.href}", target="_blank")= page.title
-						else
-							a(href="#{page.href}")= page.title
+						a(href="/#{dictionary.schedule.noun}s") #{dictionary.schedule.noun}s
 				li
 					if user && user.admin
 							a.active(href="/admin")
 								b.text-warning Control Panel
-				li
-					if user
+				
+				if user
+						li
 							a.active(href="#")
 								b.text-success= user.username
-					else
+						li
+							a(href="/end")
+								i.fa.fa-power-off
+				else
+					li
 						a(href="/auth") Sign in
 
 if header

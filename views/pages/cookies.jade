@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+	.container
+		.col-lg-12
+			h1= title
+
+			p This page details the policy of #{name} ("this website", "us", "we") regarding the collection, storage and use of cookies. This website uses cookies as an essential part of it's function and security. Cookies are very small files containing an identifier (usually a short string of letter and numbers) that are sent to the web server with each request. The purpose of these cookies is to identify your browser, although no sensitive information will ever be stored in them.
+
+			p The following cookies are stored for use by this website:
+
+			ul
+				li
+					kbd token
+					|  is used to authenticate requests made to the API by an authorised user
+
+			p
+				| For more information please 
+				a(href="#{pages.views.contact.href}") contact us
+				| .
+
+			p This policy was last modified on the 29/02/2016.

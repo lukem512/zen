@@ -1,8 +1,25 @@
 footer.text-center
 	.footer-below
-		.row
-			.col-lg-12
-				p Copyright &copy; #{organisation} #{new Date().getFullYear().toString()}
+		.container
+			.row.vdivide
+				.col-xs-8.text-left
+					p The website is maintained by #{organisation} and uses the Zen framework. 	
+				.col-xs-2.text-left
+					each page, i in nav
+						if page.footer != null && page.footer.position == 'left'
+							p.small
+								if page.popup
+									a(href="#{page.href}", target="_blank")= page.title
+								else
+									a(href="#{page.href}")= page.title
+				.col-xs-2.text-left
+					each page, i in nav
+						if page.footer != null && page.footer.position == 'right'
+							p.small
+								if page.popup
+									a(href="#{page.href}", target="_blank")= page.title
+								else
+									a(href="#{page.href}")= page.title
 
 // Load remaining JavaScript files
 script(src='/vendor/bootstrap/bootstrap.js')
