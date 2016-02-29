@@ -16,7 +16,8 @@ router.get('/', function(req, res, next) {
   	organisation: config.organisation,
   	nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    pages: config.pages
   });
 });
 
@@ -28,7 +29,8 @@ router.get('/auth', function(req, res, next) {
   	organisation: config.organisation,
   	nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    pages: config.pages
   });
 });
 
@@ -40,7 +42,8 @@ router.get('/end', function(req, res, next) {
     organisation: config.organisation,
     nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    pages: config.pages
   });
 });
 

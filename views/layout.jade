@@ -10,6 +10,7 @@ html
     link(rel='stylesheet', href='/stylesheets/theme.css')
     link(rel='stylesheet', href='/vendor/jt.timepicker/jquery.timepicker.css')
     link(rel='stylesheet', href='/vendor/fullcalendar/fullcalendar.css')
+    link(rel='stylesheet', href='/vendor/jquery.cookiebar/jquery.cookiebar.css')
 
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css')
@@ -26,12 +27,22 @@ html
     script(src='/vendor/jquery-ui/jquery-ui.js')
     script(src='/vendor/jquery.cookie/jquery.cookie.js')
     script(src='/vendor/jt.timepicker/jquery.timepicker.js')
+    script(src='/vendor/jquery.cookiebar/jquery.cookiebar.js')
     script(src='/vendor/moment/moment.js')
     script(src='/vendor/fullcalendar/fullcalendar.js')
 
     if user
         script.
             var user = '#{user.username}';
+
+            $(document).ready(function(){
+                $.cookieBar({
+                    acceptText: 'OK',
+                    zindex: '100',
+                    fixed: true,
+                    bottom: true
+                });
+            });
 
     // Meta tags
     meta(charset="utf-8")

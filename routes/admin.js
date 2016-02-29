@@ -18,7 +18,9 @@ router.get('/', function(req, res) {
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),
-        user: req.user
+        user: req.user,
+        dictionary: config.dictionary,
+        dictionary: config.dictionary
     });
 });
 
@@ -32,7 +34,8 @@ var listModel = function(req, res, params) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else {
@@ -50,7 +53,8 @@ var listModel = function(req, res, params) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
     })
@@ -91,7 +95,8 @@ router.get('/users/view/:username', function(req, res) {
                     name: config.name,
                     organisation: config.organisation,
                     nav: config.nav(),
-                    user: req.user
+                    user: req.user,
+                    dictionary: config.dictionary
                 });
             }
             else if (!user) {
@@ -100,7 +105,8 @@ router.get('/users/view/:username', function(req, res) {
                     name: config.name,
                     organisation: config.organisation,
                     nav: config.nav(),
-                    user: req.user
+                    user: req.user,
+                    dictionary: config.dictionary
                 });
             }
             else {
@@ -111,7 +117,8 @@ router.get('/users/view/:username', function(req, res) {
                     name: config.name,
                     organisation: config.organisation,
                     nav: config.nav(),
-                    user: req.user
+                    user: req.user,
+                    dictionary: config.dictionary
                 });
             }
         });
@@ -128,7 +135,8 @@ router.get('/users/new', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
     	}
         else {
@@ -138,7 +146,8 @@ router.get('/users/new', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
     	    });
         }
     });
@@ -174,7 +183,8 @@ router.get('/groups/view/:name', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
     	else if (!group) {
@@ -183,7 +193,8 @@ router.get('/groups/view/:name', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
     	}
         else {
@@ -193,7 +204,8 @@ router.get('/groups/view/:name', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
         	});
     	}
     });
@@ -206,7 +218,8 @@ router.get('/groups/new', function(req, res) {
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),
-        user: req.user
+        user: req.user,
+        dictionary: config.dictionary
     });
 });
 
@@ -256,7 +269,8 @@ router.get('/pledges/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else if (!pledge) {
@@ -265,7 +279,8 @@ router.get('/pledges/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else {
@@ -275,7 +290,8 @@ router.get('/pledges/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
     });
@@ -291,7 +307,8 @@ router.get('/pledges/new', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else {
@@ -303,7 +320,8 @@ router.get('/pledges/new', function(req, res) {
                         name: config.name,
                         organisation: config.organisation,
                         nav: config.nav(),
-                        user: req.user
+                        user: req.user,
+                        dictionary: config.dictionary
                     });
                 } 
                 else {
@@ -314,7 +332,8 @@ router.get('/pledges/new', function(req, res) {
                         name: config.name,
                         organisation: config.organisation,
                         nav: config.nav(),
-                        user: req.user
+                        user: req.user,
+                        dictionary: config.dictionary
                     });
                 }
             })   
@@ -348,7 +367,8 @@ router.get('/fulfilments/new', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else {
@@ -358,7 +378,8 @@ router.get('/fulfilments/new', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });  
         }
     });
@@ -374,7 +395,8 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else if (!fulfilment) {
@@ -383,7 +405,8 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
         else {
@@ -393,7 +416,8 @@ router.get('/fulfilments/view/:id', function(req, res) {
                 name: config.name,
                 organisation: config.organisation,
                 nav: config.nav(),
-                user: req.user
+                user: req.user,
+                dictionary: config.dictionary
             });
         }
     });
