@@ -57,7 +57,8 @@ app.use(function(req, res, next) {
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),
-    user: req.user
+    user: req.user,
+    dictionary: config.dictionary
   });
 });
 
@@ -75,7 +76,8 @@ if (app.get('env') === 'development') {
       name: config.name,
       organisation: config.organisation,
       nav: config.nav(),
-      user: req.user
+      user: req.user,
+      dictionary: config.dictionary
     });
   });
 }
@@ -91,7 +93,8 @@ app.use(function(err, req, res, next) {
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),
-    user: req.user
+    user: req.user,
+    dictionary: config.dictionary
   });
 });
 

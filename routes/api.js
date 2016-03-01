@@ -250,7 +250,6 @@ router.post('/schedules/new', function(req, res) {
 });
 
 router.post('/schedules/update', function(req, res) {
-    console.log('Looking for id of ' + req.body.id);
     Schedule.findByIdAndUpdate(sanitize(req.body.id), {
         title: sanitize(req.body.title),
         description: sanitize(req.body.description),
@@ -270,6 +269,34 @@ router.delete('/schedules/update/:id', function(req, res) {
         if (!result) return error.notfound(res);
         response.ok(res);
     });
+});
+
+// retrieve events for populating the schedules calendar
+router.get('/calendar', function(req, res) {
+
+        // User-owned events are green, others are red.
+        // TODO - a better colouring scheme is needed
+        // TODO - if the user is admin, display ALL groups
+
+        // Set groups to be an empty array if its null
+        req.user.groups = req.user.groups || [];
+
+        // Retrieve all schedules for all groups the user
+        // is a member of.
+        Schedule.groups(req.user.groups, function(err, schedules) {
+            var json = schedules.map(function(s){
+                return {
+                    title: s.title,
+                    description: s.description,
+                    start: moment(s.start_time).format(),
+                    end: moment(s.end_time).format(),
+                    owner: s.owner,
+                    url: '/' + config.dictionary.schedule.noun + 's/view/' + s._id,
+                    className: (s.owner == req.user.username) ? 'bg-success' : 'bg-danger'
+                }
+            });
+            res.json(json);
+        })
 });
 
 /*
@@ -293,6 +320,7 @@ router.get('/pledges/view/:id', function(req, res) {
 });
 
 router.post('/pledges/new', function(req, res) {
+    if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
     var pledge = new Pledge({
         username: sanitize(req.body.username),
         schedule: sanitize(req.body.schedule)
@@ -306,7 +334,29 @@ router.post('/pledges/new', function(req, res) {
 router.delete('/pledges/update/:id', function(req, res) {
     Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
+        console.log(result);
         response.ok(res);
+    });
+});
+
+router.delete('/pledges/update/schedule/:schedule/username/:username', function(req, res) {
+    Pledge.findOneAndRemove({
+        schedule: sanitize(req.params.schedule),
+        username: sanitize(req.params.username)
+    }, function(err, result) {
+        if (err) return error.server(res, err);
+        console.log(result);
+        response.ok(res);
+    });
+});
+
+// Return the users that have pledged to attend a given schedule
+router.get('/pledges/users/:schedule', function(req, res) {
+    Pledge.find({
+        schedule: sanitize(req.params.schedule)
+    }, function(err, pledges){
+        if (err) return error.server(res, err);
+        res.json(pledges.map(function(p){ return p.username; }));
     });
 });
 
@@ -387,33 +437,12 @@ router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
     });
 });
 
-// retrieve events for populating the schedules calendar
-router.get('/calendar', function(req, res) {
+/*
+ * Add a JSON 404 route
+*/
 
-        
-        // User-owned events are green, others are red.
-        // TODO - a better colouring scheme is needed
-        // TODO - if the user is admin, display ALL groups
-
-        // Set groups to be an empty array if its null
-        req.user.groups = req.user.groups || [];
-
-        // Retrieve all schedules for all groups the user
-        // is a member of.
-        Schedule.groups(req.user.groups, function(err, schedules) {
-            var json = schedules.map(function(s){
-                return {
-                    title: s.title,
-                    description: s.description,
-                    start: moment(s.start_time).format(),
-                    end: moment(s.end_time).format(),
-                    owner: s.owner,
-                    url: '/' + config.dictionary.schedule.noun + 's/view/' + s._id,
-                    className: (s.owner == req.user.username) ? 'bg-success' : 'bg-danger'
-                }
-            });
-            res.json(json);
-        })
+router.use(function(req, res, next) {
+  error.notfound(res);
 });
 
 /*

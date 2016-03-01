@@ -21,6 +21,18 @@ var _get = function(getApiUrl, callback) {
 	});
 };
 
+var _post = function(postApiUrl, params, callback) {
+	$.ajax({
+	    url: postApiUrl,
+	    data: params,
+	    type: 'POST',
+	    success: callback,
+	    error: function(e) {
+	    	alert(JSON.stringify(e));
+	    }
+	});
+};
+
 var _update = function(updateApiUrl, nextUrl, params) {
 	$.ajax({
 	    url: updateApiUrl,
@@ -36,8 +48,30 @@ var _update = function(updateApiUrl, nextUrl, params) {
 };
 
 var _del = function(updateApiUrl, nextUrl, key) {
+	if (typeof(key) == 'object') return _delPairs(updateApiUrl, nextUrl, key);
+
 	$.ajax({
 	    url: updateApiUrl + '/' + key,
+	    type: 'DELETE',
+	    success: function() {
+	    	window.location.href = nextUrl;
+	    },
+	    error: function(e) {
+	    	alert(JSON.stringify(e));
+	    }
+	});
+};
+
+var _delPairs = function(updateApiUrl, nextUrl, pair) {
+	if (typeof(key) == 'string') return _del(updateApiUrl, nextUrl, pair);
+
+	var url = updateApiUrl;
+	$.each(pair, function(k, v) {
+		url += '/' + k + '/' + v;
+	});
+
+	$.ajax({
+	    url: url,
 	    type: 'DELETE',
 	    success: function() {
 	    	window.location.href = nextUrl;

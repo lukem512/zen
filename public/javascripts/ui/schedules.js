@@ -1,6 +1,16 @@
 var addApiUrl = '/api/schedules/new';
 var updateApiUrl = '/api/schedules/update';
+
+var newPledgeApiUrl = '/api/pledges/new';
+var updatePledgeApiUrl = '/api/pledges/update';
+var getPledgesApiUrl = '/api/pledges/users';
+
 var listViewUrl = '/admin/schedules/list';
+
+var dateFormat = 'DD-MM-YYYY';
+var timeFormat = 'HH:mm';
+
+// Form validator
 
 var validate = function() {
     return _validate(function(){
@@ -9,18 +19,37 @@ var validate = function() {
     })
 };
 
-var makeDates = function() {
-	var startDateString = $('#inputStartDate').val() + ' ' + $('#inputStartTime').val();
-	var startDate = moment(startDateString, 'DD-MM-YYYY HH:mm');
+// Pledge functions
 
-	var endDateString = $('#inputEndDate').val() + ' ' + $('#inputEndTime').val();
-	var endDate = moment(endDateString, 'DD-MM-YYYY HH:mm');
+var pledgedUsers = function(id, callback) {
+	_get(getPledgesApiUrl + '/' + id, callback);
+};
 
-	return {
-		start: startDate,
-		end: endDate
+var join = function(id) {
+	var params = {
+		username: user,
+		schedule: id
 	};
-}
+	_post(newPledgeApiUrl, params, function() {
+		location.reload(true);
+	});
+};
+
+var leave = function(next, id) {
+	_del(updatePledgeApiUrl, next, {schedule: id, username: user});
+	// $.ajax({
+	//     url: updatePledgeApiUrl + '/schedule/' +  id + '/username/' + user,
+	//     type: 'DELETE',
+	//     success: function() {
+	//     	window.location.href = next;
+	//     },
+	//     error: function(e) {
+	//     	alert(JSON.stringify(e));
+	//     }
+	// });
+};
+
+// Schedule functions
 
 var add = function(next) {
 	var next = next || listViewUrl;
@@ -35,7 +64,6 @@ var add = function(next) {
 			"end_time": dates.end.format(),
 			"owner": owner
 		};
-		console.log(params);
 		_update(addApiUrl, next, params);
 	}
 };
@@ -61,12 +89,26 @@ var update = function(next, id) {
 var del = function(next, id) {
 	var next = next || listViewUrl;
 	var id = id || $('#scheduleId').text();
-	console.log('DELETE schedule with ID ' + id)
 	_del(updateApiUrl, next, id);
 };
 
+// Helpers and UI functions
+
+var makeDates = function() {
+	var startDateString = $('#inputStartDate').val() + ' ' + $('#inputStartTime').val();
+	var startDate = moment(startDateString, dateFormat + ' ' + timeFormat);
+
+	var endDateString = $('#inputEndDate').val() + ' ' + $('#inputEndTime').val();
+	var endDate = moment(endDateString, dateFormat + ' ' + timeFormat);
+
+	return {
+		start: startDate,
+		end: endDate
+	};
+};
+
 // Set up date/timepicker components
-$(function() {
+var initPickers = function() {
 	var dateSet = false;
 
 	var dateParams = {
@@ -86,6 +128,9 @@ $(function() {
 	};
 	$('#inputStartDate').datepicker(dateParams);
 
+	if ($.urlParam('date'))
+		$('#inputStartDate').datepicker('setDate', $.urlParam('date'));
+
 	dateParams = {
 		minDate: 0,
 		dateFormat: 'dd-mm-yy'
@@ -100,6 +145,9 @@ $(function() {
 	$('#inputStartTime').timepicker(timeParams);
 	$('#inputEndTime').timepicker(timeParams);
 
+	if ($.urlParam('time'))
+		$('#inputStartTime').timepicker('setTime', $.urlParam('time'));
+
 	var timeSet = false;
 	$('#inputStartTime').on('selectTime', function() {
 	    if (!timeSet) {
@@ -112,4 +160,60 @@ $(function() {
 	    	timeSet = true;
 	    }
 	});
+}
+
+$(function() {
+	initPickers();
+
+	var id = $('#id').val();
+	if (id) {
+		pledgedUsers(id, function(users){
+
+			// Did you pledge?
+			var you = false;
+
+			// Build pledge string
+			var html = (users.length) ? "" : "Nobody";
+			for (var i = 0; i < users.length; i++) {
+				if (i == users.length - 1 && users.length > 1) {
+					html += " and ";
+				}
+				else if (i < users.length - 1) {
+					html += ", ";
+				}
+				else {
+					html += " ";
+				}
+
+				var username = users[i];
+				if (users[i] == user) {
+					you = true;
+					username = "you"
+				}
+
+				html += "<a href=\"/users/" + users[i] + "\">";
+				if (i == 0) {
+					html += "<span class=\'text-capitalize\'>" + username + "</span>";
+				}
+				else {
+					html += username;
+				}
+				html += "</a>";
+			}
+			if (users.length > 1 || you) {
+				html += " have";
+			}
+			else {
+				html += " has"; 
+			}
+			html += " pledged to attend.";
+			$('#pledges').html(html);
+
+			// Change button state
+			if (you) {
+				$('#btnJoin').addClass('hidden');
+				$('#btnLeave').removeClass('hidden');
+			}
+		});
+	}
 });
