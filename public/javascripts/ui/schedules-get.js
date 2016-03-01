@@ -1,16 +1,29 @@
 var calendarApiUrl = '/api/calendar';
 
+var dateFormat = 'DD-MM-YYYY';
+var timeFormat = 'HH-mm';
+
 var nakedUrl = function() {
 	return window.location = location.protocol + '//' + location.host + location.pathname;
 };
 
 var calendarUrl = function(date, view) {
-	return nakedUrl() + '?date=' + moment(date).format('YYYY-MM-DD') + '&view=' + view;
+	if (!moment(date, dateFormat).isValid())
+		date = moment(date).format(dateFormat);
+	return nakedUrl() + '?date=' + date + '&view=' + view;
+};
+
+var newScheduleUrl = function(date, view) {
+	if (!moment(date, dateFormat).isValid())
+		date = moment(date);
+	return nakedUrl() + '/new?date=' + date.format(dateFormat) + '&time=' + date.format(timeFormat);
 };
 
 $(function() {
 	// Retrieve the date to display
-	var date = $.urlParam('date') || moment();
+	var date = moment($.urlParam('date'), dateFormat);
+	if (!date.isValid())
+		date = moment();
 
 	// Retrieve the view
 	var view = $.urlParam('view') || 'month';
@@ -21,6 +34,14 @@ $(function() {
 
 	$('#calendar').fullCalendar({
 		customButtons: {
+			_new: {
+				text: 'New',
+				click: function() {
+					// Go to new schedule page
+					date = $('#calendar').fullCalendar('getDate');
+					window.location = newScheduleUrl(date);
+				}
+			},
         	_today: {
 	            text: 'Today',
 	            click: function() {
@@ -43,7 +64,7 @@ $(function() {
 	            			date = date.subtract(1, 'months');
 	            		break;
 	            	}
-	                window.location = calendarUrl(date, view);
+	                window.location = calendarUrl(date.format(dateFormat), view);
 	            }
 	        },
 	        _next: {
@@ -61,19 +82,19 @@ $(function() {
 	            			date = date.add(1, 'months');
 	            		break;
 	            	}
-	                window.location = calendarUrl(date, view);
+	                window.location = calendarUrl(date.format(dateFormat), view);
 	            }
 	        }
     	},
     	header: {
     		left: 'title',
         	center: '',
-        	right: '_today _prev,_next'
+        	right: '_new _today _prev,_next'
     	},
 		defaultView: view,
 		defaultDate: date,	
 		events: calendarApiUrl,
-		selectable: true,
+		selectable: false,
 		nowIndicator: true,
 		eventBorderColor: 'rgba(0,0,0,0)',
 		timeFormat: 'HH:mm',
@@ -85,9 +106,15 @@ $(function() {
 		},
         dayClick: function(day) {
 	        // TODO - display button for returning to month view
-
-	        // Go to day view for the selected date
-	        window.location = calendarUrl(moment(day).format('YYYY-MM-DD'), 'day');
+	        if (view == 'agendaDay') {
+	        	console.log(day)
+	        	// Go to the new schedule page
+				window.location = newScheduleUrl(moment(day));
+	        }
+	        else {
+	        	// Go to day view for the selected date
+	        	window.location = calendarUrl(moment(day).format(dateFormat), 'day');
+	        }
 	    }
     });
 });
