@@ -27,7 +27,7 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 				
 				if user
 						li
-							a.active(href="#")
+							a.active(href="/users/#{user.username}")
 								b.text-success= user.username
 						li
 							a(href="/end")

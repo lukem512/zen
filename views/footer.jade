@@ -3,7 +3,10 @@ footer.text-center
 		.container
 			.row.vdivide
 				.col-xs-8.text-left
-					p The website is maintained by #{organisation} and uses the Zen framework. 	
+					p
+						| The website is maintained by #{organisation} and uses the 
+						a(href="https://github.com/lukem512/zen") Zen
+						|  framework. 	
 				.col-xs-2.text-left
 					each page, i in nav
 						if page.footer != null && page.footer.position == 'left'

@@ -1,0 +1,27 @@
+extends ../layout
+
+block content
+	h1= title
+	if _schedules.length > 0
+		#schedules
+			p I have created the following schedules: 
+				each schedule, i in _schedules
+					span.schedule
+						if i > 1
+							| ,
+						a(href="/#{dictionary.schedule.noun}s/view/#{schedule.id}") #{schedule.title}
+	if _pledges.length > 0
+		#pledges
+			p I have pledged to attend the following schedules: 
+				each pledge, i in _pledges
+					span.schedule
+						if pledge.schedule != -1
+							if i > 1
+								| ,
+							a(href="/#{dictionary.schedule.noun}s/view/#{pledge.schedule}") #{pledge.title} 
+	if _user.username == user.username || user.admin
+		hr
+		button#btnSettings.btn.btn-primary(type="button", onclick="window.location='/users/edit/#{_user.username}'") Settings
+		&nbsp;
+	if user.admin
+		button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')") Delete

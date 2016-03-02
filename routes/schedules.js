@@ -8,6 +8,9 @@ var config = require('../config');
 
 var Schedule = require('../models/schedules');
 
+var response = require('./response');
+var error = response.error;
+
 /* GET list schedules page */
 router.get('/', function(req, res, next) {
   res.render('schedules/list', {
@@ -35,25 +38,8 @@ router.get('/new', function(req, res, next) {
 /* GET edit schedule page */
 router.get('/edit/:id', function(req, res, next) {
   Schedule.findById(sanitize(req.params.id), function(err, schedule){
-    if (err) {
-      console.error(err);
-      return res.render('500', {
-          title: 'Error 500',
-          name: config.name,
-          organisation: config.organisation,
-          nav: config.nav(),
-          user: req.user
-      });
-    }
-    else if (!schedule) {
-      return res.render('404', {
-          title: 'Error 404',
-          name: config.name,
-          organisation: config.organisation,
-          nav: config.nav(),
-          user: req.user
-      });
-    }
+    if (err) return error.server(req, res, err);
+    if (!schedule) return error.notfound(req, res);
 
     // Format the schedule date
     var startDate = moment(schedule.start_time);
@@ -78,25 +64,9 @@ router.get('/edit/:id', function(req, res, next) {
 /* GET view schedule page */
 router.get('/view/:id', function(req, res, next) {
   Schedule.findById(sanitize(req.params.id), function(err, schedule){
-    if (err) {
-      console.error(err);
-      return res.render('500', {
-          title: 'Error 500',
-          name: config.name,
-          organisation: config.organisation,
-          nav: config.nav(),
-          user: req.user
-      });
-    }
-    else if (!schedule) {
-      return res.render('404', {
-          title: 'Error 404',
-          name: config.name,
-          organisation: config.organisation,
-          nav: config.nav(),
-          user: req.user
-      });
-    }
+    if (err) return error.server(req, res, err);
+    if (!schedule) return error.notfound(req, res);
+
     res.render('schedules/view', {
       title: schedule.title,
       name: config.name,
