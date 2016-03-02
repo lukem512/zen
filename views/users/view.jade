@@ -13,7 +13,7 @@ block content
 				| .
 	if _pledges.length > 0
 		#pledges
-			p I have #{dictionary.pledge.verb} to attend the following #{dictionary.schedule.noun}s: 
+			p I have #{dictionary.pledge.verb.past} to attend the following #{dictionary.schedule.noun}s: 
 				each pledge, i in _pledges
 					span.schedule
 						if pledge.schedule != -1
