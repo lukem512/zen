@@ -11,6 +11,17 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
+// Middleware to require authorisation for all schedules routes
+router.use(function(req, res, next){
+  if (req.authentication.success) {
+    next();
+  }
+  else {
+    var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+    return res.redirect('/auth?r=' + fullUrl);
+  }
+});
+
 /* GET list schedules page */
 router.get('/', function(req, res, next) {
   res.render('schedules/list', {
@@ -25,6 +36,9 @@ router.get('/', function(req, res, next) {
 
 /* GET new schedule page */
 router.get('/new', function(req, res, next) {
+  
+  // TODO - check user is authenticated
+
   res.render('schedules/new', {
       title: 'Create a ' + config.dictionary.schedule.noun,
       name: config.name,
@@ -40,6 +54,8 @@ router.get('/edit/:id', function(req, res, next) {
   Schedule.findById(sanitize(req.params.id), function(err, schedule){
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
+
+    // TODO - check user is authenticated
 
     // Format the schedule date
     var startDate = moment(schedule.start_time);
