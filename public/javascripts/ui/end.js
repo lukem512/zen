@@ -8,3 +8,10 @@ var end = function() {
 	// Redirect to main page
 	window.location = '/';
 };
+
+$(document).ready(function(){
+	// Is the user already signed out?
+	if (typeof user == 'undefined') {
+		window.location = '/';
+	}
+});

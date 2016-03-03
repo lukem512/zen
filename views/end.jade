@@ -4,6 +4,7 @@ block content
 	script(src='/javascripts/ui/end.js')
 	h1= title
 	p Clicking here will end your session. Are you sure you want to sign out?
+	hr
 	form#formAuthenticate(name="authenticate",role="form",method="post",action="/api/authenticate")
 		.form-group
 			button#btnAuthenticate.btn.btn-success(type="button", onclick="end()") Sign out
