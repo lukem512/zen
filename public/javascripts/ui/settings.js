@@ -4,14 +4,49 @@ var updateApiUrl = '/api/users/update';
 
 var validate = function() {
     return _validate(function(){
-        // TODO
+    	var result = true;
 
         // Check old password is valid!
+        $.ajax({
+		    url: '/api/authenticate',
+		    data: {
+				"username": user,
+				"password": $('#inputOldPass').val()
+			},
+		    type: 'POST',
+		    async: false
+		}).error(function(e) {
+			if (e.responseJSON.message) {
+				message(e.responseJSON.message, true);
+	    	}
+	    	else {
+	    		message('An error occurred whilst changing your settings.', true);
+	    	}
+	    	result = false;
+		});
 
         // Check new password fulfils length criteria
+        // TODO
         
-        return true;
+        return result;
     })
+};
+
+var message = function(text, isError) {
+	var el = $('#message');
+	var isError = isError || false;
+
+	if (isError) {
+		el.addClass('text-danger');
+	} else {
+		el.removeClass('text-danger');
+	}
+
+	el.text(text);
+
+	if (el.hasClass('hidden')) {
+		el.removeClass('hidden');
+	}
 };
 
 var update = function(next) {
@@ -22,7 +57,6 @@ var update = function(next) {
 			"username": user,
 			"userpass": $('#inputNewPass').val()
 		};
-		console.log(params)
 		_update(updateApiUrl, next, params);
 	}
 };

@@ -8,6 +8,7 @@ block content
 		| You are able to change the following settings. If you wish to change anything else about your profile, please  
 		a(href="#{pages.views.contact.href}") contact us
 		| .
+	p#message.hidden
 	form#formSettings(name="settings",role="form",method="post",action="/api/users/update")
 		.form-group.hidden
 			input#userId.form-control(type="input", name="id", value="#{user._id}")
