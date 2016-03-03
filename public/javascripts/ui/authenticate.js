@@ -63,37 +63,28 @@ $(document).ready(function(){
 	// Retrieve the next URL
 	var nextUrl = $.urlParam('r') || defaultNextUrl;
 
-	console.log(nextUrl);
-
 	// Create a temporary a element to decode URI
 	var l = document.createElement("a");
     l.href = nextUrl;
 
     // Remove any hosts other than this one
-    console.log(l.hostname)
-    console.log(location.host)
-    console.log(l.port)
     var testStr = l.port ? (l.hostname + ':' + l.port) : l.hostname;
     if (testStr !== location.host) {
-    	console.log('Fail at host')
     	nextUrl = defaultNextUrl;
     }
 
     // Remove any protocol other than http(s)
     if (l.protocol !== "http:" && l.protocol !== "https:") {
-    	console.log('Fail at protocol')
     	nextUrl = defaultNextUrl;
     }
 
 	// Remove any programming characters
 	nextUrl = nextUrl.replace(/[!'{}()*;]/g, '*');
 
-	console.log(nextUrl);
-
 	// Is the user already auth'd?
-	// if (user) {
-	// 	window.location = nextUrl;
-	// }
+	if (user) {
+		window.location = nextUrl;
+	}
 })
 
 $(document).keypress(function(e){
