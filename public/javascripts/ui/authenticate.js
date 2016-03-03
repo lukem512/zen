@@ -14,7 +14,7 @@ var auth = function() {
 	    	$.cookie("token", res.token, { expires: 1 });
 
 	    	// Redirect to main page
-	    	window.location = '/';
+	    	window.location = nextUrl;
 	    },
 	    error: function(e) {
 	    	// Display an error message
@@ -55,7 +55,47 @@ var end = function() {
 	window.location = '/';
 };
 
+$(document).ready(function(){
+
+	// Default next url to redirect to
+	var defaultNextUrl = '/';
+
+	// Retrieve the next URL
+	var nextUrl = $.urlParam('r') || defaultNextUrl;
+
+	console.log(nextUrl);
+
+	// Create a temporary a element to decode URI
+	var l = document.createElement("a");
+    l.href = nextUrl;
+
+    // Remove any hosts other than this one
+    console.log(l.hostname)
+    console.log(location.host)
+    if ((l.hostname + ':' + l.port) !== location.host) {
+    	console.log('Fail at host')
+    	nextUrl = defaultNextUrl;
+    }
+
+    // Remove any protocol other than http(s)
+    if (l.protocol !== "http:" && l.protocol !== "https:") {
+    	console.log('Fail at protocol')
+    	nextUrl = defaultNextUrl;
+    }
+
+	// Remove any programming characters
+	nextUrl = nextUrl.replace(/[!'{}()*;]/g, '*');
+
+	console.log(nextUrl);
+
+	// Is the user already auth'd?
+	// if (user) {
+	// 	window.location = nextUrl;
+	// }
+})
+
 $(document).keypress(function(e){
+	// Capture enter event
 	var keyCode = e.which || e.keyCode || 0;
     if (keyCode == 13){
         e.preventDefault();
