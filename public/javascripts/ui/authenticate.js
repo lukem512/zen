@@ -72,7 +72,9 @@ $(document).ready(function(){
     // Remove any hosts other than this one
     console.log(l.hostname)
     console.log(location.host)
-    if ((l.hostname + ':' + l.port) !== location.host) {
+    console.log(l.port)
+    var testStr = l.port ? (l.hostname + ':' + l.port) : l.hostname;
+    if (testStr !== location.host) {
     	console.log('Fail at host')
     	nextUrl = defaultNextUrl;
     }
