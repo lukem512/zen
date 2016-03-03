@@ -1,6 +1,10 @@
 // Authentication handler
 // This communicates with the API to sign in the user.
 
+// Default next url to redirect to
+var defaultNextUrl = '/';
+var nextUrl = defaultNextUrl;
+
 var auth = function() {
 	$.ajax({
 	    url: '/api/authenticate',
@@ -57,11 +61,8 @@ var end = function() {
 
 $(document).ready(function(){
 
-	// Default next url to redirect to
-	var defaultNextUrl = '/';
-
 	// Retrieve the next URL
-	var nextUrl = $.urlParam('r') || defaultNextUrl;
+	nextUrl = $.urlParam('r') || defaultNextUrl;
 
 	// Create a temporary a element to decode URI
 	var l = document.createElement("a");
