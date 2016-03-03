@@ -49,16 +49,6 @@ var message = function(text, isError) {
 	}
 };
 
-var end = function() {
-	// Remove the cookie to log out!
-	$.removeCookie("token");
-
-	console.log('Removing cookie!');
-
-	// Redirect to main page
-	window.location = '/';
-};
-
 $(document).ready(function(){
 
 	// Retrieve the next URL
@@ -83,7 +73,7 @@ $(document).ready(function(){
 	nextUrl = nextUrl.replace(/[!'{}()*;]/g, '*');
 
 	// Is the user already auth'd?
-	if (user) {
+	if (typeof user !== 'undefined') {
 		window.location = nextUrl;
 	}
 })

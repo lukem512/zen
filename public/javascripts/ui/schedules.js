@@ -37,16 +37,6 @@ var join = function(id) {
 
 var leave = function(next, id) {
 	_del(updatePledgeApiUrl, next, {schedule: id, username: user});
-	// $.ajax({
-	//     url: updatePledgeApiUrl + '/schedule/' +  id + '/username/' + user,
-	//     type: 'DELETE',
-	//     success: function() {
-	//     	window.location.href = next;
-	//     },
-	//     error: function(e) {
-	//     	alert(JSON.stringify(e));
-	//     }
-	// });
 };
 
 // Schedule functions

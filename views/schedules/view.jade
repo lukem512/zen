@@ -39,6 +39,6 @@ block content
 	script.
 		$(function() {
 			var startDate = moment('#{schedule.start_time}');
-			$('#startDate').attr('href', '/#{dictionary.schedule.noun}s?date=' + startDate.format('YYYY-MM-DD') + '&view=day');
+			$('#startDate').attr('href', '/#{dictionary.schedule.noun}s?date=' + startDate.format('DD-MM-YYYY') + '&view=day');
 			$('#startDate').text(startDate.calendar());
 		});

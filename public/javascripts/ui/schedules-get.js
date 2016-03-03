@@ -4,7 +4,7 @@ var dateFormat = 'DD-MM-YYYY';
 var timeFormat = 'HH-mm';
 
 var nakedUrl = function() {
-	return window.location = location.protocol + '//' + location.host + location.pathname;
+	return location.protocol + '//' + location.host + location.pathname;
 };
 
 var calendarUrl = function(date, view) {
@@ -45,7 +45,14 @@ $(function() {
         	_today: {
 	            text: 'Today',
 	            click: function() {
-	            	// Go to the default calendar page
+	            	// Go to the today in day
+	                window.location = calendarUrl(moment().format(dateFormat), 'agendaDay');
+	            }
+	        },
+	        _month: {
+	            text: 'Month',
+	            click: function() {
+	            	// Go to default calendar view
 	                window.location = nakedUrl();
 	            }
 	        },
@@ -89,15 +96,32 @@ $(function() {
     	header: {
     		left: 'title',
         	center: '',
-        	right: '_new _today _prev,_next'
+        	right: '_new _today _month _prev,_next'
     	},
 		defaultView: view,
 		defaultDate: date,	
 		events: calendarApiUrl,
-		selectable: false,
+		eventAfterAllRender: function(view) {
+			// TODO - make the title a link!
+			var titleSelector = '.fc-left h2';
+
+			// Go to month view
+			date = $('#calendar').fullCalendar('getDate')
+			var link = calendarUrl(moment(date).format(dateFormat), 'month');
+
+			// Make the HTML
+			$(titleSelector).html('<a href="'+link+'">' + $(titleSelector).text() + '</a>');
+		},
+		eventMouseover: function(event, jsEvent, view) {
+			// TODO - show tooltip with author, pledged users, etc.
+		},
+		eventMouseout: function(event, jsEvent, view) {
+			// TODO - hide tooltip
+		},
 		nowIndicator: true,
 		eventBorderColor: 'rgba(0,0,0,0)',
 		timeFormat: 'HH:mm',
+		selectable: false,
 		select: function(start, end, evt) {
 			// TODO - show a '+' popup
 		},

@@ -47,6 +47,19 @@ router.get('/end', function(req, res, next) {
   });
 });
 
+/* GET settings page */
+router.get('/settings', function(req, res, next) {
+  res.render('settings', {
+    title: 'Settings',
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
+    user: req.user,
+    dictionary: config.dictionary,
+    pages: config.pages
+  });
+});
+
 /*
  * User-defined pages
 */

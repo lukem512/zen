@@ -1,0 +1,22 @@
+extends layout
+
+block content
+	h1= title
+	script(src='/javascripts/ui/generic.js')
+	script(src='/javascripts/ui/settings.js')
+	p
+		| You are able to change the following settings. If you wish to change anything else about your profile, please  
+		a(href="#{pages.views.contact.href}") contact us
+		| .
+	form#formSettings(name="settings",role="form",method="post",action="/api/users/update")
+		.form-group.hidden
+			input#userId.form-control(type="input", name="id", value="#{user._id}")
+		#password
+			.form-group
+				input#inputOldPass.form-control(type="password", placeholder="Old password", name="oldpassword")
+			.form-group
+				input#inputNewPass.form-control(type="password", placeholder="New password", name="newpassword")
+		.form-group
+			button#btnSave.btn.btn-success(type="button", onclick="update('/')") Save
+			| &nbsp;
+			button#btnCancel.btn.btn-danger(type="button", onclick="window.location='/'") Cancel

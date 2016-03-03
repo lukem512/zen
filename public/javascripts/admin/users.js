@@ -19,7 +19,6 @@ var add = function() {
 	if (validate()){
 		var params = {
 			"username": $('#inputUserName').val(),
-			"useremail": $('#inputUserEmail').val(),	
 			"userpass": $('#inputUserPass').val(),
 			"usergroups": groups()
 		};
@@ -32,7 +31,6 @@ var update = function() {
 		var params = {
 			"id": $('#userId').text(),
 			"username": $('#inputUserName').val(),
-			"useremail": $('#inputUserEmail').val(),	
 			"userpass": $('#inputUserPass').val(),
 			"usergroups": groups()
 		};

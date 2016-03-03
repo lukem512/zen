@@ -18,12 +18,14 @@ block content
 					span.schedule
 						if pledge.schedule != -1
 							if i > 0
-								| ,
+								| , 
 							a(href="/#{dictionary.schedule.noun}s/view/#{pledge.schedule}") #{pledge.title}
 				| .
-	if _user.username == user.username || user.admin
+	if _user.username == user.username
 		hr
-		button#btnSettings.btn.btn-primary(type="button", onclick="window.location='/users/edit/#{_user.username}'") Settings
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/settings'") Settings
 		&nbsp;
 	if user.admin
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/admin/users/view/#{_user.username}'") Edit
+		&nbsp;
 		button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')") Delete

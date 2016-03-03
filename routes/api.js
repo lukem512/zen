@@ -89,6 +89,24 @@ router.use(function(req, res, next){
     }
 });
 
+var isAdmin = function(req, res, next) {
+    if (!req.user.admin) {
+        return response.invalid(res);
+    }
+    else {
+        next();
+    }
+};
+
+var isCurrentUser = function(req, res, next) {
+    if (req.body.username != req.user.username) {
+        return response.invalid(res);
+    }
+    else {
+        next();
+    }
+};
+
 /*
  * Users.
  * Users within the system.
@@ -110,9 +128,10 @@ router.get('/users/view/:username', function(req, res) {
 });
 
 router.post('/users/new', function(req, res) {
+    if (!req.user.admin) return response.invalid(res);
+
     var user = new User({
         username: sanitize(req.body.username),
-        email: sanitize(req.body.useremail),
         password: bcrypt.hashSync(sanitize(req.body.userpass)),
         groups: sanitize(req.body['usergroups[]'])
     });
@@ -123,18 +142,35 @@ router.post('/users/new', function(req, res) {
 });
 
 router.post('/users/update', function(req, res) {
-    User.findByIdAndUpdate(sanitize(req.body.id), {
-        username: sanitize(req.body.username),
-        email: sanitize(req.body.useremail),
-        password: bcrypt.hashSync(sanitize(req.body.userpass)),
-        groups: sanitize(req.body['usergroups[]'])
-    }, function(err, result) {
+    User.findById(req.body.id, function (err, user) {
         if (err) return error.server(res, err);
-        response.ok(res);
-    });
+
+        if (user.username != req.user.username && !req.user.admin) return response.invalid(res);
+
+        var update = {};
+
+        if (req.body.username) {
+            update['username'] = sanitize(req.body.username);
+        }
+
+        if (req.body.userpass) {
+            update['password'] = bcrypt.hashSync(sanitize(req.body.userpass));
+        }
+
+        if (req.body['usergroups[]']) {
+            update['groups'] = sanitize(req.body['usergroups[]']);
+        }
+
+        User.findByIdAndUpdate(sanitize(req.body.id), update, function(err, result) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
+    })
 });
 
 router.delete('/users/update/:username', function(req, res) {
+    if (!req.user.admin) return response.invalid(res);
+
     User.findOneAndRemove({
         username: sanitize(req.params.username)
     }, function(err, result){

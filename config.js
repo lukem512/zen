@@ -20,10 +20,9 @@ var config = {
 	admin: {
 		// The initial admin credentials.
 		// These should be changed as soon as possible
-		// after installation.
+		// after installation, via the admin panel or the users settings.
 		username: 'admin',
-		password: 'change_me',
-		email: 'you@yourdomain.com'
+		password: 'change_me'
 	},
 
   	// Pages to create. These are not included in the navigation
