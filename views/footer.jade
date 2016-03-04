@@ -1,28 +1,29 @@
 footer.text-center
 	.footer-below
 		.container
-			.row.vdivide
-				.col-xs-8.text-left
+			.row
+				.col-sm-8.col-xs-12
 					p
 						| The website is maintained by #{organisation} and uses the 
 						a(href="https://github.com/lukem512/zen") Zen
-						|  framework. 	
-				.col-xs-2.text-left
-					each page, i in nav
-						if page.footer != null && page.footer.position == 'left'
-							p.small
-								if page.popup
-									a(href="#{page.href}", target="_blank")= page.title
-								else
-									a(href="#{page.href}")= page.title
-				.col-xs-2.text-left
-					each page, i in nav
-						if page.footer != null && page.footer.position == 'right'
-							p.small
-								if page.popup
-									a(href="#{page.href}", target="_blank")= page.title
-								else
-									a(href="#{page.href}")= page.title
+						|  framework.
+				.vdivide
+					.col-sm-2.col-xs-6
+						each page, i in nav
+							if page.footer != null && page.footer.position == 'left'
+								p.small
+									if page.popup
+										a(href="#{page.href}", target="_blank")= page.title
+									else
+										a(href="#{page.href}")= page.title
+					.col-sm-2.col-xs-6
+						each page, i in nav
+							if page.footer != null && page.footer.position == 'right'
+								p.small
+									if page.popup
+										a(href="#{page.href}", target="_blank")= page.title
+									else
+										a(href="#{page.href}")= page.title
 
 // Load remaining JavaScript files
 script(src='/vendor/bootstrap/bootstrap.js')
