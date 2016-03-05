@@ -12,14 +12,17 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
 			ul.nav.navbar-nav.navbar-right
 				each page, i in nav
 					if page.nav == null || page.nav
-						li
-							if page.popup
-								a(href="#{page.href}", target="_blank")= page.title
-							else
-								a(href="#{page.href}")= page.title
+						if page.guestOnly == null || (page.guestOnly && !user)
+							li
+								if page.popup
+									a(href="#{page.href}", target="_blank")= page.title
+								else
+									a(href="#{page.href}")= page.title
 				if user
 					li
-						a(href="/#{dictionary.schedule.noun}s") #{dictionary.schedule.noun}s
+						a(href="/#{dictionary.action.noun.plural}") #{dictionary.action.noun.plural}
+					li
+						a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
 				li
 					if user && user.admin
 							a.active(href="/admin")

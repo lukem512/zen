@@ -36,6 +36,9 @@ var config = {
 	  		about: {
 	  			title: 'About',
 	  			href: '/about',
+	  			// The link will not be shown to signed-in users
+	  			guestOnly: true,
+	  			// The link will be shown in the left-hand footer column
 	  			footer: {
 	  				display: true,
 	  				position: 'left'
@@ -46,6 +49,7 @@ var config = {
 	  		contact: {
 	  			title: 'Contact us',
 	  			href: '/contact',
+	  			// The link will not be shown in the nav
 	  			nav: false,
 	  			footer: {
 	  				display: true,
@@ -74,6 +78,7 @@ var config = {
   	},
 
   	// Additional links to include in the navigation bar
+  	// and/or the website footer.
 	links:
 	[
   		{
@@ -97,28 +102,40 @@ var config = {
   	dictionary: {
   		action: {
   			// The action is the most important part to change!
-			noun: 'meditation',
+			noun: {
+				singular: 'meditation',
+				plural: 'meditation'
+			},
 			verb: {
 				present: 'meditate',
 				past: 'meditated'
 			}
 		},
 		schedule: {
-			noun: 'schedule',
+			noun: {
+				singular: 'schedule',
+				plural: 'schedules'
+			},
 			verb: {
 				present: 'schedule',
 				past: 'scheduled'
 			}
 		},
 		pledge: {
-			noun: 'pledge',
+			noun: {
+				singular: 'pledge',
+				plural: 'pledges'
+			},
 			verb: {
 				present: 'pledge',
 				past: 'pledged'
 			}
 		},
 		fulfilment: {
-			noun: 'fulfilment',
+			noun: {
+				singular: 'fulfilment',
+				plural: 'fulfilments'
+			},
 			verb: {
 				present: 'fulfil',
 				past: 'fulfilled'
@@ -141,6 +158,10 @@ var config = {
     		// Displaying a page in the footer is not default behaviour
     		if (page.footer == null)
     			page.footer = false;
+
+    		// Displaying a page to guests only is not the default behaviour
+    		if (page.guestOnly == null)
+    			page.guestOnly = false;
 
     		if (page.nav || page.footer) {
     			pageLinks.push(page);

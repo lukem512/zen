@@ -11,7 +11,7 @@ block content
 			| User 
 			a(href="/admin/users/view/#{pledge.username}") #{pledge.username}
 			|  has pledged to attend schedule 
-			a(href="/#{dictionary.schedule.noun}s/view/#{pledge.schedule}") #{pledge.schedule}
+			a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}") #{pledge.schedule}
 			| .
 		.form-group
 			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete

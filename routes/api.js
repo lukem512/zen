@@ -107,6 +107,15 @@ var isCurrentUser = function(req, res, next) {
     }
 };
 
+var isAdminOrCurrentUser = function(req, res, next) {
+    if (req.body.owner != req.user.username && !req.user.admin) {
+        return response.invalid(res);
+    }
+    else {
+        next();
+    }
+};
+
 /*
  * Users.
  * Users within the system.
@@ -128,6 +137,7 @@ router.get('/users/view/:username', function(req, res) {
 });
 
 router.post('/users/new', function(req, res) {
+    // TODO - is admin
     if (!req.user.admin) return response.invalid(res);
 
     var user = new User({
@@ -142,6 +152,7 @@ router.post('/users/new', function(req, res) {
 });
 
 router.post('/users/update', function(req, res) {
+    // TODO - is admin or current user
     User.findById(req.body.id, function (err, user) {
         if (err) return error.server(res, err);
 
@@ -169,6 +180,7 @@ router.post('/users/update', function(req, res) {
 });
 
 router.delete('/users/update/:username', function(req, res) {
+    // TODO - is admin
     if (!req.user.admin) return response.invalid(res);
 
     User.findOneAndRemove({
@@ -185,6 +197,7 @@ router.delete('/users/update/:username', function(req, res) {
 */
 
 router.get('/groups/list', function(req, res) {
+    // TODO - is admin
     Group.find(function(err, groups){
         if (err) return error.server(res, err);
         res.json(groups);
@@ -271,6 +284,7 @@ router.get('/schedules/view/:id', function(req, res) {
 });
 
 router.post('/schedules/new', function(req, res) {
+    // TODO - is admin or current user
     if (req.body.owner != req.user.username && !req.user.admin) return response.invalid(res);
     var schedule = new Schedule({
         title: sanitize(req.body.title),
@@ -286,6 +300,7 @@ router.post('/schedules/new', function(req, res) {
 });
 
 router.post('/schedules/update', function(req, res) {
+    // TODO - is admin or current user
     Schedule.findByIdAndUpdate(sanitize(req.body.id), {
         title: sanitize(req.body.title),
         description: sanitize(req.body.description),
@@ -300,6 +315,7 @@ router.post('/schedules/update', function(req, res) {
 });
 
 router.delete('/schedules/update/:id', function(req, res) {
+    // TODO - is admin or current user
     Schedule.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
         if (!result) return error.notfound(res);
@@ -327,7 +343,7 @@ router.get('/calendar', function(req, res) {
                     start: moment(s.start_time).format(),
                     end: moment(s.end_time).format(),
                     owner: s.owner,
-                    url: '/' + config.dictionary.schedule.noun + 's/view/' + s._id,
+                    url: '/' + config.dictionary.schedule.noun.plural + '/view/' + s._id,
                     className: (s.owner == req.user.username) ? 'bg-success' : 'bg-danger'
                 }
             });
@@ -356,6 +372,7 @@ router.get('/pledges/view/:id', function(req, res) {
 });
 
 router.post('/pledges/new', function(req, res) {
+    // TODO - is admin or current user
     if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
     var pledge = new Pledge({
         username: sanitize(req.body.username),
@@ -368,6 +385,7 @@ router.post('/pledges/new', function(req, res) {
 });
 
 router.delete('/pledges/update/:id', function(req, res) {
+    // TODO - is admin or current user
     Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
         console.log(result);
@@ -419,6 +437,7 @@ router.get('/fulfilments/view/:id', function(req, res) {
 });
 
 router.post('/fulfilments/new', function(req, res) {
+    // TODO - is admin or current user
     var fulfilment = new Fulfilment({
         username: sanitize(req.body.username),
         start_time: new Date(req.body.start_time),
@@ -431,6 +450,7 @@ router.post('/fulfilments/new', function(req, res) {
 });
 
 router.post('/fulfilments/update', function(req, res) {
+    // TODO - is admin or current user
     Fulfilment.findByIdAndUpdate(sanitize(req.body.id), {
         username: sanitize(req.body.username),
         start_time: new Date(req.body.start_time),
@@ -443,6 +463,7 @@ router.post('/fulfilments/update', function(req, res) {
 
 /* DELETE to fulfilment update service */
 router.delete('/fulfilments/update/:id', function(req, res) {
+    // TODO - is admin or current user
     Fulfilment.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
         response.ok(res);

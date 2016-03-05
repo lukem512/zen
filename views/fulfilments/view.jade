@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+	h1 Fulfilment
+	script(src='/javascripts/ui/generic.js')
+	script(src='/javascripts/ui/datepicker.js')
+	script(src='/javascripts/ui/fulfilments.js')
+	p
+		a.text-capitalize(href="/users/#{fulfilment.username}", title="Visit {fulfilment.username}'s profile") #{fulfilment.username}
+		|  #{dictionary.action.verb.past} #{moment(fulfilment.start_time).calendar()} until 
+		if (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).weeks() > 1
+			| #{moment(fulfilment.end_time).calendar()}
+		else
+			if (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).days() > 1
+				| #{moment(fulfilment.end_time).format('dddd')} at 
+			| #{moment(fulfilment.end_time).format('h:mm A')}
+		| .
+	if fulfilment.username == user.username || user.admin
+		hr
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/edit/#{fulfilment.id}'") Edit
+		| &nbsp;
+		button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Delete

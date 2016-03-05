@@ -5,7 +5,9 @@ block content
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/settings.js')
 	p
-		| You are able to change the following settings. If you wish to change anything else about your profile, please  
+		| You are able to change the following settings. If you wish to change anything else about your 
+		a(href="/users/#{user.username}", title="View your profile") profile
+		| , please  
 		a(href="#{pages.views.contact.href}") contact us
 		| .
 	p#message.hidden

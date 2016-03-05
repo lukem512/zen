@@ -9,8 +9,9 @@ var auth = require('./routes/auth');
 var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
-var schedules = require('./routes/schedules');
 var users = require('./routes/users');
+var schedules = require('./routes/schedules');
+var fulfilments = require('./routes/fulfilments');
 
 var config = require('./config');
 
@@ -31,6 +32,9 @@ install();
 // app initialisation
 var app = express();
 
+// set up locals for templating
+app.locals.moment = require('moment');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -49,8 +53,11 @@ app.use('/admin', admin);
 app.use('/api', api);
 app.use('/users', users);
 
-console.log('Setting schedule routes at /' + config.dictionary.schedule.noun);
-app.use('/' + config.dictionary.schedule.noun + 's', schedules);
+console.log('Setting schedule routes at /' + config.dictionary.schedule.noun.plural);
+app.use('/' + config.dictionary.schedule.noun.plural, schedules);
+
+console.log('Setting fulfilment routes at /' + config.dictionary.action.noun.plural);
+app.use('/' + config.dictionary.action.noun.plural, fulfilments);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

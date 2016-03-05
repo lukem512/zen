@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+	h1= title
+	p These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for #{statistics.total} in total with an average of #{statistics.weeklyAverage} each week. You have #{statistics.scheduled} of #{dictionary.schedule.noun.plural} coming up!
+	if fulfilments.length > 0
+		#fulfilments
+			for fulfilment, i in fulfilments
+				p
+					strong #{moment(fulfilment.start_time).calendar()}
+					|  you #{dictionary.action.verb.past} for 
+					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{ (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize() }
+					| .
+	else
+		p
+			em You have not logged any #{dictionary.schedule.noun.plural} yet! To do so, click the button below.
+	hr
+	form
+		.form-group
+			button#btnNow.btn.btn-success.text-capitalize(type="button", title="Start your #{dictionary.action.noun.singular} now!") #{dictionary.action.verb.present} now
+			| &nbsp;
+			button#btnLog.btn.btn-primary.text-capitalize(type="button", title="Log a previously completed #{dictionary.action.noun.singular}", onclick="window.location='/#{dictionary.action.noun.plural}/log'") Log #{dictionary.action.noun.singular}

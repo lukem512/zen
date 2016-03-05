@@ -23,30 +23,13 @@ var auth = function() {
 	    error: function(e) {
 	    	// Display an error message
 	    	if (e.responseJSON.message) {
-	    		message(e.responseJSON.message, true);
+	    		_message(e.responseJSON.message, true);
 	    	}
 	    	else {
-	    		message('An error occurred whilst logging in.', true);
+	    		_message('An error occurred whilst logging in.', true);
 	    	}
 	    }
 	});
-};
-
-var message = function(text, isError) {
-	var el = $('#message');
-	var isError = isError || false;
-
-	if (isError) {
-		el.addClass('text-danger');
-	} else {
-		el.removeClass('text-danger');
-	}
-
-	el.text(text);
-
-	if (el.hasClass('hidden')) {
-		el.removeClass('hidden');
-	}
 };
 
 $(document).ready(function(){

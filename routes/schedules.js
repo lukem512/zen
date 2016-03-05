@@ -25,7 +25,7 @@ router.use(function(req, res, next){
 /* GET list schedules page */
 router.get('/', function(req, res, next) {
   res.render('schedules/list', {
-    title: 'View ' + config.dictionary.schedule.noun + 's',
+    title: 'View ' + config.dictionary.schedule.noun.plural,
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),
@@ -40,7 +40,7 @@ router.get('/new', function(req, res, next) {
   // TODO - check user is authenticated
 
   res.render('schedules/new', {
-      title: 'Create a ' + config.dictionary.schedule.noun,
+      title: 'Create a ' + config.dictionary.schedule.noun.singular,
       name: config.name,
       organisation: config.organisation,
       nav: config.nav(),
@@ -62,7 +62,7 @@ router.get('/edit/:id', function(req, res, next) {
     var endDate = moment(schedule.end_time);
 
     res.render('schedules/edit', {
-        title: 'Edit a ' + config.dictionary.schedule.noun,
+        title: 'Edit a ' + config.dictionary.schedule.noun.singular,
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),
@@ -70,8 +70,8 @@ router.get('/edit/:id', function(req, res, next) {
         dictionary: config.dictionary,
         start_date: startDate.format('DD-MM-YYYY'),
         start_time: startDate.format('HH:mm'),
-        end_date: schedule.end_date = endDate.format('DD-MM-YYYY'),
-        end_time: schedule.end_time = endDate.format('HH:mm'),
+        end_date: endDate.format('DD-MM-YYYY'),
+        end_time: endDate.format('HH:mm'),
         schedule: schedule
     });
   });

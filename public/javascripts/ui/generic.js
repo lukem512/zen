@@ -82,6 +82,23 @@ var _delPairs = function(updateApiUrl, nextUrl, pair) {
 	});
 };
 
+var _message = function(text, isError) {
+	var el = $('#message');
+	var isError = isError || false;
+
+	if (isError) {
+		el.addClass('text-danger');
+	} else {
+		el.removeClass('text-danger');
+	}
+
+	el.text(text);
+
+	if (el.hasClass('hidden')) {
+		el.removeClass('hidden');
+	}
+};
+
 $.urlParam = function(name){
 	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
 	return (results) ? results[1] || 0 : null;

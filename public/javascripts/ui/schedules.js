@@ -7,9 +7,6 @@ var getPledgesApiUrl = '/api/pledges/users';
 
 var listViewUrl = '/admin/schedules/list';
 
-var dateFormat = 'DD-MM-YYYY';
-var timeFormat = 'HH:mm';
-
 // Form validator
 
 var validate = function() {
@@ -82,79 +79,9 @@ var del = function(next, id) {
 	_del(updateApiUrl, next, id);
 };
 
-// Helpers and UI functions
-
-var makeDates = function() {
-	var startDateString = $('#inputStartDate').val() + ' ' + $('#inputStartTime').val();
-	var startDate = moment(startDateString, dateFormat + ' ' + timeFormat);
-
-	var endDateString = $('#inputEndDate').val() + ' ' + $('#inputEndTime').val();
-	var endDate = moment(endDateString, dateFormat + ' ' + timeFormat);
-
-	return {
-		start: startDate,
-		end: endDate
-	};
-};
-
-// Set up date/timepicker components
-var initPickers = function() {
-	var dateSet = false;
-
-	var dateParams = {
-		minDate: 0,
-		dateFormat: 'dd-mm-yy',
-		onClose: function(date) {
-			if (!dateSet) {
-				// Don't change if the end date has already been set
-				var endDate = $('#inputEndDate').datepicker('getDate', date);
-				if (!endDate) {
-					$('#inputEndDate').datepicker('setDate', date);
-				}
-				dateSet = true;
-			}
-	    	$('#inputEndDate').datepicker('option','minDate', date);
-	    }
-	};
-	$('#inputStartDate').datepicker(dateParams);
-
-	if ($.urlParam('date'))
-		$('#inputStartDate').datepicker('setDate', $.urlParam('date'));
-
-	dateParams = {
-		minDate: 0,
-		dateFormat: 'dd-mm-yy'
-	};
-	$('#inputEndDate').datepicker(dateParams);
-
-	var timeParams = {
-		scrollDefault: 'now',
-		timeFormat: 'H:i',
-		step: 15
-	};
-	$('#inputStartTime').timepicker(timeParams);
-	$('#inputEndTime').timepicker(timeParams);
-
-	if ($.urlParam('time'))
-		$('#inputStartTime').timepicker('setTime', $.urlParam('time'));
-
-	var timeSet = false;
-	$('#inputStartTime').on('selectTime', function() {
-	    if (!timeSet) {
-	    	// Don't change if the end time has already been set
-	    	var endTime = $('#inputEndTime').timepicker('getTime');
-	    	if (!endTime){
-	    		var startTime = new Date($(this).timepicker('getTime'));
-	    		$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + 15 * 60000));
-	    	}
-	    	timeSet = true;
-	    }
-	});
-}
-
 $(function() {
 	initPickers();
-
+	
 	var id = $('#id').val();
 	if (id) {
 		pledgedUsers(id, function(users){

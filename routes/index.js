@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
   res.render('index', {
   	title: 'Welcome to ' + config.name,
   	header: {
-  		content: '<h1>Are you ready to supercharge your ' + config.dictionary.action.noun + ' sessions?</h1>'
+  		content: '<h1>Are you ready to supercharge your ' + config.dictionary.action.noun.singular + ' sessions?</h1>'
   	},
   	name: config.name,
   	organisation: config.organisation,

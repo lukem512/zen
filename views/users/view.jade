@@ -1,25 +1,40 @@
 extends ../layout
 
 block content
-	h1= title
+	if _user.username == user.username
+		h1 #{title} (You)
+	else
+		h1= title
 	if _schedules.length > 0
 		#schedules
-			p I have created the following #{dictionary.schedule.noun}s: 
+			p
+				if _user.username == user.username
+					| You have 
+				else
+					span.text-capitalize #{_user.username} 
+					| has 
+				| created the following #{dictionary.schedule.noun.plural}: 
 				each schedule, i in _schedules
 					span.schedule
 						if i > 0
 							| , 
-						a(href="/#{dictionary.schedule.noun}s/view/#{schedule.id}") #{schedule.title}
+						a(href="/#{dictionary.schedule.noun.singular}s/view/#{schedule.id}") #{schedule.title}
 				| .
 	if _pledges.length > 0
 		#pledges
-			p I have #{dictionary.pledge.verb.past} to attend the following #{dictionary.schedule.noun}s: 
+			p
+				if _user.username == user.username
+					| You have 
+				else
+					span.text-capitalize #{_user.username} 
+					| has 
+				| #{dictionary.pledge.verb.past} to attend the following #{dictionary.schedule.noun.plural}: 
 				each pledge, i in _pledges
 					span.schedule
 						if pledge.schedule != -1
 							if i > 0
 								| , 
-							a(href="/#{dictionary.schedule.noun}s/view/#{pledge.schedule}") #{pledge.title}
+							a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}") #{pledge.title}
 				| .
 	if _user.username == user.username
 		hr
