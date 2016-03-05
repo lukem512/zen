@@ -2,7 +2,24 @@ extends ../layout
 
 block content
 	h1= title
-	p These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for #{statistics.total} in total with an average of #{statistics.weeklyAverage} each week. You have #{statistics.scheduled} of #{dictionary.schedule.noun.plural} coming up!
+	p
+		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for 
+		if statistics.total > 0
+			strong #{moment.duration(statistics.total).humanize()}
+		else
+			strong 0 minutes
+		|  in total 
+		if statistics.weeklyAverage > 0
+			| with an average of 
+			strong #{moment.duration(statistics.weeklyAverage).humanize()}
+			|  each week
+		| . You have 
+		if statistics.scheduled > 0
+			strong #{moment.duration(statistics.scheduled).humanize()}
+			| of
+		else
+			| no
+		|  #{dictionary.schedule.noun.plural} coming up.
 	if fulfilments.length > 0
 		#fulfilments
 			for fulfilment, i in fulfilments

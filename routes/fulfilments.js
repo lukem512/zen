@@ -26,6 +26,19 @@ router.use(function(req, res, next){
 router.get('/', function(req, res, next) {
   Fulfilment.find({ username: sanitize(req.user.username) }, function(err, fulfilments) {
     if (err) return error.server(res, req, err);
+
+    var stats = {
+      total: 0,
+      weeks: 0,
+      scheduled: 0
+    };
+
+    fulfilments.forEach(function(f) {
+      stats.total += moment.duration(moment(f.end_time).diff(f.start_time));
+    });
+
+    stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
+
     res.render('fulfilments/list', {
       title: config.dictionary.action.noun.plural,
       name: config.name,
@@ -34,11 +47,7 @@ router.get('/', function(req, res, next) {
       user: req.user,
       dictionary: config.dictionary,
       fulfilments: fulfilments,
-      statistics: {
-        total: '10 hours',
-        weeklyAverage: '2.5 hours',
-        scheduled: '1.5 hours'
-      }
+      statistics: stats
     });
   });
 });
