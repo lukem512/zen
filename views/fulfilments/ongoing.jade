@@ -2,7 +2,7 @@ extends ../layout
 
 block content
 	h1= title
-	p Press the button below to begin your #{dictionary.action.noun.singular} session.
+	p#message Press the button below to begin your #{dictionary.action.noun.singular} session.
 	h1#timer
 	hr
 	script(src='/javascripts/ui/generic.js')
@@ -10,11 +10,10 @@ block content
 	script(src='/javascripts/ui/fulfilments.js')
 	script(src='/vendor/timer.jquery/timer.jquery.min.js')
 	form#formLog(name="log",role="form",method="post",action="/api/fulfilments/new")
-		p#message.hidden
 		.form-group.hidden
 			input#inputUsername.hidden(name="username", value="#{user.username}")
 		.form-group
-			button#btnStart.btn.btn-success(type="button", onclick="toggle()") Start
+			button#btnStart.btn.btn-success(type="button", onclick="toggle('/#{dictionary.action.noun.plural}')") Start
 			| &nbsp;
 			button#btnStop.btn.btn-warning(type="button", onclick="stop('/#{dictionary.action.noun.plural}')", disabled) Finish
 			| &nbsp;

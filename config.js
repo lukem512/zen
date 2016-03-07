@@ -108,7 +108,8 @@ var config = {
 			},
 			verb: {
 				present: 'meditate',
-				past: 'meditated'
+				past: 'meditated',
+				presentParticiple: 'meditating'
 			}
 		},
 		schedule: {

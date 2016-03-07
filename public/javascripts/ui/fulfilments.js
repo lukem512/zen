@@ -4,6 +4,7 @@ var updateApiUrl = '/api/fulfilments/update';
 var beginApiUrl = '/api/fulfilments/ongoing/begin';
 var aliveApiUrl = '/api/fulfilments/ongoing/alive';
 var endApiUrl = '/api/fulfilments/ongoing/end';
+var getApiUrl = '/api/fulfilments/ongoing';
 var deleteApiUrl = '/api/fulfilments/ongoing';
 
 // Form validator
@@ -68,6 +69,9 @@ var del = function(next, id) {
 };
 
 var cancel = function(next) {
+	// Remove message when user navigates away
+	window.onbeforeunload = null;
+
 	$('#timer').timer('pause');
 	$('#btnStop').attr('disabled', true);
 
@@ -80,17 +84,24 @@ var cancel = function(next) {
 };
 
 var stop = function(next) {
+	// Remove message when user navigates away
+	window.onbeforeunload = null;
+
 	$('#timer').timer('pause');
 	$('#btnStop').attr('disabled', true);
 	_post(endApiUrl, {
     	username: user
     }, function(res) {
-    	console.log('End', res);
-    	window.location = next;
+    	if (!res.time) {
+    		window.location = next;
+    	}
+    	else {
+    		window.location = next;
+    	}
     });
 };
 
-var toggle = function() {
+var toggle = function(next) {
 	var state = $('#timer').data('state');
 
 	switch (state) {
@@ -117,23 +128,47 @@ var toggle = function() {
 	        	if (res.error) {
 	        		$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
 	        		$('#message').addClass('text-danger');
-	        		$('#message').removeClass('hidden');
 	        	}
 	        	else {
+	        		if (res.time > 0) {
+	        			$('#message').text('We found a previous session and resumed it for you. If you want to begin again, please press \'Finish\' or \'Cancel\'.');
+	        		}
 		        	$('#timer').timer({
+		        		seconds: (res.time / 1000) || 0,
 						format: '%H:%M:%S',
-						duration: '30s',
+						duration: '10s',
 					    callback: function() {
 					        _post(aliveApiUrl, {
 					        	username: user
 					        }, function(res) {
-					        	console.log('Alive', res);
+					        	if (!res.time) {
+					        		window.onbeforeunload = null;
+					        		window.location = next;
+					        	}
+					        	else {
+					        		console.log('Alive', res);
+					        	}
 					        });
 					    },
 					    repeat: true
 					});
 					$('#btnStart').text('Pause');
 					$('#btnStop').attr('disabled', false);
+
+					// Set up message when user navigates away
+					window.onbeforeunload = function (e) {
+					    e = e || window.event;
+
+					    var message = 'Please use the \'Finish\' or \'Cancel\' buttons to end your session.';
+
+					    // For IE6-8 and Firefox prior to version 4
+					    if (e) {
+					        e.returnValue = message;
+					    }
+
+					    // For Chrome, Safari, IE8+ and Opera 12+
+					    return message;
+					};
 	        	}
 	        });
 			break;
@@ -142,4 +177,18 @@ var toggle = function() {
 
 $(function() {
 	initPickers(true);
+
+	// Is there an ongoing transaction already?
+	getApiUrl = getApiUrl + '/' + user;
+	_get(getApiUrl, function(res){
+		if (res.error) {
+			$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
+	        $('#message').addClass('text-danger');
+		}
+		else {
+			if (res.time > 0 || $.urlParam('start') == 'true') {
+				toggle();
+			}
+		}
+	});
 });

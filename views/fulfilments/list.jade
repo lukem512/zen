@@ -3,7 +3,7 @@ extends ../layout
 block content
 	h1= title
 	p
-		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for 
+		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for around 
 		if statistics.total > 0
 			strong #{moment.duration(statistics.total).humanize()}
 		else
@@ -25,7 +25,12 @@ block content
 			for fulfilment, i in fulfilments
 				p
 					strong #{moment(fulfilment.start_time).calendar()}
-					|  you #{dictionary.action.verb.past} for 
+					|  you 
+					if fulfilment.ongoing
+						| are currently #{dictionary.action.verb.presentParticiple} and have been 
+					else
+						| #{dictionary.action.verb.past} 
+					| for 
 					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{ (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize() }
 					| .
 	else

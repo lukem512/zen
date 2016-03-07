@@ -503,27 +503,48 @@ router.post('/fulfilments/ongoing/begin', function(req, res) {
         ongoing: true
     }, function(err, fulfilment) {
         if (err) return error.server(res, err);
-        if (fulfilment) return response.invalid(res);
+
+        // 15 minutes
+        var threshold = 15 * 60 * 1000;
+
+        // Is there an ongoing fulfilment?
+        // Either finish it or continue it.
+        if (fulfilment) {
+            var delta = (new Date() - fulfilment.start_time);
+            if (delta < threshold) {
+                console.log('Resuming recent fulfilment!');
+                return res.json({
+                    message: 'Resuming recent ' + config.dictionary.schedule.noun.singular,
+                    time: delta
+                });
+            } else {
+                console.log('Setting the old fulfilment to complete');
+                fulfilment.ongoing = false;
+                fulfilment.save();
+            }
+        }
+
+        // Initially, set the fulfilment to 10s
+        var start_date = new Date();
+
+        var initial_time = 10; // seconds
+        var end_date = new Date();
+        end_date.setSeconds(start_date.getSeconds() + initial_time);
+
+        var newf = new Fulfilment({
+            username: sanitize(req.body.username),
+            start_time: start_date,
+            end_time: end_date,
+            ongoing: true
+        });
+        newf.save(function(err, doc) {
+            if (err) return error.server(res, err);
+            return res.json({
+                message: 'OK',
+                time: 0
+            });
+        });
     })
-
-    // Initially, set the fulfilment to 10s
-    var start_date = new Date();
-
-    var initial_time = 10; // seconds
-    var end_date = new Date();
-    end_date.setSeconds(start_date.getSeconds() + initial_time);
-
-    var fulfilment = new Fulfilment({
-        username: sanitize(req.body.username),
-        start_time: start_date,
-        end_time: end_date,
-        ongoing: true
-    });
-    fulfilment.save(function(err, doc) {
-        if (err) return error.server(res, err);
-        response.ok(res);
-    });
-
 });
 
 router.post('/fulfilments/ongoing/alive', function(req, res) {
@@ -537,7 +558,18 @@ router.post('/fulfilments/ongoing/alive', function(req, res) {
         end_time: new Date()
     }, function(err, result) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        console.log(result);
+        if (!result) {
+            return res.json({
+                message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
+            }); 
+        }
+        else {
+            return res.json({
+                message: 'OK',
+                time: (result.end_time - result.start_time)
+            });
+        }
     });
 });
 
@@ -554,7 +586,36 @@ router.post('/fulfilments/ongoing/end', function(req, res) {
         ongoing: false
     }, function(err, result) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (!result) {
+            return res.json({
+                message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
+            }); 
+        }
+        return res.json({
+            message: 'OK',
+            time: (result.end_time - result.start_time)
+        });
+    });
+});
+
+router.get('/fulfilments/ongoing/:username', function(req, res) {
+    // TODO - is admin or current user
+
+    // Find an ongoing fulfilment from the user
+    Fulfilment.findOne({
+        username: sanitize(req.params.username),
+        ongoing: true
+    }, function(err, result) {
+        if (err) return error.server(res, err);
+
+        if (!result) return res.json({
+            message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
+        });
+
+        return res.json({
+            message: 'OK',
+            time: (result.end_time - result.start_time)
+        });
     });
 });
 
