@@ -1,6 +1,11 @@
 var addApiUrl = '/api/fulfilments/new';
 var updateApiUrl = '/api/fulfilments/update';
 
+var beginApiUrl = '/api/fulfilments/ongoing/begin';
+var aliveApiUrl = '/api/fulfilments/ongoing/alive';
+var endApiUrl = '/api/fulfilments/ongoing/end';
+var deleteApiUrl = '/api/fulfilments/ongoing';
+
 // Form validator
 
 var validate = function() {
@@ -60,6 +65,79 @@ var update = function(next, id) {
 var del = function(next, id) {
 	var next = next || '/';
 	_del(updateApiUrl, next, id);
+};
+
+var cancel = function(next) {
+	$('#timer').timer('pause');
+	$('#btnStop').attr('disabled', true);
+
+	if ($('#timer').data('state') == 'stopped'){
+		window.location = next;
+	}
+	else {
+		_del(deleteApiUrl, next, user);
+	}
+};
+
+var stop = function(next) {
+	$('#timer').timer('pause');
+	$('#btnStop').attr('disabled', true);
+	_post(endApiUrl, {
+    	username: user
+    }, function(res) {
+    	console.log('End', res);
+    	window.location = next;
+    });
+};
+
+var toggle = function() {
+	var state = $('#timer').data('state');
+
+	switch (state) {
+		case 'running':
+			$('#timer').timer('pause');
+			$('#btnStart').text('Start');
+			break;
+
+		case 'paused':
+			$('#timer').timer('resume');
+			$('#btnStart').text('Pause');
+			break;
+
+		case 'stopped':
+			$('#timer').timer('restart');
+			$('#btnStart').text('Pause');
+			break;
+
+		default:
+			_post(beginApiUrl, {
+	        	username: user
+	        }, function(res) {
+	        	console.log('Begin', res);
+	        	if (res.error) {
+	        		$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
+	        		$('#message').addClass('text-danger');
+	        		$('#message').removeClass('hidden');
+	        	}
+	        	else {
+		        	$('#timer').timer({
+						format: '%H:%M:%S',
+						duration: '30s',
+					    callback: function() {
+					        _post(aliveApiUrl, {
+					        	username: user
+					        }, function(res) {
+					        	console.log('Alive', res);
+					        });
+					    },
+					    repeat: true
+					});
+					$('#btnStart').text('Pause');
+					$('#btnStop').attr('disabled', false);
+	        	}
+	        });
+			break;
+	}
 };
 
 $(function() {

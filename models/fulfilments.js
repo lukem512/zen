@@ -14,6 +14,10 @@ var FulfilmentSchema = new mongoose.Schema({
   },
   end_time: {
     type: Date
+  },
+  ongoing: {
+    type: Boolean,
+    default: false
   }
 });
 

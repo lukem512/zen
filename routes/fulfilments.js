@@ -107,4 +107,16 @@ router.get('/log', function(req, res, next) {
   });
 });
 
+/* GET real-time fulfilment form */
+router.get('/now', function(req, res, next) {
+  res.render('fulfilments/ongoing', {
+    title: 'Log a new ' + config.dictionary.action.noun.singular,
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
+    user: req.user,
+    dictionary: config.dictionary
+  });
+});
+
 module.exports = router;

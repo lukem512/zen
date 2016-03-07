@@ -494,6 +494,84 @@ router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
     });
 });
 
+router.post('/fulfilments/ongoing/begin', function(req, res) {
+    // TODO - is admin or current user
+
+    // Each user can only have one ongoing fulfilment!
+    Fulfilment.findOne({
+        username: sanitize(req.body.username),
+        ongoing: true
+    }, function(err, fulfilment) {
+        if (err) return error.server(res, err);
+        if (fulfilment) return response.invalid(res);
+    })
+
+    // Initially, set the fulfilment to 10s
+    var start_date = new Date();
+
+    var initial_time = 10; // seconds
+    var end_date = new Date();
+    end_date.setSeconds(start_date.getSeconds() + initial_time);
+
+    var fulfilment = new Fulfilment({
+        username: sanitize(req.body.username),
+        start_time: start_date,
+        end_time: end_date,
+        ongoing: true
+    });
+    fulfilment.save(function(err, doc) {
+        if (err) return error.server(res, err);
+        response.ok(res);
+    });
+
+});
+
+router.post('/fulfilments/ongoing/alive', function(req, res) {
+    // TODO - is admin or current user
+
+    // Update the ongoing fulfilment with the current time
+    Fulfilment.findOneAndUpdate({
+        username: sanitize(req.body.username),
+        ongoing: true
+    }, {
+        end_time: new Date()
+    }, function(err, result) {
+        if (err) return error.server(res, err);
+        response.ok(res);
+    });
+});
+
+router.post('/fulfilments/ongoing/end', function(req, res) {
+    // TODO - is admin or current user
+
+    // Update the user's ongoing fulfilment with the final time
+    // and remove the ongoing flag
+    Fulfilment.findOneAndUpdate({
+        username: sanitize(req.body.username),
+        ongoing: true
+    }, {
+        end_time: new Date(),
+        ongoing: false
+    }, function(err, result) {
+        if (err) return error.server(res, err);
+        response.ok(res);
+    });
+});
+
+router.delete('/fulfilments/ongoing/:username', function(req, res) {
+    // TODO - is admin or current user
+
+    // Remove an ongoing fulfilment from the user
+    Fulfilment.findOneAndRemove({
+        username: sanitize(req.params.username),
+        ongoing: true
+    }, function(err, result) {
+        if (err) return error.server(res, err);
+        if (!result) return error.notfound(res);
+        response.ok(res);
+    });
+});
+
 /*
  * Add a JSON 404 route
 */
