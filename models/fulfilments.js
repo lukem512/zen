@@ -6,7 +6,8 @@ var Pledge = require('./pledges');
 var FulfilmentSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
+    required: true,
+    lowercase: true
   },
   start_time: {
     type: Date,

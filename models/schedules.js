@@ -21,7 +21,8 @@ var ScheduleSchema = new mongoose.Schema({
   },
   owner: {
   	type: String,
-  	required: true
+  	required: true,
+    lowercase: true
   }
 });
 

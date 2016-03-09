@@ -3,7 +3,8 @@ var mongoose = require('mongoose');
 var PledgeSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
+    required: true,
+    lowercase: true
   },
   schedule: {
     type: String,
