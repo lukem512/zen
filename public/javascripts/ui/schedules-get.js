@@ -129,16 +129,17 @@ $(function() {
 			// TODO - hide the '+' popup
 		},
         dayClick: function(day) {
-	        // TODO - display button for returning to month view
 	        if (view == 'agendaDay') {
-	        	console.log(day)
-	        	// Go to the new schedule page
-				window.location = newScheduleUrl(moment(day));
+	        	// Only do this for today and in the future
+	        	if (day >= new moment()) {
+		        	// Go to the new schedule page
+					window.location = newScheduleUrl(moment(day));
+				}
 	        }
 	        else {
 	        	// Go to day view for the selected date
 	        	window.location = calendarUrl(moment(day).format(dateFormat), 'day');
-	        }
+	       	}
 	    }
     });
 });
