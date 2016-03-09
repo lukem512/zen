@@ -23,6 +23,6 @@ block content
 		.form-group.hidden
 			input#inputOwner.hidden(name="owner", value="#{user.username}")
 		.form-group
-			button#btnEdit.btn.btn-success(type="button", onclick="update('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')") Edit
+			button#btnSave.btn.btn-success(type="button", onclick="update('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')") Save
 			&nbsp;
 			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')") Delete
