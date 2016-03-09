@@ -22,6 +22,6 @@ block content
 		.form-group.hidden
 			input#inputUsername.hidden(name="username", value="#{user.username}")
 		.form-group
-			button#btnEdit.btn.btn-success(type="button", onclick="update('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Edit
+			button#btnSave.btn.btn-success(type="button", onclick="update('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Save
 			&nbsp;
 			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Delete
