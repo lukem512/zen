@@ -42,8 +42,7 @@ var add = function(next) {
 	var next = next || listViewUrl;
 	var dates = makeDates();
 	if (validate() && dates.start.isValid() && dates.end.isValid()){
-			var owner = $('#inputOwner').find(":selected").text() || $('#inputOwner').val();
-
+		var owner = $('#inputOwner').find(":selected").text() || $('#inputOwner').val();
 		var params = {
 			"title": $('#inputTitle').val(),
 			"description": $('#inputDescription').val(),

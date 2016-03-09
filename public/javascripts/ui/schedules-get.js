@@ -39,6 +39,12 @@ $(function() {
 				click: function() {
 					// Go to new schedule page
 					date = $('#calendar').fullCalendar('getDate');
+
+					// Use today if the current day is in the past
+					if (date < new moment()) {
+						date = new moment();
+					}
+
 					window.location = newScheduleUrl(date);
 				}
 			},

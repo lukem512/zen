@@ -6,13 +6,11 @@ var timeFormat = 'HH:mm';
 var initPickers = function(past) {
 	var dateSet = false;
 
-	past = past || false;
-	console.log(past);
-
 	var dateParams = {
 		dateFormat: 'dd-mm-yy',
 	};
 
+	past = past || false;
 	if (past) {
 		dateParams.maxDate = 0;
 	} else {
@@ -25,7 +23,6 @@ var initPickers = function(past) {
 		if (date == "") {
 			return;
 		}
-		console.log(date)
 
 		if (!dateSet) {
 			// Don't change if the end date has already been set
