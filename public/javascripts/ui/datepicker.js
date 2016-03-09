@@ -7,6 +7,7 @@ var initPickers = function(past) {
 	var dateSet = false;
 
 	past = past || false;
+	console.log(past);
 
 	var dateParams = {
 		dateFormat: 'dd-mm-yy',
@@ -93,7 +94,3 @@ var makeDates = function() {
 		end: endDate
 	};
 };
-
-$(function(){
-	initPickers();
-});

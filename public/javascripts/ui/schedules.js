@@ -22,13 +22,13 @@ var pledgedUsers = function(id, callback) {
 	_get(getPledgesApiUrl + '/' + id, callback);
 };
 
-var join = function(id) {
+var join = function(next, id) {
 	var params = {
 		username: user,
 		schedule: id
 	};
 	_post(newPledgeApiUrl, params, function() {
-		location.reload(true);
+		window.location = next;
 	});
 };
 
@@ -94,7 +94,7 @@ $(function() {
 				if (i == users.length - 1 && users.length > 1) {
 					html += " and ";
 				}
-				else if (i < users.length - 1) {
+				else if (i < users.length - 1 && i > 0) {
 					html += ", ";
 				}
 				else {
@@ -133,5 +133,11 @@ $(function() {
 				$('#btnLeave').removeClass('hidden');
 			}
 		});
+	}
+});
+
+$(function() {
+	if (typeof(initPickers) == 'function') {
+		initPickers();
 	}
 });
