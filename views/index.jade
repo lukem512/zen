@@ -4,4 +4,7 @@ block content
 	.container
 		.col-lg-12
 			h1= title
-			p This is the home page.
+			p
+				| This is #{name}, an application that will help you #{dictionary.action.verb.present} and increase your productivity. Create a #{dictionary.schedule.noun.singular}, #{dictionary.pledge.verb.present} to #{dictionary.action.verb.present} with others and track your progress &mdash; just click  
+				a(href="/auth/") sign in
+				|  to get started!
