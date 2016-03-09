@@ -40,7 +40,7 @@ router.get('/', function(req, res, next) {
     stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
 
     res.render('fulfilments/list', {
-      title: config.dictionary.action.noun.plural,
+      title: 'View ' + config.dictionary.action.noun.plural,
       name: config.name,
       organisation: config.organisation,
       nav: config.nav(),
@@ -58,7 +58,7 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
     res.render('fulfilments/view', {
-      title: config.dictionary.fulfilment.noun.singular,
+      title: 'View ' + config.dictionary.action.noun.singular,
       name: config.name,
       organisation: config.organisation,
       nav: config.nav(),
@@ -79,7 +79,7 @@ router.get('/edit/:id', function(req, res, next) {
     var endDate = moment(fulfilment.end_time);
 
     res.render('fulfilments/edit', {
-      title: config.dictionary.fulfilment.noun.singular,
+      title: 'Edit ' + config.dictionary.action.noun.singular,
       name: config.name,
       organisation: config.organisation,
       nav: config.nav(),
@@ -98,7 +98,7 @@ router.get('/edit/:id', function(req, res, next) {
 /* GET retrospective fulfilment form */
 router.get('/log', function(req, res, next) {
   res.render('fulfilments/retrospective', {
-    title: 'Log ' + config.dictionary.action.noun.singular,
+    title: 'Log a ' + config.dictionary.action.noun.singular,
     name: config.name,
     organisation: config.organisation,
     nav: config.nav(),

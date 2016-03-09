@@ -93,3 +93,7 @@ var makeDates = function() {
 		end: endDate
 	};
 };
+
+$(function(){
+	initPickers();
+});

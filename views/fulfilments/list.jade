@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-	h1= title
+	h1= dictionary.action.noun.plural
 	p
 		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for around 
 		if statistics.total > 0

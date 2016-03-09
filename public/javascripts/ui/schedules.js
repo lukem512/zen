@@ -80,9 +80,8 @@ var del = function(next, id) {
 };
 
 $(function() {
-	initPickers();
-	
 	var id = $('#id').val();
+	var future = !($('#future').is(':checked'));
 	if (id) {
 		pledgedUsers(id, function(users){
 
@@ -117,11 +116,13 @@ $(function() {
 				}
 				html += "</a>";
 			}
-			if (users.length > 1 || you) {
-				html += " have";
-			}
-			else {
-				html += " has"; 
+			if (future) {
+				if (users.length > 1 || you) {
+					html += " have";
+				}
+				else {
+					html += " has"; 
+				}
 			}
 			html += " pledged to attend.";
 			$('#pledges').html(html);

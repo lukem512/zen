@@ -6,6 +6,7 @@ block content
 	script(src='/javascripts/ui/schedules.js')
 
 	input#id.hidden(value="#{schedule.id}")
+	input#future.hidden(type="checkbox", checked="#{(new Date() - schedule.start_time) < 0}")
 
 	p
 		a#user.text-capitalize(href="/users/#{schedule.owner}")
@@ -13,12 +14,13 @@ block content
 				| #{schedule.owner} 
 			else
 				| you 
-		if schedule.owner != user.username
-			| has 
-		else
-			| have 
+		if (new Date() - schedule.start_time) < 0
+			if schedule.owner != user.username
+				| has 
+			else
+				| have
 		| #{dictionary.schedule.verb.past} a #{dictionary.action.noun.plural} session for 
-		a#startDate(href="#")
+		a#startDate(href="#") #{moment(schedule.start_time).calendar()}
 		| . 
 	if schedule.description
 		p
