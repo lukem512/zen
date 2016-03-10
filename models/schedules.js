@@ -24,13 +24,15 @@ var ScheduleSchema = new mongoose.Schema({
   	required: true,
     lowercase: true
   }
+}, {
+  timestamps: true
 });
 
 ScheduleSchema.statics.during = function(start_time, end_time, callback) {
   this.find({
     $or: [
-      { start_time: { $gte: start_time } },
-      { end_time: { $lte: end_time } }
+      { start_time: { $gte: start_time, $lt: end_time } },
+      { start_time: { $lt: start_time }, end_time: { $gte: end_time } }
     ]
   }, callback);
 };
@@ -38,7 +40,7 @@ ScheduleSchema.statics.during = function(start_time, end_time, callback) {
 ScheduleSchema.statics.group = function(group, callback) {
   var schedules = this;
   Group.members(group, function(err, users){
-    if (err) callback(err);
+    if (err) return callback(err);
     var usernames = users.map(function(u){
       return u.username;
     });

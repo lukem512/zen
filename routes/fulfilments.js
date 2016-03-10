@@ -60,15 +60,15 @@ var getCompletedPledges = function(fulfilments, callback) {
   var tasks = [];
   fulfilments.forEach(function(f, i) {
     tasks.push(function(next){
-        Fulfilment.completes(f._id, function(err, pledges){
-          if (err) return error.server(res, req, err);
-          pls[i] = pledges;
-          next();
-        });
+      Fulfilment.completes(f._id, function(err, pledges){
+        if (err) return error.server(res, req, err);
+        pls[i] = pledges;
+        next();
       });
+    });
   });
 
-  async.parallel(tasks, function() {
+  async.series(tasks, function() {
     callback(pls);
   })
 }
@@ -81,19 +81,29 @@ router.get('/', function(req, res, next) {
     Schedule.find({ owner: req.user.username }, function(err, schedules) {
       if (err) return error.server(res, req, err);
 
+      // Make statistics object
+      var statistics = getStats(fulfilments, schedules);
+
       // Find all the pledges that this completes
       getCompletedPledges(fulfilments, function(pledges) {
 
-        // Did the user complete a schedule?
-        var schedule = null;
-        pledges.forEach(function(p) {
-          if (p.username == req.user.username) {
-            schedule = p.schedule;
+        // Clean pledges object
+        var schedules = [];
+
+        pledges.forEach(function(arr, i) {
+          for (j = arr.length - 1; j >= 0; j -= 1) {
+            if (arr[j].username == req.user.username) {
+              // Save the schedule details
+              schedules[i] = {
+                id: arr[j].schedule,
+                title: arr[j].scheduleTitle
+              };
+
+              // But remove the pledge from the array
+              arr.splice(j, 1);
+            }
           }
         });
-
-        // Make statistics object
-        var statistics = getStats(fulfilments, schedules);
 
         res.render('fulfilments/list', {
           title: 'View ' + config.dictionary.action.noun.plural,
@@ -104,7 +114,8 @@ router.get('/', function(req, res, next) {
           dictionary: config.dictionary,
           fulfilments: fulfilments,
           statistics: statistics,
-          pledges: pledges
+          pledges: pledges,
+          schedules: schedules
         });
       })
     });
@@ -116,6 +127,7 @@ router.get('/view/:id', function(req, res, next) {
   Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
+
     res.render('fulfilments/view', {
       title: 'View ' + config.dictionary.action.noun.singular,
       name: config.name,

@@ -11,6 +11,8 @@ var GroupSchema = new mongoose.Schema({
   description: {
     type: String,
   }
+}, {
+  timestamps: true
 });
 
 GroupSchema.statics.members = function(name, callback) {
