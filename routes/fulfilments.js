@@ -3,6 +3,7 @@ var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
 var moment = require('moment');
+var async = require('async');
 
 var config = require('../config');
 
@@ -22,32 +23,77 @@ router.use(function(req, res, next){
   }
 });
 
+var getStats = function(fulfilments) {
+  var stats = {
+    total: 0,
+    weeks: 0,
+    scheduled: 0
+  };
+
+  fulfilments.forEach(function(f, i) {
+    stats.total += moment.duration(moment(f.end_time).diff(f.start_time));
+
+    var weeks = moment().diff(moment(f.start_time), 'weeks');
+    if (weeks > stats.weeks) {
+      stats.weeks = weeks;
+    }
+
+    // TODO - count scheduled
+  });
+
+  console.log(stats.weeks);
+
+  stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
+
+  return stats;
+}
+
+var getCompletedPledges = function(fulfilments, callback) {
+  var pls = [];
+
+  var tasks = [];
+  fulfilments.forEach(function(f, i) {
+    tasks.push(function(next){
+        Fulfilment.completes(f._id, function(err, pledges){
+          if (err) return error.server(res, req, err);
+          pls[i] = pledges;
+          next();
+        });
+      });
+  });
+
+  async.parallel(tasks, function() {
+    callback(pls);
+  })
+}
+
 /* GET list fulfilments page */
 router.get('/', function(req, res, next) {
   Fulfilment.find({ username: sanitize(req.user.username) }, function(err, fulfilments) {
     if (err) return error.server(res, req, err);
 
-    var stats = {
-      total: 0,
-      weeks: 0,
-      scheduled: 0
-    };
+    // Find all the pledges that this completes
+    getCompletedPledges(fulfilments, function(pledges) {
 
-    fulfilments.forEach(function(f) {
-      stats.total += moment.duration(moment(f.end_time).diff(f.start_time));
-    });
+      // Did the user complete a schedule?
+      var schedule = null;
+      pledges.forEach(function(p) {
+        if (p.username == req.user.username) {
+          schedule = p.schedule;
+        }
+      });
 
-    stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
-
-    res.render('fulfilments/list', {
-      title: 'View ' + config.dictionary.action.noun.plural,
-      name: config.name,
-      organisation: config.organisation,
-      nav: config.nav(),
-      user: req.user,
-      dictionary: config.dictionary,
-      fulfilments: fulfilments,
-      statistics: stats
+      res.render('fulfilments/list', {
+        title: 'View ' + config.dictionary.action.noun.plural,
+        name: config.name,
+        organisation: config.organisation,
+        nav: config.nav(),
+        user: req.user,
+        dictionary: config.dictionary,
+        fulfilments: fulfilments,
+        statistics: getStats(fulfilments),
+        pledges: pledges
+      });
     });
   });
 });
