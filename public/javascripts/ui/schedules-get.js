@@ -16,7 +16,13 @@ var calendarUrl = function(date, view) {
 var newScheduleUrl = function(date, view) {
 	if (!moment(date, dateFormat).isValid())
 		date = moment(date);
-	return nakedUrl() + '/new?date=' + date.format(dateFormat) + '&time=' + date.format(timeFormat);
+
+	var url = nakedUrl() + '/new?date=' + date.format(dateFormat);
+
+	if (date.format(timeFormat) != '00-00')
+		url += '&time=' + date.format(timeFormat);
+
+	return  url;
 };
 
 $(function() {
