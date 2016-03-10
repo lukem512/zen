@@ -10,26 +10,27 @@ var _validate = function(validator, modifier) {
     }
 }
 
-var _get = function(getApiUrl, callback) {
+var defaultError = function(e) {
+	alert('Something went wrong with your request, sorry!');
+	console.error(e);
+};
+
+var _get = function(getApiUrl, callback, error) {
 	$.ajax({
 	    url: getApiUrl,
 	    type: 'GET',
 	    success: callback,
-	    error: function(e) {
-	    	alert(JSON.stringify(e));
-	    }
+	    error: error || defaultError
 	});
 };
 
-var _post = function(postApiUrl, params, callback) {
+var _post = function(postApiUrl, params, callback, error) {
 	$.ajax({
 	    url: postApiUrl,
 	    data: params,
 	    type: 'POST',
 	    success: callback,
-	    error: function(e) {
-	    	alert(JSON.stringify(e));
-	    }
+	    error: error || defaultError
 	});
 };
 
@@ -41,9 +42,7 @@ var _update = function(updateApiUrl, nextUrl, params) {
 	    success: function() {
 	    	window.location.href = nextUrl;
 	    },
-	    error: function(e) {
-	    	alert(JSON.stringify(e));
-	    }
+	    error: defaultError
 	});
 };
 
@@ -56,9 +55,7 @@ var _del = function(updateApiUrl, nextUrl, key) {
 	    success: function() {
 	    	window.location.href = nextUrl;
 	    },
-	    error: function(e) {
-	    	alert(JSON.stringify(e));
-	    }
+	    error: defaultError
 	});
 };
 
@@ -76,9 +73,7 @@ var _delPairs = function(updateApiUrl, nextUrl, pair) {
 	    success: function() {
 	    	window.location.href = nextUrl;
 	    },
-	    error: function(e) {
-	    	alert(JSON.stringify(e));
-	    }
+	    error: defaultError
 	});
 };
 

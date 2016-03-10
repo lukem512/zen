@@ -29,6 +29,11 @@ var join = function(next, id) {
 	};
 	_post(newPledgeApiUrl, params, function() {
 		window.location = next;
+	}, function(e) {
+		console.error(e);
+		$('#message').html('You are unable to join at this time. Please try again later.');
+		$('#message').addClass('text-danger');
+		$('#message').removeClass('hidden');
 	});
 };
 
