@@ -374,13 +374,22 @@ router.get('/pledges/view/:id', function(req, res) {
 router.post('/pledges/new', function(req, res) {
     // TODO - is admin or current user
     if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
-    var pledge = new Pledge({
+
+    var pledgeObj = {
         username: sanitize(req.body.username),
         schedule: sanitize(req.body.schedule)
-    });
-    pledge.save(function(err, doc) {
+    };
+
+    // Add a new pledge, if one does not already exist
+    Pledge.findOne(pledgeObj, function(err, existing) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (existing) return response.invalid(res);
+
+        var pledge = new Pledge(pledgeObj);
+        pledge.save(function(err, doc) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 
@@ -388,7 +397,6 @@ router.delete('/pledges/update/:id', function(req, res) {
     // TODO - is admin or current user
     Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
-        console.log(result);
         response.ok(res);
     });
 });
@@ -399,7 +407,6 @@ router.delete('/pledges/update/schedule/:schedule/username/:username', function(
         username: sanitize(req.params.username)
     }, function(err, result) {
         if (err) return error.server(res, err);
-        console.log(result);
         response.ok(res);
     });
 });
@@ -512,13 +519,11 @@ router.post('/fulfilments/ongoing/begin', function(req, res) {
         if (fulfilment) {
             var delta = (new Date() - fulfilment.start_time);
             if (delta < threshold) {
-                console.log('Resuming recent fulfilment!');
                 return res.json({
                     message: 'Resuming recent ' + config.dictionary.schedule.noun.singular,
                     time: delta
                 });
             } else {
-                console.log('Setting the old fulfilment to complete');
                 fulfilment.ongoing = false;
                 fulfilment.save();
             }
@@ -558,7 +563,6 @@ router.post('/fulfilments/ongoing/alive', function(req, res) {
         end_time: new Date()
     }, function(err, result) {
         if (err) return error.server(res, err);
-        console.log(result);
         if (!result) {
             return res.json({
                 message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
