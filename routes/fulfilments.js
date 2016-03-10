@@ -8,6 +8,7 @@ var async = require('async');
 var config = require('../config');
 
 var Fulfilment = require('../models/fulfilments');
+var Schedule = require('../models/schedules');
 
 var response = require('./response');
 var error = response.error;
@@ -23,27 +24,32 @@ router.use(function(req, res, next){
   }
 });
 
-var getStats = function(fulfilments) {
+var getStats = function(fulfilments, schedules) {
   var stats = {
     total: 0,
     weeks: 0,
     scheduled: 0
   };
 
-  fulfilments.forEach(function(f, i) {
+  // Count filfilled sessions
+  fulfilments.forEach(function(f) {
     stats.total += moment.duration(moment(f.end_time).diff(f.start_time));
 
     var weeks = moment().diff(moment(f.start_time), 'weeks');
     if (weeks > stats.weeks) {
       stats.weeks = weeks;
     }
-
-    // TODO - count scheduled
   });
 
-  console.log(stats.weeks);
-
+  // Compute average time per week
   stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
+
+  // Count scheduled sessions
+  // Only count those in the future!
+  schedules.forEach(function(s) {
+    if (moment().diff(moment(s.end_time)) < 0)
+      stats.scheduled += moment.duration(moment(s.end_time).diff(s.start_time));
+  });
 
   return stats;
 }
@@ -69,31 +75,38 @@ var getCompletedPledges = function(fulfilments, callback) {
 
 /* GET list fulfilments page */
 router.get('/', function(req, res, next) {
-  Fulfilment.find({ username: sanitize(req.user.username) }, function(err, fulfilments) {
+  Fulfilment.find({ username: req.user.username }, function(err, fulfilments) {
     if (err) return error.server(res, req, err);
 
-    // Find all the pledges that this completes
-    getCompletedPledges(fulfilments, function(pledges) {
+    Schedule.find({ owner: req.user.username }, function(err, schedules) {
+      if (err) return error.server(res, req, err);
 
-      // Did the user complete a schedule?
-      var schedule = null;
-      pledges.forEach(function(p) {
-        if (p.username == req.user.username) {
-          schedule = p.schedule;
-        }
-      });
+      // Find all the pledges that this completes
+      getCompletedPledges(fulfilments, function(pledges) {
 
-      res.render('fulfilments/list', {
-        title: 'View ' + config.dictionary.action.noun.plural,
-        name: config.name,
-        organisation: config.organisation,
-        nav: config.nav(),
-        user: req.user,
-        dictionary: config.dictionary,
-        fulfilments: fulfilments,
-        statistics: getStats(fulfilments),
-        pledges: pledges
-      });
+        // Did the user complete a schedule?
+        var schedule = null;
+        pledges.forEach(function(p) {
+          if (p.username == req.user.username) {
+            schedule = p.schedule;
+          }
+        });
+
+        // Make statistics object
+        var statistics = getStats(fulfilments, schedules);
+
+        res.render('fulfilments/list', {
+          title: 'View ' + config.dictionary.action.noun.plural,
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          user: req.user,
+          dictionary: config.dictionary,
+          fulfilments: fulfilments,
+          statistics: statistics,
+          pledges: pledges
+        });
+      })
     });
   });
 });

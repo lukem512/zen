@@ -16,10 +16,11 @@ block content
 		| . You have 
 		if statistics.scheduled > 0
 			strong #{moment.duration(statistics.scheduled).humanize()}
-			| of
+			|  of 
 		else
-			| no
-		|  #{dictionary.schedule.noun.plural} coming up.
+			| no 
+		a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
+		|  coming up.
 	if fulfilments.length > 0
 		#fulfilments
 			for fulfilment, i in fulfilments
@@ -33,9 +34,24 @@ block content
 					| for 
 					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{ (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize() }
 					| .
+					if pledges[i].length > 0
+						|  This 
+						if fulfilment.ongoing
+							| #{dictionary.fulfilment.verb.present} 
+						else
+							| #{dictionary.fulfilment.verb.past} 
+						| #{pledges[i][1].schedule} with 
+						for pledge, j in pledges[i]
+							if j > 0
+								if j < (pledges[i].length - 1)
+									| , 
+								else
+									|  and 
+							a.text-capitalize(href="/users/#{pledge.username}") #{pledge.username}
+					| .
 	else
 		p
-			em You have not logged any #{dictionary.schedule.noun.plural} yet! To do so, click the button below.
+			em You have not logged any #{dictionary.action.noun.plural} sessions yet! To do so, click the button below.
 	hr
 	form
 		.form-group
