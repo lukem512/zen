@@ -24,6 +24,16 @@ var FulfilmentSchema = new mongoose.Schema({
   timestamps: true
 });
 
+
+FulfilmentSchema.statics.during = function(start_time, end_time, callback) {
+  this.find({
+    $or: [
+      { start_time: { $gte: start_time, $lt: end_time } },
+      { start_time: { $lt: start_time }, end_time: { $gte: end_time } }
+    ]
+  }, callback);
+};
+
 FulfilmentSchema.statics.completes = function(id, callback) {
   this.findById(id, function(err, fulfilment){
     if (err) return callback(err);

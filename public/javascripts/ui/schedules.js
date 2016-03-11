@@ -4,6 +4,7 @@ var updateApiUrl = '/api/schedules/update';
 var newPledgeApiUrl = '/api/pledges/new';
 var updatePledgeApiUrl = '/api/pledges/update';
 var getPledgesApiUrl = '/api/pledges/users';
+var getFulfilmentsApiUrl = '/api/fulfilments/users';
 
 var listViewUrl = '/admin/schedules/list';
 
@@ -14,6 +15,12 @@ var validate = function() {
         // TODO
         return true;
     })
+};
+
+// Fulfilment functions
+
+var fulfilledUsers = function(id, callback) {
+	_get(getFulfilmentsApiUrl + '/' + id, callback);
 };
 
 // Pledge functions
@@ -85,8 +92,16 @@ var del = function(next, id) {
 
 $(function() {
 	var id = $('#id').val();
-	var future = !($('#future').is(':checked'));
+	var future = !($('#past').is(':checked'));
 	if (id) {
+
+		// TODO
+		if (!future) {
+			fulfilledUsers(id, function(users) {
+				console.log(users);
+			});
+		}
+
 		pledgedUsers(id, function(users){
 
 			// Did you pledge?

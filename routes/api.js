@@ -637,6 +637,86 @@ router.delete('/fulfilments/ongoing/:username', function(req, res) {
     });
 });
 
+// Return the users that have fulfilled a pledged to attend a given schedule
+router.get('/fulfilments/users/:schedule', function(req, res) {
+    // TODO - return results for current group only
+
+    var id = sanitize(req.params.schedule);
+
+    // Find the schedule
+    Schedule.findById(id, function(err, schedule) {
+        if (err) return error.server(res, err);
+        if (!schedule) return error.notfound(res);
+
+        // Find all fulfilments during this schedule
+        Fulfilment.during(schedule.start_time, schedule.end_time, function(err, fulfilments) {
+            if (err) return error.server(res, err);
+
+            console.log('fulfilments', fulfilments);
+
+            // Were any of these users pledged?
+            Pledge.find({
+                schedule: id
+            }, function(err, pledges){
+                if (err) return error.server(res, err);
+                
+                console.log('pledges', pledges);
+                
+                // Find the fulfilments that correspond to pledges
+                var fulfilled = [];
+                pledges.forEach(function(f) {
+                    fulfilments.some(function(p) {
+                        if (f.username == p.username) {
+                            console.log(p.username + ' fulfilled their pledge!');
+                            fulfilled.push(p.username);
+                            return true;
+                        }
+                    });
+                });
+                
+                // TODO - partial / fully complete
+                res.json(fulfilled);
+            });
+        });
+    });
+});
+
+/*
+ * Feed routes
+*/
+
+router.get('/feed', function(req, res) {
+    // TODO
+
+    // Get user feed for all users in group of requesting user
+
+    // Interlace them in chronological order
+});
+
+router.get('/feed/:user', function(req, res) {
+    // TODO
+
+    // Retrieve pledges, schedules and fulfilments, most-recent first
+    // TODO - restrict to one user!
+    async.parallel([
+        function(next) {
+            Pledge.find({}).sort({ createdAt: 'desc' }).exec(next);
+        },
+        function(next) {
+            Schedule.find({}).sort({ createdAt: 'desc' }).exec(next);
+        },
+        function(next) {
+            Fulfilment.find({}).sort({ createdAt: 'desc' }).exec(next);
+        }
+    ], function(results) {
+        console.log(results);
+    });
+
+    // Humanize
+
+    // Return as array
+});
+
 /*
  * Add a JSON 404 route
 */
