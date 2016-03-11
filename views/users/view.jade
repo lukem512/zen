@@ -39,8 +39,8 @@ block content
 	if _user.username == user.username
 		hr
 		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/settings'") Settings
-		&nbsp;
+		| &nbsp;
 	if user.admin
 		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/admin/users/view/#{_user.username}'") Edit
-		&nbsp;
+		| &nbsp;
 		button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')") Delete

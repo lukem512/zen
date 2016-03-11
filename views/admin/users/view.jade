@@ -8,9 +8,9 @@ block content
 	p#userId= _user._id
 	form#formViewUser(name="viewuser",role="form",method="post",action="/api/users/update")
 		.form-group
-			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{_user.username}")
+			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{_user.username}", title="Username")
 		.form-group
-			input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", value="password")
+			input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", value="#{_user.password}", title="Password")
 		.form-group
 			each group, i in groups
 				label
@@ -21,6 +21,6 @@ block content
 					= group.name
 				&nbsp; &nbsp; &nbsp;
 		.form-group
-			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
-			&nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();", title="Update this user") Update
+			| &nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();", title="Delete this user") Delete

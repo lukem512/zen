@@ -140,6 +140,7 @@ router.get('/users/new', function(req, res) {
             });
     	}
         else {
+
         	res.render('admin/users/new', {
     	    	title: 'Add New User',
     	    	groups: groups,

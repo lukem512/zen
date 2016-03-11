@@ -1,5 +1,6 @@
 var addApiUrl = '/api/users/new';
 var updateApiUrl = '/api/users/update';
+var generateApiUrl = '/api/users/generate';
 var listViewUrl = '/admin/users/list';
 
 var validate = function() {
@@ -40,4 +41,12 @@ var update = function() {
 
 var del = function() {
 	_del(updateApiUrl, listViewUrl, $('#inputUserName').val());
+};
+
+var gen = function() {
+	_get(generateApiUrl, function(generated) {
+		$('#inputUserName').val(generated.username);
+		$('#inputUserPass').val(generated.password).addClass('hidden');
+		$('#inputUserPassGen').val(generated.password).removeClass('hidden');
+	})
 };

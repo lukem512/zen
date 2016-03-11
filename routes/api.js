@@ -6,6 +6,7 @@ var sanitize = require('mongo-sanitize');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
+var moniker = require('moniker');
 
 var User = require('../models/users');
 var Group = require('../models/groups');
@@ -188,6 +189,31 @@ router.delete('/users/update/:username', function(req, res) {
     }, function(err, result){
         if (err) return error.server(res, err);
         response.ok(res);
+    });
+});
+
+// Generate user credentials
+var randomNumber = function(high, low) {
+    return Math.floor(Math.random() * (high - low + 1) + low);
+};
+
+var generateUsername = function() {
+    var noun = moniker.generator([moniker.noun]);
+    return noun.choose() + randomNumber(100, 1);
+};
+
+var generatorPassword = function() {
+    var noun = moniker.generator([moniker.noun]);
+    var adjective = moniker.generator([moniker.adjective]);
+    return adjective.choose() + randomNumber(100, 1) + noun.choose() + randomNumber(1000, 1);
+};
+
+router.get('/users/generate', function(req, res) {
+    // TODO - is user admin?
+
+    return res.json({
+        username: generateUsername(),
+        password: generatorPassword()
     });
 });
 
