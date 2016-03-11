@@ -6,7 +6,7 @@ block content
 	script(src='/javascripts/ui/schedules.js')
 
 	input#id.hidden(value="#{schedule.id}")
-	input#future.hidden(type="checkbox", checked="#{(new Date() - schedule.start_time) < 0}")
+	input#past.hidden(type="checkbox", checked="#{new Date() > new Date(schedule.end_time)}")
 
 	p
 		a#user.text-capitalize(href="/users/#{schedule.owner}")
@@ -32,11 +32,11 @@ block content
 	hr
 	#message.hidden
 	#buttons
-		if schedule.owner != user.username
+		if (schedule.owner != user.username) && ((new Date() < new Date(schedule.end_time)))
 			button#btnJoin.btn.btn-success(type="button", onclick="join(window.location, '#{schedule.id}')") Join
 			button#btnLeave.btn.btn-warning.hidden(type="button", onclick="leave(window.location, '#{schedule.id}')") Leave
 			| &nbsp;
-		if schedule.owner == user.username || user.admin
+		if ((schedule.owner == user.username) && ((new Date() < new Date(schedule.end_time)))) || user.admin
 			button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.schedule.noun.plural}/edit/#{schedule.id}'") Edit
 			| &nbsp;
 			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')") Delete
