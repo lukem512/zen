@@ -22,6 +22,10 @@ block content
 		.form-group.hidden
 			input#inputUsername.hidden(name="username", value="#{user.username}")
 		.form-group
-			button#btnSave.btn.btn-success(type="button", onclick="update('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Save
+			button#btnSave.btn.btn-success(type="button", onclick="update('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
+				i.fa.fa-save
+				| &nbsp; Save
 			&nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
+				i.fa.fa-remove
+				| &nbsp; Delete

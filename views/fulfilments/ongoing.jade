@@ -13,8 +13,17 @@ block content
 		.form-group.hidden
 			input#inputUsername.hidden(name="username", value="#{user.username}")
 		.form-group
-			button#btnStart.btn.btn-success(type="button", onclick="toggle('/#{dictionary.action.noun.plural}')") Start
+			button#btnStart.btn.btn-success(type="button", onclick="toggle('/#{dictionary.action.noun.plural}')")
+				i.fa.fa-play
+				| &nbsp; Start
+			button#btnPause.btn.btn-success.hidden(type="button", onclick="toggle('/#{dictionary.action.noun.plural}')")
+				i.fa.fa-pause
+				| &nbsp; Pause
 			| &nbsp;
-			button#btnStop.btn.btn-warning(type="button", onclick="stop('/#{dictionary.action.noun.plural}')", disabled) Finish
+			button#btnStop.btn.btn-warning(type="button", onclick="stop('/#{dictionary.action.noun.plural}')", disabled)
+				i.fa.fa-check
+				| &nbsp; Finish
 			| &nbsp;
-			button#btnCancel.btn.btn-danger(type="button", onclick="cancel('/#{dictionary.action.noun.plural}')") Cancel
+			button#btnCancel.btn.btn-danger(type="button", onclick="cancel('/#{dictionary.action.noun.plural}')")
+				i.fa.fa-times
+				| &nbsp; Cancel

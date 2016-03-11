@@ -14,6 +14,10 @@ block content
 		.form-group
 			input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{fulfilment.end_time}")
 		.form-group
-			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();")
+				i.fa.fa-save
+				| &nbsp; Save
 			&nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();")
+				i.fa.fa-remove
+				| &nbsp; Delete

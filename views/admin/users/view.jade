@@ -20,7 +20,12 @@ block content
 						input.form-control(type="checkbox", name="usergroups", value="#{group.name}")
 					= group.name
 				&nbsp; &nbsp; &nbsp;
+		hr
 		.form-group
-			button#btnUpdate.btn.btn-success(type="button", onclick="update();", title="Update this user") Update
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();", title="Update this user")
+				i.fa.fa-save
+				| &nbsp; Save
 			| &nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();", title="Delete this user") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();", title="Delete this user")
+				i.fa.fa-remove
+				| &nbsp; Delete

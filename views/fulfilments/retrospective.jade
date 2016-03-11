@@ -22,6 +22,10 @@ block content
 		.form-group.hidden
 			input#inputUsername.hidden(name="username", value="#{user.username}")
 		.form-group
-			button#btnSubmit.btn.btn-success(type="button", onclick="add('/#{dictionary.action.noun.plural}')") Create
+			button#btnSubmit.btn.btn-success(type="button", onclick="add('/#{dictionary.action.noun.plural}')")
+				i.fa.fa-plus
+				| &nbsp; Create
 			| &nbsp;
-			button#btnCancel.btn.btn-danger(type="button", onclick="window.history.back()") Cancel
+			button#btnCancel.btn.btn-danger(type="button", onclick="window.history.back()")
+				i.fa.fa-remove
+				| &nbsp; Cancel

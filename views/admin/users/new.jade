@@ -15,6 +15,7 @@ block content
                 label= group.name
                     input.form-control(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
                 | &nbsp; &nbsp; &nbsp;
+        hr
         .form-group
             button#btnSubmit.btn.btn-success(type="button", onclick="add()", title="Create a new user")
                 i.fa.fa-plus

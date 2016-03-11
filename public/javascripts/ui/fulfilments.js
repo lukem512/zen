@@ -107,17 +107,20 @@ var toggle = function(next) {
 	switch (state) {
 		case 'running':
 			$('#timer').timer('pause');
-			$('#btnStart').text('Start');
+			$('#btnStart').removeClass('hidden');
+			$('#btnPause').addClass('hidden');
 			break;
 
 		case 'paused':
 			$('#timer').timer('resume');
-			$('#btnStart').text('Pause');
+			$('#btnStart').addClass('hidden');
+			$('#btnPause').removeClass('hidden');
 			break;
 
 		case 'stopped':
 			$('#timer').timer('restart');
-			$('#btnStart').text('Pause');
+			$('#btnStart').addClass('hidden');
+			$('#btnPause').removeClass('hidden');
 			break;
 
 		default:
@@ -152,7 +155,8 @@ var toggle = function(next) {
 					    },
 					    repeat: true
 					});
-					$('#btnStart').text('Pause');
+					$('#btnStart').addClass('hidden');
+					$('#btnPause').removeClass('hidden');
 					$('#btnStop').attr('disabled', false);
 
 					// Set up message when user navigates away

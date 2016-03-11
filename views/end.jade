@@ -7,4 +7,6 @@ block content
 	hr
 	form#formAuthenticate(name="authenticate",role="form",method="post",action="/api/authenticate")
 		.form-group
-			button#btnAuthenticate.btn.btn-danger(type="button", onclick="end()") Sign out
+			button#btnAuthenticate.btn.btn-danger(type="button", onclick="end()")
+				i.fa.fa-sign-out
+				| &nbsp; Sign out

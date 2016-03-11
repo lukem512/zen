@@ -14,4 +14,6 @@ block content
 			a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}") #{pledge.schedule}
 			| .
 		.form-group
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();")
+				i.fa.fa-remove
+				| &nbsp; Delete

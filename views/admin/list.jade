@@ -2,8 +2,11 @@ extends ../layout
 
 block content
     h1= title
-    a(href="#{keys.route}/new") New
     ul
         each obj, i in objects
             li
                 a(href="#{keys.route}/view/#{obj[keys.link.id]}")= obj[keys.link.text]
+    hr
+    button#btnNew.btn.btn-success(type="button", onclick="window.location='#{keys.route}/new'")
+        i.fa.fa-plus
+        | &nbsp; Create

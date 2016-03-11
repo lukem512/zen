@@ -57,6 +57,10 @@ block content
 	hr
 	form
 		.form-group
-			button#btnNow.btn.btn-success.text-capitalize(type="button", title="Start your #{dictionary.action.noun.singular} now!", onclick="window.location='/#{dictionary.action.noun.plural}/now'") #{dictionary.action.verb.present} now
+			button#btnNow.btn.btn-success.text-capitalize(type="button", title="Start your #{dictionary.action.noun.singular} now!", onclick="window.location='/#{dictionary.action.noun.plural}/now'")
+				i.fa.fa-hourglass-half
+				| &nbsp; #{dictionary.action.verb.present} now
 			| &nbsp;
-			button#btnLog.btn.btn-primary.text-capitalize(type="button", title="Log a previously completed #{dictionary.action.noun.singular}", onclick="window.location='/#{dictionary.action.noun.plural}/log'") Log #{dictionary.action.noun.singular}
+			button#btnLog.btn.btn-primary.text-capitalize(type="button", title="Log a previously completed #{dictionary.action.noun.singular}", onclick="window.location='/#{dictionary.action.noun.plural}/log'")
+				i.fa.fa-file-o
+				| &nbsp; Log #{dictionary.action.noun.singular}

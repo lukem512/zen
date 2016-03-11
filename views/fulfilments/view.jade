@@ -18,8 +18,14 @@ block content
 	if fulfilment.username == user.username || user.admin
 		hr
 		if fulfilment.ongoing
-			button#btnResume.btn.btn-success(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/now?start=true'") Resume
+			button#btnResume.btn.btn-success(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/now?start=true'")
+				i.fa.fa-play
+				| &nbsp; Resume
 			| &nbsp;
-		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/edit/#{fulfilment.id}'") Edit
+		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/edit/#{fulfilment.id}'")
+			i.fa.fa-pencil
+			| &nbsp; Edit
 		| &nbsp;
-		button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')") Delete
+		button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
+			i.fa.fa-remove
+			| &nbsp; Delete

@@ -13,6 +13,10 @@ block content
 			textarea#inputGroupDescription.form-control(placeholder="No description was given.", name="description")
 				| #{group.description}
 		.form-group
-			button#btnUpdate.btn.btn-success(type="button", onclick="update();") Update
+			button#btnUpdate.btn.btn-success(type="button", onclick="update();")
+				i.fa.fa-save
+				| &nbsp; Save
 			&nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del();") Delete
+			button#btnDelete.btn.btn-danger(type="button", onclick="del();")
+				i.fa.fa-remove
+				| &nbsp; Delete
