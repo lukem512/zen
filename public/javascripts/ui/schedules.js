@@ -90,66 +90,101 @@ var del = function(next, id) {
 	_del(updateApiUrl, next, id);
 };
 
-$(function() {
-	var id = $('#id').val();
-	var future = !($('#past').is(':checked'));
-	if (id) {
+var listUsers = function(users) {
+	// Did you pledge?
+	var you = false;
 
-		// TODO
-		if (!future) {
-			fulfilledUsers(id, function(users) {
-				console.log(users);
-			});
+	var html = "";
+	for (var i = 0; i < users.length; i++) {
+		if (i == users.length - 1 && users.length > 1) {
+			html += " and ";
+		}
+		else if (i < users.length - 1 && i > 0) {
+			html += ", ";
+		}
+		else {
+			html += " ";
 		}
 
-		pledgedUsers(id, function(users){
+		var username = users[i];
+		if (users[i] == user) {
+			you = true;
+			username = "you"
+		}
 
-			// Did you pledge?
-			var you = false;
+		html += "<a href=\"/users/" + users[i] + "\">";
+		if (i == 0) {
+			html += "<span class=\'text-capitalize\'>" + username + "</span>";
+		}
+		else {
+			html += username;
+		}
+		html += "</a>";
+	}
+	return { html: html, you: you };
+}
 
-			// Build pledge string
-			var html = (users.length) ? "" : "Nobody";
-			for (var i = 0; i < users.length; i++) {
-				if (i == users.length - 1 && users.length > 1) {
-					html += " and ";
-				}
-				else if (i < users.length - 1 && i > 0) {
-					html += ", ";
-				}
-				else {
-					html += " ";
-				}
+var displayPledgesFuture = function(users) {
 
-				var username = users[i];
-				if (users[i] == user) {
-					you = true;
-					username = "you"
-				}
+	var list = listUsers(users);
 
-				html += "<a href=\"/users/" + users[i] + "\">";
-				if (i == 0) {
-					html += "<span class=\'text-capitalize\'>" + username + "</span>";
-				}
-				else {
-					html += username;
-				}
-				html += "</a>";
-			}
+	var html =
+		((users.length) ? "" : "Nobody") +
+		list.html +
+		((users.length > 1 || list.you) ? " have " : " has ") +
+		dictionary.pledge.verb.past +
+		" to attend.";
+
+	$('#pledges').html(html);
+
+	// Change button state
+	if (list.you) {
+		$('#btnJoin').addClass('hidden');
+		$('#btnLeave').removeClass('hidden');
+	}
+};
+
+var displayPledgesPast = function(absent, present) {
+	var html = "";
+
+	if (present.length > 0) {
+		var list = listUsers(present);
+		html =
+			html +
+			list.html +
+			" " + 
+			dictionary.fulfilment.verb.past +
+			((present.length > 1 || list.you) ? " your " : " their ") +
+			dictionary.pledge.verb.past +
+			" to attend.";
+	}
+
+	if (absent.length > 0) {
+		var list = listUsers(absent);
+		html =
+			html +
+			((html.length > 0) ? " " : "") +
+			list.html +
+			" did not attend this " + 
+			dictionary.schedule.noun.singular +
+			".";
+	}
+
+	$('#pledges').html(html);
+};
+
+$(function() {
+	var id = __id;
+	var future = !(__past);
+	if (id) {
+		pledgedUsers(id, function(pledged) {
 			if (future) {
-				if (users.length > 1 || you) {
-					html += " have";
-				}
-				else {
-					html += " has"; 
-				}
-			}
-			html += " pledged to attend.";
-			$('#pledges').html(html);
-
-			// Change button state
-			if (you) {
-				$('#btnJoin').addClass('hidden');
-				$('#btnLeave').removeClass('hidden');
+				displayPledgesFuture(pledged);
+			} else {
+				fulfilledUsers(id, function(fulfilled) {
+					var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
+					displayPledgesPast(absent, fulfilled);
+				});
 			}
 		});
 	}

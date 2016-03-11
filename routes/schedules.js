@@ -90,7 +90,8 @@ router.get('/view/:id', function(req, res, next) {
       nav: config.nav(),
       user: req.user,
       dictionary: config.dictionary,
-      schedule: schedule
+      schedule: schedule,
+      past: (moment().diff(moment(schedule.start_time)) > 0)
     });
   });
 });

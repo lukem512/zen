@@ -41,6 +41,8 @@ html
             var user = '#{user.username}';
 
     script.
+        var dictionary = JSON.parse('!{JSON.stringify(dictionary)}');
+
         $(document).ready(function(){
             $.cookieBar({
                 acceptText: 'OK',

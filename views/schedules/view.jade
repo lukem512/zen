@@ -2,11 +2,13 @@ extends ../layout
 
 block content
 	h1= schedule.title
+
+	script.
+		var __id = '#{schedule.id}';
+		var __past = #{past};
+
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
-
-	input#id.hidden(value="#{schedule.id}")
-	input#past.hidden(type="checkbox", checked="#{new Date() > new Date(schedule.end_time)}")
 
 	p
 		a#user.text-capitalize(href="/users/#{schedule.owner}")

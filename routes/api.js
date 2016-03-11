@@ -652,22 +652,17 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
         Fulfilment.during(schedule.start_time, schedule.end_time, function(err, fulfilments) {
             if (err) return error.server(res, err);
 
-            console.log('fulfilments', fulfilments);
-
             // Were any of these users pledged?
             Pledge.find({
                 schedule: id
             }, function(err, pledges){
                 if (err) return error.server(res, err);
-                
-                console.log('pledges', pledges);
-                
+                                
                 // Find the fulfilments that correspond to pledges
                 var fulfilled = [];
                 pledges.forEach(function(f) {
                     fulfilments.some(function(p) {
                         if (f.username == p.username) {
-                            console.log(p.username + ' fulfilled their pledge!');
                             fulfilled.push(p.username);
                             return true;
                         }
