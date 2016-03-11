@@ -91,7 +91,7 @@ router.get('/view/:id', function(req, res, next) {
       user: req.user,
       dictionary: config.dictionary,
       schedule: schedule,
-      past: (moment().diff(moment(schedule.start_time)) > 0)
+      past: (moment().diff(moment(schedule.end_time)) > 0)
     });
   });
 });
