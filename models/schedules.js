@@ -28,12 +28,30 @@ var ScheduleSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// TODO - clarify and check
 ScheduleSchema.statics.during = function(start_time, end_time, callback) {
   this.find({
     $or: [
       { start_time: { $gte: start_time, $lt: end_time } },
       { start_time: { $lt: start_time }, end_time: { $gte: end_time } }
     ]
+  }, callback);
+};
+
+// Find schedules which occur between two tightly defined times.
+// Start and end times are inclusive.
+ScheduleSchema.statics.bounded = function(start_time, end_time, callback) {
+  this.find({
+    start_time: { $gte: start_time, $lt: end_time },
+    end_time: { $lte: end_time, $gt: start_time}
+  }, callback);
+};
+
+// Find schedules which occur between two loosely defined times.
+ScheduleSchema.statics.overlaps = function(start_time, end_time, callback) {
+  this.find({
+    start_time: { $lt: end_time },
+    end_time: { $gt: start_time },
   }, callback);
 };
 
@@ -67,5 +85,24 @@ ScheduleSchema.statics.groups = function(groups, callback) {
     callback(err, results)
   });
 };
+
+ScheduleSchema.statics.owner = function(username, callback) {
+  var schedules = this;
+  schedules.find({
+    owner: username
+  }, callback);
+};
+
+ScheduleSchema.statics.owners = function(usernames, callback) {
+  var schedules = this;
+  schedules.find({
+    owner: { $in: usernames }
+  }, callback);
+};
+
+ScheduleSchema.methods.ownedBy = function(usernames, callback) {
+  if (typeof(usernames) === 'string') usernames = [usernames];
+  return (usernames.indexOf(this.owner) > -1);
+}
 
 module.exports = mongoose.model('Schedule', ScheduleSchema);

@@ -7,6 +7,8 @@ var endApiUrl = '/api/fulfilments/ongoing/end';
 var getApiUrl = '/api/fulfilments/ongoing';
 var deleteApiUrl = '/api/fulfilments/ongoing';
 
+var scheduleApiUrl = '/api/pledges/username';
+
 // Form validator
 
 var validate = function() {
@@ -35,6 +37,38 @@ var validate = function() {
         return true;
     })
 };
+
+// Schedule functionality
+
+var getSchedule = function() {
+	var url = scheduleApiUrl + '/' + user + '/now';
+	_get(url, function(response){
+		if (response.schedule) {
+			// TODO - is the schedule now or soon?
+
+			console.log(response.schedule)
+
+			var html = 
+				'You are ' + 
+				dictionary.pledge.verb.past +
+				' to ' +
+				'<a href=\"/'+dictionary.schedule.noun.plural+'/view/'+response.schedule._id+'\" target=\"_blank\" title=\"View ' + dictionary.schedule.noun.singular + ' in a new tab\">' +
+				response.schedule.title +
+			    '</a>.';
+
+			 html = html +
+			 	' The ' +
+			 	dictionary.schedule.noun.singular + 
+			 	((moment().diff(response.schedule.start_time) > 0) ? ' began ' : ' begins ') +
+			 	moment().to(response.schedule.start_time) +
+			 	'.';
+			 	
+			$('#schedule').html(html);
+		}
+	});
+};
+
+// Events
 
 var add = function(next) {
 	var next = next || '/';
@@ -195,4 +229,7 @@ $(function() {
 			}
 		}
 	});
+
+	// A schedule soon?
+	getSchedule();
 });

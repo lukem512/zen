@@ -174,14 +174,14 @@ var displayPledgesPast = function(absent, present) {
 };
 
 $(function() {
-	var id = __id;
-	var future = !(__past);
-	if (id) {
+	var __id = __id || false;
+	if (__id) {
+		var future = !(__past);
 		pledgedUsers(id, function(pledged) {
 			if (future) {
 				displayPledgesFuture(pledged);
 			} else {
-				fulfilledUsers(id, function(fulfilled) {
+				fulfilledUsers(__id, function(fulfilled) {
 					var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
 					displayPledgesPast(absent, fulfilled);
 				});

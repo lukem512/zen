@@ -447,6 +447,42 @@ router.get('/pledges/users/:schedule', function(req, res) {
     });
 });
 
+// Return an active schedule that the user has pledged to.
+// The schedule can be active now or starting soon.
+router.get('/pledges/username/:username/now', function(req, res) {
+    var username = sanitize(req.params.username);
+    Pledge.find({
+        username: username
+    }, function(err, pledges) {
+        if (err) return error.server(res, err);
+
+        // Use now as the start date,
+        // and 15 minutes in the future as the end date.
+        var now = new Date();
+        var soon = new Date(now.getTime() + 15*60000);
+
+        Schedule.overlaps(now, soon, function(err, schedules) {
+            if (err) return error.server(res, err);
+
+            var result = {
+                message: 'No ' + config.dictionary.schedule.noun.singular
+            };
+
+            schedules.some(function(s) {
+                if (s.ownedBy(username)) {
+                    result = {
+                        message: 'OK',
+                        schedule: s
+                    };
+                    return true;
+                }
+            });
+
+            return res.json(result);
+        })
+    });
+});
+
 /*
  * Fulfilments
  * Users can create schedules, visible to their group.
@@ -663,7 +699,7 @@ router.delete('/fulfilments/ongoing/:username', function(req, res) {
     });
 });
 
-// Return the users that have fulfilled a pledged to attend a given schedule
+// Return the users that have fulfilled a pledge to attend a given schedule
 router.get('/fulfilments/users/:schedule', function(req, res) {
     // TODO - return results for current group only
 
