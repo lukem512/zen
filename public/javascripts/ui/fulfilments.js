@@ -138,9 +138,10 @@ var stop = function(next) {
     });
 };
 
+var hadError = false;
+
 var toggle = function(next) {
 	var state = $('#timer').data('state');
-	var hadError = false;
 	var timeInterval = 10;
 
 	switch (state) {
