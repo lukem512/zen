@@ -71,7 +71,7 @@ var getCompletedPledges = function(fulfilments, callback) {
   async.series(tasks, function() {
     callback(pls);
   })
-}
+};
 
 /* GET list fulfilments page */
 router.get('/', function(req, res, next) {
@@ -128,14 +128,27 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
 
-    res.render('fulfilments/view', {
-      title: 'View ' + config.dictionary.action.noun.singular,
-      name: config.name,
-      organisation: config.organisation,
-      nav: config.nav(),
-      user: req.user,
-      dictionary: config.dictionary,
-      fulfilment: fulfilment
+    Fulfilment.completes(fulfilment._id, function(err, pledges) {
+      if (err) return error.server(req, res, err);
+      
+      var pledge = null;
+      pledges.some(function(p) {
+        if (p.username == req.user.username) {
+          pledge = p;
+          return true;
+        }
+      });
+
+      res.render('fulfilments/view', {
+        title: 'View ' + config.dictionary.action.noun.singular,
+        name: config.name,
+        organisation: config.organisation,
+        nav: config.nav(),
+        user: req.user,
+        dictionary: config.dictionary,
+        fulfilment: fulfilment,
+        pledge: pledge
+      });
     });
   });
 });

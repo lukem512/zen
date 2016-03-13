@@ -15,6 +15,11 @@ block content
 				| #{moment(fulfilment.end_time).format('dddd')} at 
 			| #{moment(fulfilment.end_time).format('h:mm A')}
 		| .
+	if pledge
+		p#pledge
+			| This #{dictionary.fulfilment.verb.past} the #{dictionary.schedule.noun.singular} 
+			a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}", title="View this #{dictionary.schedule.noun.singular}") #{pledge.schedule}
+			| .
 	if fulfilment.username == user.username || user.admin
 		hr
 		if fulfilment.ongoing
