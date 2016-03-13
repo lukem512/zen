@@ -138,10 +138,9 @@ var stop = function(next) {
     });
 };
 
-var hadError = false;
-
 var toggle = function(next) {
 	var state = $('#timer').data('state');
+	var hadError = false;
 	var timeInterval = 10;
 
 	switch (state) {
@@ -187,13 +186,12 @@ var toggle = function(next) {
 					        	if (!res.time) {
 					        		window.onbeforeunload = null;
 					        		window.location = next;
-					        		console.log(hadError);
-					        		if (hadError) {
-						        		$('#message').text('Your progress has been saved!');
-						        		$('#message').removeClass('text-danger');
-						        		$('#message').addClass('text-success');
-					        		}
 					        	}
+					        	if (hadError) {
+					        		$('#message').text('Your progress has been saved!');
+					        		$('#message').removeClass('text-danger');
+					        		$('#message').addClass('text-success');
+				        		}
 					        }, function(err) {
 					        	console.error(err);
 					        	hadError = true;
