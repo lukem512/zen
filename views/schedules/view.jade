@@ -4,8 +4,8 @@ block content
 	h1= schedule.title
 
 	script.
-		var __id = '#{schedule.id}';
-		var __past = #{past};
+		window.__id = '#{schedule.id}';
+		window.__past = #{past};
 
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')

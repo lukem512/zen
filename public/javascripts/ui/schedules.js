@@ -174,10 +174,10 @@ var displayPledgesPast = function(absent, present) {
 };
 
 $(function() {
-	var __id = __id || false;
+	var __id = window.__id || false;
 	if (__id) {
-		var future = !(__past);
-		pledgedUsers(id, function(pledged) {
+		var future = !(window.__past);
+		pledgedUsers(__id, function(pledged) {
 			if (future) {
 				displayPledgesFuture(pledged);
 			} else {
@@ -187,6 +187,8 @@ $(function() {
 				});
 			}
 		});
+	} else {
+		console.error('__id was not defined');
 	}
 });
 
