@@ -44,10 +44,6 @@ var getSchedule = function() {
 	var url = scheduleApiUrl + '/' + user + '/now';
 	_get(url, function(response){
 		if (response.schedule) {
-			// TODO - is the schedule now or soon?
-
-			console.log(response.schedule)
-
 			var html = 
 				'You are ' + 
 				dictionary.pledge.verb.past +
@@ -121,8 +117,15 @@ var stop = function(next) {
 	// Remove message when user navigates away
 	window.onbeforeunload = null;
 
+	// Pause the timer
 	$('#timer').timer('pause');
+
+	// Disable buttons
+	$('#btnStart').attr('disabled', true);
+	$('#btnPause').attr('disabled', true);
 	$('#btnStop').attr('disabled', true);
+
+	// Send the final results!
 	_post(endApiUrl, {
     	username: user
     }, function(res) {
@@ -137,6 +140,8 @@ var stop = function(next) {
 
 var toggle = function(next) {
 	var state = $('#timer').data('state');
+	var hadError = false;
+	var timeInterval = 10;
 
 	switch (state) {
 		case 'running':
@@ -161,8 +166,8 @@ var toggle = function(next) {
 			_post(beginApiUrl, {
 	        	username: user
 	        }, function(res) {
-	        	console.log('Begin', res);
 	        	if (res.error) {
+	        		console.error(res.error);
 	        		$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
 	        		$('#message').addClass('text-danger');
 	        	}
@@ -173,7 +178,7 @@ var toggle = function(next) {
 		        	$('#timer').timer({
 		        		seconds: (res.time / 1000) || 0,
 						format: '%H:%M:%S',
-						duration: '10s',
+						duration: timeInterval+'s',
 					    callback: function() {
 					        _post(aliveApiUrl, {
 					        	username: user
@@ -181,10 +186,19 @@ var toggle = function(next) {
 					        	if (!res.time) {
 					        		window.onbeforeunload = null;
 					        		window.location = next;
+					        		console.log(hadError);
+					        		if (hadError) {
+						        		$('#message').text('Your progress has been saved!');
+						        		$('#message').removeClass('text-danger');
+						        		$('#message').addClass('text-success');
+					        		}
 					        	}
-					        	else {
-					        		console.log('Alive', res);
-					        	}
+					        }, function(err) {
+					        	console.error(err);
+					        	hadError = true;
+					        	$('#message').text('We are unable to save your progress - is your Internet connection having trouble? Retrying in ' + timeInterval + ' seconds.');
+					        	$('#message').removeClass('text-success');
+					        	$('#message').addClass('text-danger');
 					        });
 					    },
 					    repeat: true
