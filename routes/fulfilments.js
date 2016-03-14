@@ -122,22 +122,35 @@ router.get('/', function(req, res, next) {
   });
 });
 
+// Retrieves any schedule objects completed by a fulfilment
+// for a given user
+var getSchedules = function(fulfilment, username, callback) {
+  Fulfilment.completes(fulfilment._id, function(err, pledges) {
+    if (err) return error.server(req, res, err);
+    
+    var userSchedules = [];
+    pledges.forEach(function(p) {
+      if (p.username == username) {
+        userPledges.push(p.schedule);
+      }
+    });
+
+    Schedule.find({
+      _id: {
+        $in: userSchedules
+      }
+    }, callback);
+  });
+};
+
 /* GET view fulfilment page */
 router.get('/view/:id', function(req, res, next) {
   Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
 
-    Fulfilment.completes(fulfilment._id, function(err, pledges) {
+    getSchedules(fulfilment, req.user.username, function(err, schedules) {
       if (err) return error.server(req, res, err);
-      
-      var pledge = null;
-      pledges.some(function(p) {
-        if (p.username == req.user.username) {
-          pledge = p;
-          return true;
-        }
-      });
 
       res.render('fulfilments/view', {
         title: 'View ' + config.dictionary.action.noun.singular,
@@ -147,7 +160,7 @@ router.get('/view/:id', function(req, res, next) {
         user: req.user,
         dictionary: config.dictionary,
         fulfilment: fulfilment,
-        pledge: pledge
+        schedules: schedules
       });
     });
   });

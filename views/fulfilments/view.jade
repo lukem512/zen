@@ -15,11 +15,22 @@ block content
 				| #{moment(fulfilment.end_time).format('dddd')} at 
 			| #{moment(fulfilment.end_time).format('h:mm A')}
 		| .
-	if pledge
-		p#pledge
-			| This #{dictionary.fulfilment.verb.past} the #{dictionary.schedule.noun.singular} 
-			a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}", title="View this #{dictionary.schedule.noun.singular}") #{pledge.schedule}
+	if schedules.length > 0
+		p#schedules
+			| This #{dictionary.fulfilment.verb.past} the 
+			if schedules.length > 1
+				| #{dictionary.schedule.noun.plural} 
+			else
+				| #{dictionary.schedule.noun.singular} 
+			for schedule, i in schedules
+				if i > 0
+					if i < schedule.length - 1
+						| , 
+					else 
+						| and 
+				a(href="/#{dictionary.schedule.noun.plural}/view/#{schedule._id}", title="View this #{dictionary.schedule.noun.singular}") #{schedule.title}
 			| .
+
 	if fulfilment.username == user.username || user.admin
 		hr
 		if fulfilment.ongoing
