@@ -11,6 +11,9 @@ var scheduleApiUrl = '/api/pledges/username';
 var getFulfilmentsApiUrl = '/api/fulfilments/users';
 var getPledgesApiUrl = '/api/pledges/users';
 
+var aliveTimeInterval = 10;
+var refreshTimeInterval = 10;
+
 // Form validator
 
 var validate = function() {
@@ -190,7 +193,6 @@ var stop = function(next) {
 var toggle = function(next) {
 	var state = $('#timer').data('state');
 	var hadError = false;
-	var timeInterval = 10;
 
 	switch (state) {
 		case 'running':
@@ -293,5 +295,5 @@ $(function() {
 	});
 
 	// A schedule soon?
-	getSchedule();
+	setInterval(getSchedule, refreshTimeInterval * 1000);
 });
