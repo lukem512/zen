@@ -267,10 +267,20 @@ router.post('/groups/update', function(req, res) {
 });
 
 router.delete('/groups/update/:name', function(req, res) {
+    var name = sanitize(req.params.name);
+
+    // Remove the group!
     Group.findOneAndRemove({
-        name: sanitize(req.params.name)
+        name: name
     }, function(err, result) {
         if (err) return error.server(res, err);
+
+        // Remove the group from all member documents
+        User.update({ groups: name }, { $pullAll: { groups: [name] } }, function(err, users) {
+            if (err) return console.error(err);
+        });
+
+        // Send back response
         response.ok(res);
     });
 });
