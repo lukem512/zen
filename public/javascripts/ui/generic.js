@@ -98,3 +98,38 @@ $.urlParam = function(name){
 	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
 	return (results) ? results[1] || 0 : null;
 }
+
+var listUsers = function(users) {
+	// Is the current user present?
+	var you = false;
+
+	// Make a HTML list
+	var html = "";
+	for (var i = 0; i < users.length; i++) {
+		if (i == users.length - 1 && users.length > 1) {
+			html += " and ";
+		}
+		else if (i < users.length - 1 && i > 0) {
+			html += ", ";
+		}
+		else {
+			html += " ";
+		}
+
+		var username = users[i];
+		if (users[i] == user) {
+			you = true;
+			username = "you"
+		}
+
+		html += "<a href=\"/users/" + users[i] + "\">";
+		if (i == 0) {
+			html += "<span class=\'text-capitalize\'>" + username + "</span>";
+		}
+		else {
+			html += username;
+		}
+		html += "</a>";
+	}
+	return { html: html, you: you };
+};

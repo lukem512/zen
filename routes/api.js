@@ -711,7 +711,7 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
         if (!schedule) return error.notfound(res);
 
         // Find all fulfilments during this schedule
-        Fulfilment.during(schedule.start_time, schedule.end_time, function(err, fulfilments) {
+        Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
             if (err) return error.server(res, err);
 
             // Were any of these users pledged?

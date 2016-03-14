@@ -90,40 +90,6 @@ var del = function(next, id) {
 	_del(updateApiUrl, next, id);
 };
 
-var listUsers = function(users) {
-	// Did you pledge?
-	var you = false;
-
-	var html = "";
-	for (var i = 0; i < users.length; i++) {
-		if (i == users.length - 1 && users.length > 1) {
-			html += " and ";
-		}
-		else if (i < users.length - 1 && i > 0) {
-			html += ", ";
-		}
-		else {
-			html += " ";
-		}
-
-		var username = users[i];
-		if (users[i] == user) {
-			you = true;
-			username = "you"
-		}
-
-		html += "<a href=\"/users/" + users[i] + "\">";
-		if (i == 0) {
-			html += "<span class=\'text-capitalize\'>" + username + "</span>";
-		}
-		else {
-			html += username;
-		}
-		html += "</a>";
-	}
-	return { html: html, you: you };
-}
-
 var displayPledgesFuture = function(users) {
 
 	var list = listUsers(users);
@@ -187,9 +153,7 @@ $(function() {
 				});
 			}
 		});
-	} else {
-		console.error('__id was not defined');
-	}
+	};
 });
 
 $(function() {

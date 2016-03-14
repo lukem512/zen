@@ -25,12 +25,10 @@ var FulfilmentSchema = new mongoose.Schema({
 });
 
 
-FulfilmentSchema.statics.during = function(start_time, end_time, callback) {
+FulfilmentSchema.statics.overlaps = function(start_time, end_time, callback) {
   this.find({
-    $or: [
-      { start_time: { $gte: start_time, $lt: end_time } },
-      { start_time: { $lt: start_time }, end_time: { $gte: end_time } }
-    ]
+    start_time: { $lt: end_time },
+    end_time: { $gt: start_time },
   }, callback);
 };
 
@@ -68,7 +66,7 @@ FulfilmentSchema.statics.completes = function(id, callback) {
             _id: p._id,
             username: p.username,
             schedule: p.schedule,
-            scheduleTitle: meta[p.schedule].title, /// TODO - sometimes this is not defined!
+            scheduleTitle: meta[p.schedule].title,
             completion: meta[p.schedule].completion
           };
         });

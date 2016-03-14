@@ -73,6 +73,27 @@ var getCompletedPledges = function(fulfilments, callback) {
   })
 };
 
+// Retrieves any schedule objects completed by a fulfilment
+// for a given user
+var getSchedules = function(fulfilment, username, callback) {
+  Fulfilment.completes(fulfilment._id, function(err, pledges) {
+    if (err) return error.server(req, res, err);
+    
+    var userSchedules = [];
+    pledges.forEach(function(p) {
+      if (p.username == username) {
+        userSchedules.push(p.schedule);
+      }
+    });
+
+    Schedule.find({
+      _id: {
+        $in: userSchedules
+      }
+    }, callback);
+  });
+};
+
 /* GET list fulfilments page */
 router.get('/', function(req, res, next) {
   Fulfilment.find({ username: req.user.username }, function(err, fulfilments) {
@@ -121,27 +142,6 @@ router.get('/', function(req, res, next) {
     });
   });
 });
-
-// Retrieves any schedule objects completed by a fulfilment
-// for a given user
-var getSchedules = function(fulfilment, username, callback) {
-  Fulfilment.completes(fulfilment._id, function(err, pledges) {
-    if (err) return error.server(req, res, err);
-    
-    var userSchedules = [];
-    pledges.forEach(function(p) {
-      if (p.username == username) {
-        userPledges.push(p.schedule);
-      }
-    });
-
-    Schedule.find({
-      _id: {
-        $in: userSchedules
-      }
-    }, callback);
-  });
-};
 
 /* GET view fulfilment page */
 router.get('/view/:id', function(req, res, next) {

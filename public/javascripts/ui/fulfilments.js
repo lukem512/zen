@@ -8,6 +8,8 @@ var getApiUrl = '/api/fulfilments/ongoing';
 var deleteApiUrl = '/api/fulfilments/ongoing';
 
 var scheduleApiUrl = '/api/pledges/username';
+var getFulfilmentsApiUrl = '/api/fulfilments/users';
+var getPledgesApiUrl = '/api/pledges/users';
 
 // Form validator
 
@@ -40,27 +42,74 @@ var validate = function() {
 
 // Schedule functionality
 
+var displaySchedule = function(schedule) {
+	var html = 
+		'You are ' + 
+		dictionary.pledge.verb.past +
+		' to ' +
+		'<a href=\"/'+dictionary.schedule.noun.plural+'/view/'+schedule._id+'\" target=\"_blank\" title=\"View ' + dictionary.schedule.noun.singular + ' in a new tab\">' +
+		schedule.title +
+	    '</a>.';
+
+	 html = html +
+	 	' The ' +
+	 	dictionary.schedule.noun.singular + 
+	 	((moment().diff(schedule.start_time) > 0) ? ' began ' : ' begins ') +
+	 	moment().to(schedule.start_time) +
+	 	'.';
+	 	
+	$('#schedule').html(html);
+};
+
 var getSchedule = function() {
 	var url = scheduleApiUrl + '/' + user + '/now';
 	_get(url, function(response){
 		if (response.schedule) {
-			var html = 
-				'You are ' + 
-				dictionary.pledge.verb.past +
-				' to ' +
-				'<a href=\"/'+dictionary.schedule.noun.plural+'/view/'+response.schedule._id+'\" target=\"_blank\" title=\"View ' + dictionary.schedule.noun.singular + ' in a new tab\">' +
-				response.schedule.title +
-			    '</a>.';
-
-			 html = html +
-			 	' The ' +
-			 	dictionary.schedule.noun.singular + 
-			 	((moment().diff(response.schedule.start_time) > 0) ? ' began ' : ' begins ') +
-			 	moment().to(response.schedule.start_time) +
-			 	'.';
-			 	
-			$('#schedule').html(html);
+			displaySchedule(response.schedule);
+			getOnlineUsers(response.schedule._id);
 		}
+	});
+};
+
+// User functionality
+
+var displayUsers = function(absent, present) {
+	var html = "";
+
+	if (present.length > 0) {
+		var list = listUsers(present);
+		html =
+			html +
+			list.html +
+			((absent.length > 1) ? " are " : " is ") + 
+			"online!";
+	}
+
+	if (absent.length > 0) {
+		var list = listUsers(absent);
+		html =
+			html +
+			((html.length > 0) ? " " : "") +
+			list.html +
+			((absent.length > 1) ? " are " : " is ") + 
+			"not online.";
+	}
+
+	$('#users').html(html);
+};
+
+var getPledgedUsers = function(id, callback) {
+	var url = getPledgesApiUrl + '/' + id;
+	_get(url, callback);
+};
+
+var getOnlineUsers = function(id) {
+	var url = getFulfilmentsApiUrl + '/' + id;
+	getPledgedUsers(id, function(pledged) {
+		_get(url, function(fulfilled){
+			var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
+			displayUsers(absent, fulfilled);
+		});
 	});
 };
 
