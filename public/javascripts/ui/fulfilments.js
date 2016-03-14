@@ -305,5 +305,6 @@ $(function() {
 	});
 
 	// A schedule soon?
+	getSchedule();
 	setInterval(getSchedule, refreshTimeInterval * 1000);
 });

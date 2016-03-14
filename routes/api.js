@@ -469,7 +469,16 @@ router.get('/pledges/username/:username/now', function(req, res) {
             };
 
             schedules.some(function(s) {
-                if (s.ownedBy(username)) {
+                var found = false;
+
+                pledges.some(function(p) {
+                    if (p.schedule == s._id) {
+                        found = true;
+                        return true;
+                    }
+                });
+
+                if (found || s.ownedBy(username)) {
                     result = {
                         message: 'OK',
                         schedule: s
@@ -713,6 +722,8 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
         // Find all fulfilments during this schedule
         Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
             if (err) return error.server(res, err);
+
+            // TODO - schedule owner!
 
             // Were any of these users pledged?
             Pledge.find({
