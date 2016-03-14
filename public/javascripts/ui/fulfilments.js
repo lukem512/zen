@@ -71,6 +71,8 @@ var getSchedule = function() {
 			displaySchedule(response.schedule);
 			getOnlineUsers(response.schedule._id);
 		}
+	}, function(err) {
+		console.error(err);
 	});
 };
 
@@ -103,7 +105,9 @@ var displayUsers = function(absent, present) {
 
 var getPledgedUsers = function(id, callback) {
 	var url = getPledgesApiUrl + '/' + id;
-	_get(url, callback);
+	_get(url, callback, function(err) {
+		console.error(err);
+	});
 };
 
 var getOnlineUsers = function(id) {
@@ -113,6 +117,8 @@ var getOnlineUsers = function(id) {
 			var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
 			displayUsers(absent, fulfilled);
 		});
+	}, function(err) {
+		console.error(err);
 	});
 };
 
