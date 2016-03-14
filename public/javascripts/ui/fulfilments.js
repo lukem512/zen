@@ -298,6 +298,10 @@ $(function() {
 				toggle();
 			}
 		}
+	}, function(err) {
+		console.error(err);
+		$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
+	    $('#message').addClass('text-danger');
 	});
 
 	// A schedule soon?
