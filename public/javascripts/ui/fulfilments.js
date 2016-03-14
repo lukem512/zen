@@ -81,21 +81,21 @@ var getSchedule = function() {
 var displayUsers = function(absent, present) {
 	var html = "";
 
-	if (present.length > 0) {
-		var list = listUsers(present);
+	var presentList = listUsers(present, true);
+	if (presentList.n > 0) {
 		html =
 			html +
-			list.html +
+			presentList.html +
 			((absent.length > 1) ? " are " : " is ") + 
 			"online!";
 	}
 
-	if (absent.length > 0) {
-		var list = listUsers(absent);
+	var absentList = listUsers(absent, true);
+	if (absentList.n > 0) {
 		html =
 			html +
 			((html.length > 0) ? " " : "") +
-			list.html +
+			absentList.html +
 			((absent.length > 1) ? " are " : " is ") + 
 			"not online.";
 	}
@@ -235,7 +235,7 @@ var toggle = function(next) {
 		        	$('#timer').timer({
 		        		seconds: (res.time / 1000) || 0,
 						format: '%H:%M:%S',
-						duration: timeInterval+'s',
+						duration: aliveTimeInterval+'s',
 					    callback: function() {
 					        _post(aliveApiUrl, {
 					        	username: user
@@ -252,7 +252,7 @@ var toggle = function(next) {
 					        }, function(err) {
 					        	console.error(err);
 					        	hadError = true;
-					        	$('#message').text('We are unable to save your progress - is your Internet connection having trouble? Retrying in ' + timeInterval + ' seconds.');
+					        	$('#message').text('We are unable to save your progress - is your Internet connection having trouble? Retrying in ' + aliveTimeInterval + ' seconds.');
 					        	$('#message').removeClass('text-success');
 					        	$('#message').addClass('text-danger');
 					        });

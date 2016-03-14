@@ -99,9 +99,15 @@ $.urlParam = function(name){
 	return (results) ? results[1] || 0 : null;
 }
 
-var listUsers = function(users) {
+var listUsers = function(users, omitSelf) {
 	// Is the current user present?
 	var you = false;
+
+	if (omitSelf) {
+		users = users.filter(function(u) {
+			return (u != user);
+		});
+	}
 
 	// Make a HTML list
 	var html = "";
@@ -131,5 +137,5 @@ var listUsers = function(users) {
 		}
 		html += "</a>";
 	}
-	return { html: html, you: you };
+	return { html: html, you: you, n: users.length };
 };

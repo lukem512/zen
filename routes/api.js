@@ -312,16 +312,24 @@ router.get('/schedules/view/:id', function(req, res) {
 router.post('/schedules/new', function(req, res) {
     // TODO - is admin or current user
     if (req.body.owner != req.user.username && !req.user.admin) return response.invalid(res);
+
+    var username = sanitize(req.body.owner);
+
     var schedule = new Schedule({
         title: sanitize(req.body.title),
         description: sanitize(req.body.description),
         start_time: new Date(req.body.start_time),
         end_time: new Date(req.body.end_time),
-        owner: sanitize(req.body.owner)
+        owner: username
     });
+
     schedule.save(function(err, doc) {
         if (err) return error.server(res, err);
-        response.ok(res);
+
+        newPledge(username, doc._id, function(err, doc) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 
@@ -397,25 +405,29 @@ router.get('/pledges/view/:id', function(req, res) {
     });
 });
 
-router.post('/pledges/new', function(req, res) {
-    // TODO - is admin or current user
-    if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
-
+// Create a new pledge
+var newPledge = function(username, schedule, callback) {
+    // Create Pledge object
     var pledgeObj = {
-        username: sanitize(req.body.username),
-        schedule: sanitize(req.body.schedule)
+        username: username,
+        schedule: schedule
     };
 
     // Add a new pledge, if one does not already exist
     Pledge.findOne(pledgeObj, function(err, existing) {
-        if (err) return error.server(res, err);
-        if (existing) return response.invalid(res);
-
+        if (err) return callback(err, existing);
         var pledge = new Pledge(pledgeObj);
-        pledge.save(function(err, doc) {
-            if (err) return error.server(res, err);
-            response.ok(res);
-        });
+        pledge.save(callback);
+    });
+}
+
+router.post('/pledges/new', function(req, res) {
+    // TODO - is admin or current user
+    if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
+
+    newPledge(sanitize(req.body.username), sanitize(req.body.schedule), function(err, pledge) {
+        if (err) return error.server(res, err);
+        response.ok(res);
     });
 });
 
@@ -469,22 +481,15 @@ router.get('/pledges/username/:username/now', function(req, res) {
             };
 
             schedules.some(function(s) {
-                var found = false;
-
                 pledges.some(function(p) {
                     if (p.schedule == s._id) {
-                        found = true;
+                        result = {
+                            message: 'OK',
+                            schedule: s
+                        };
                         return true;
                     }
                 });
-
-                if (found || s.ownedBy(username)) {
-                    result = {
-                        message: 'OK',
-                        schedule: s
-                    };
-                    return true;
-                }
             });
 
             return res.json(result);
@@ -722,8 +727,6 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
         // Find all fulfilments during this schedule
         Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
             if (err) return error.server(res, err);
-
-            // TODO - schedule owner!
 
             // Were any of these users pledged?
             Pledge.find({
