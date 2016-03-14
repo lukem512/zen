@@ -350,9 +350,18 @@ router.post('/schedules/update', function(req, res) {
 
 router.delete('/schedules/update/:id', function(req, res) {
     // TODO - is admin or current user
-    Schedule.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
+
+    var id = sanitize(req.params.id);
+
+    Schedule.findByIdAndRemove(id, function(err, result) {
         if (err) return error.server(res, err);
         if (!result) return error.notfound(res);
+
+        // Remove all pledges associated with this schedule
+        Pledge.find({schedule: id}).remove(function(err) {
+            if (err) console.error(err);
+        });
+
         response.ok(res);
     });
 });
