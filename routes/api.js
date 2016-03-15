@@ -184,11 +184,46 @@ router.delete('/users/update/:username', function(req, res) {
     // TODO - is admin
     if (!req.user.admin) return response.invalid(res);
 
-    User.findOneAndRemove({
-        username: sanitize(req.params.username)
-    }, function(err, result){
+    var username = sanitize(req.params.username);
+    User.findOne({
+        username: username
+    }, function(err, user){
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (!user) return error.notfound(res);
+
+        user.delete(function(err) {
+            if (err) return error.server(res, err);
+            
+            Schedule.find( { owner: username }, function(err, schedules) {
+                if (err) return error.server(res, err);
+                schedules.forEach(function(schedule) {
+                    deleteSchedule(schedule._id, function(err, result) {
+                        if (err) return console.error(err);
+                        if (!result) return console.error('Unable to locate schedule ' + schedule._id);
+                    });
+                });
+            });
+
+            Pledge.find({ username: username }, function(err, results) {
+                if (err) return error.server(res, err);
+                results.forEach(function(result) {
+                    result.delete(function(err) {
+                        if (err) return console.error(err);
+                    });
+                });
+            });
+
+            Fulfilment.find({ username: username }, function(err, results) {
+                if (err) return error.server(res, err);
+                results.forEach(function(result) {
+                    result.delete(function(err) {
+                        if (err) return console.error(err);
+                    });
+                });
+            });
+
+            response.ok(res);
+        });
     });
 });
 
@@ -270,18 +305,23 @@ router.delete('/groups/update/:name', function(req, res) {
     var name = sanitize(req.params.name);
 
     // Remove the group!
-    Group.findOneAndRemove({
+    Group.findOne({
         name: name
-    }, function(err, result) {
+    }, function(err, group) {
         if (err) return error.server(res, err);
+        if (!group) return error.notfound(res);
 
-        // Remove the group from all member documents
-        User.update({ groups: name }, { $pullAll: { groups: [name] } }, function(err, users) {
-            if (err) return console.error(err);
-        });
+        group.delete(function(err) {
+            if (err) return error.server(res, err);
 
-        // Send back response
-        response.ok(res);
+            // Remove the group from all member documents
+            User.update({ groups: name }, { $pullAll: { groups: [name] } }, function(err, users) {
+                if (err) return console.error(err);
+            });
+
+            // Send back response
+            response.ok(res);
+        })
     });
 });
 
@@ -358,20 +398,33 @@ router.post('/schedules/update', function(req, res) {
     });
 });
 
+var deleteSchedule = function(id, callback) {
+    Schedule.findById(id, function(err, schedule) {
+        if (err || !schedule) return callback(err);
+
+        schedule.delete(function(err) {
+            if (err) return callback(err);
+
+            // Remove all pledges associated with this schedule
+            Pledge.find({schedule: id}, function(err, pledges) {
+                pledges.forEach(function(pledge) {
+                    pledge.delete(function(err) {
+                        if (err) console.error(err);
+                    });
+                });
+            });
+
+            callback(err, schedule);
+        });
+    });
+};
+
 router.delete('/schedules/update/:id', function(req, res) {
     // TODO - is admin or current user
 
-    var id = sanitize(req.params.id);
-
-    Schedule.findByIdAndRemove(id, function(err, result) {
+    deleteSchedule(sanitize(req.params.id), function(err, result) {
         if (err) return error.server(res, err);
         if (!result) return error.notfound(res);
-
-        // Remove all pledges associated with this schedule
-        Pledge.find({schedule: id}).remove(function(err) {
-            if (err) console.error(err);
-        });
-
         response.ok(res);
     });
 });
@@ -452,19 +505,29 @@ router.post('/pledges/new', function(req, res) {
 
 router.delete('/pledges/update/:id', function(req, res) {
     // TODO - is admin or current user
-    Pledge.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
+    Pledge.findById(sanitize(req.params.id), function(err, pledge) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (!pledge) return error.notfound(res);
+
+        pledge.delete(function(err) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 
 router.delete('/pledges/update/schedule/:schedule/username/:username', function(req, res) {
-    Pledge.findOneAndRemove({
+    Pledge.findOne({
         schedule: sanitize(req.params.schedule),
         username: sanitize(req.params.username)
-    }, function(err, result) {
+    }, function(err, pledge) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (!pledge) return error.notfound(res);
+
+        pledge.delete(function(err) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 
@@ -566,9 +629,14 @@ router.post('/fulfilments/update', function(req, res) {
 /* DELETE to fulfilment update service */
 router.delete('/fulfilments/update/:id', function(req, res) {
     // TODO - is admin or current user
-    Fulfilment.findByIdAndRemove(sanitize(req.params.id), function(err, result) {
+    Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
         if (err) return error.server(res, err);
-        response.ok(res);
+        if (!fulfilment) return error.notfound(res);
+
+        fulfilment.delete(function(err) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 
@@ -722,13 +790,17 @@ router.delete('/fulfilments/ongoing/:username', function(req, res) {
     // TODO - is admin or current user
 
     // Remove an ongoing fulfilment from the user
-    Fulfilment.findOneAndRemove({
+    Fulfilment.findOne({
         username: sanitize(req.params.username),
         ongoing: true
-    }, function(err, result) {
+    }, function(err, fulfilment) {
         if (err) return error.server(res, err);
         if (!result) return error.notfound(res);
-        response.ok(res);
+
+        fulfilment.delete(function(err) {
+            if (err) return error.server(res, err);
+            response.ok(res);
+        });
     });
 });
 

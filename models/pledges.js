@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mongoose_deleted = require('mongoose-deleted');
 
 var PledgeSchema = new mongoose.Schema({
   username: {
@@ -37,4 +38,5 @@ PledgeSchema.statics.completeUser = function(username, callback) {
   }, callback);
 };
 
+mongoose_deleted(PledgeSchema);
 module.exports = mongoose.model('Pledge', PledgeSchema);

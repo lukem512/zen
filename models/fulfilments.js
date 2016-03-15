@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mongoose_deleted = require('mongoose-deleted');
 
 var Schedule = require('./schedules');
 var Pledge = require('./pledges');
@@ -23,7 +24,6 @@ var FulfilmentSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
 
 FulfilmentSchema.statics.overlaps = function(start_time, end_time, callback) {
   this.find({
@@ -78,4 +78,5 @@ FulfilmentSchema.statics.completes = function(id, callback) {
   });
 }
 
+mongoose_deleted(FulfilmentSchema);
 module.exports = mongoose.model('Fulfilment', FulfilmentSchema);

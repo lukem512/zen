@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mongoose_deleted = require('mongoose-deleted');
 
 var User = require('./users');
 
@@ -28,4 +29,5 @@ GroupSchema.statics.members = function(name, callback) {
 	});
 };
 
+mongoose_deleted(GroupSchema);
 module.exports = mongoose.model('Group', GroupSchema);

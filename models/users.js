@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mongoose_deleted = require('mongoose-deleted');
 
 var UserSchema = new mongoose.Schema({
   username: {
@@ -22,4 +23,5 @@ var UserSchema = new mongoose.Schema({
   timestamps: true
 });
 
+mongoose_deleted(UserSchema);
 module.exports = mongoose.model('User', UserSchema);

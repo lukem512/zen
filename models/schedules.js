@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var mongoose_deleted = require('mongoose-deleted');
 var async = require('async');
 
 var Group = require('./groups');
@@ -103,6 +104,7 @@ ScheduleSchema.statics.owners = function(usernames, callback) {
 ScheduleSchema.methods.ownedBy = function(usernames, callback) {
   if (typeof(usernames) === 'string') usernames = [usernames];
   return (usernames.indexOf(this.owner) > -1);
-}
+};
 
+mongoose_deleted(ScheduleSchema);
 module.exports = mongoose.model('Schedule', ScheduleSchema);
