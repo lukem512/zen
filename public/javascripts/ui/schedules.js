@@ -60,7 +60,7 @@ var add = function(next) {
 			"description": $('#inputDescription').val(),
 			"start_time": dates.start.format(),
 			"end_time": dates.end.format(),
-			"owner": owner
+			"username": owner
 		};
 		_update(addApiUrl, next, params);
 	}
@@ -78,7 +78,7 @@ var update = function(next, id) {
 			"description": $('#inputDescription').val(),
 			"start_time": dates.start.format(),
 			"end_time": dates.end.format(),
-			"owner": owner
+			"username": owner
 		};
 		_update(updateApiUrl, next, params);
 	}
