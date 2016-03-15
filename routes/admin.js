@@ -10,7 +10,13 @@ var Schedule = require('../models/schedules');
 var Pledge = require('../models/pledges');
 var Fulfilment = require('../models/fulfilments');
 
+var middlewares = require('./middlewares');
+
 var config = require('../config');
+
+// Middleware to require authorisation for all admin routes
+router.use(middlewares.isLoggedIn);
+router.use(middlewares.isAdmin);
 
 router.get('/', function(req, res) {
     res.render('admin/index', {

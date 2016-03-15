@@ -11,16 +11,10 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
+var middlewares = require('./middlewares');
+
 // Middleware to require authorisation for all schedules routes
-router.use(function(req, res, next){
-  if (req.authentication.success) {
-    next();
-  }
-  else {
-    var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-    return res.redirect('/auth?r=' + fullUrl);
-  }
-});
+router.use(middlewares.isLoggedInRedirect);
 
 /* GET list schedules page */
 router.get('/', function(req, res, next) {

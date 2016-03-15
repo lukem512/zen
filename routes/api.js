@@ -14,30 +14,10 @@ var Schedule = require('../models/schedules');
 var Pledge = require('../models/pledges');
 var Fulfilment = require('../models/fulfilments');
 
+var middlewares = require('./middlewares');
+var response = require('./response');
+
 var config = require('../config');
-
-/*
- * Response functions.
-*/
-
-var error = {
-    notfound: function(res) {
-        res.status(404).json({error: 'Resource not found'});
-    },
-    server: function(res, err) {
-        console.error(err);
-        res.status(500).json({error: 'Server error'});
-    }
-};
-
-var response = {
-    ok: function(res) {
-        res.json({message: 'OK'});
-    },
-    invalid: function(res) {
-        res.json({message: 'Invalid'});
-    }
-};
 
 /*
  * Authentication functions.
@@ -47,7 +27,7 @@ router.post('/authenticate', function(req, res){
     User.findOne({
         username: sanitize(req.body.username)
     }, function (err, user){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
         if (!user) {
             res.status(403).json({
@@ -78,44 +58,7 @@ router.post('/authenticate', function(req, res){
 });
 
 // Middleware to require authorisation for all API routes
-router.use(function(req, res, next){
-    if (req.authentication.success) {
-        next();
-    }
-    else {
-        return res.status(req.authentication.status).json({
-            success: req.authentication.success,
-            message: req.authentication.message
-        }); 
-    }
-});
-
-var isAdmin = function(req, res, next) {
-    if (!req.user.admin) {
-        return response.invalid(res);
-    }
-    else {
-        next();
-    }
-};
-
-var isCurrentUser = function(req, res, next) {
-    if (req.body.username != req.user.username) {
-        return response.invalid(res);
-    }
-    else {
-        next();
-    }
-};
-
-var isAdminOrCurrentUser = function(req, res, next) {
-    if (req.body.owner != req.user.username && !req.user.admin) {
-        return response.invalid(res);
-    }
-    else {
-        next();
-    }
-};
+router.use(middlewares.isLoggedIn);
 
 /*
  * Users.
@@ -124,22 +67,22 @@ var isAdminOrCurrentUser = function(req, res, next) {
 
 router.get('/users/list', function(req, res) {
     User.find(function(err, users){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(users);
     });
 });
 
 router.get('/users/view/:username', function(req, res) {
     User.find({ username: sanitize(req.params.username) }, function(err, user){
-        if (err) return error.server(res, err);
-        if (!user) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!user) return response.JSON.error.notfound(res);
         res.json(user);
     });
 });
 
 router.post('/users/new', function(req, res) {
     // TODO - is admin
-    if (!req.user.admin) return response.invalid(res);
+    if (!req.user.admin) return response.JSON.invalid(res);
 
     var user = new User({
         username: sanitize(req.body.username),
@@ -147,17 +90,17 @@ router.post('/users/new', function(req, res) {
         groups: sanitize(req.body['usergroups[]'])
     });
     user.save(function(err, result) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
 router.post('/users/update', function(req, res) {
     // TODO - is admin or current user
     User.findById(req.body.id, function (err, user) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
-        if (user.username != req.user.username && !req.user.admin) return response.invalid(res);
+        if (user.username != req.user.username && !req.user.admin) return response.JSON.invalid(res);
 
         var update = {};
 
@@ -174,28 +117,28 @@ router.post('/users/update', function(req, res) {
         }
 
         User.findByIdAndUpdate(sanitize(req.body.id), update, function(err, result) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     })
 });
 
 router.delete('/users/update/:username', function(req, res) {
     // TODO - is admin
-    if (!req.user.admin) return response.invalid(res);
+    if (!req.user.admin) return response.JSON.invalid(res);
 
     var username = sanitize(req.params.username);
     User.findOne({
         username: username
     }, function(err, user){
-        if (err) return error.server(res, err);
-        if (!user) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!user) return response.JSON.error.notfound(res);
 
         user.delete(function(err) {
-            if (err) return error.server(res, err);
+            if (err) return response.JSON.error.server(res, err);
             
             Schedule.find( { owner: username }, function(err, schedules) {
-                if (err) return error.server(res, err);
+                if (err) return response.JSON.error.server(res, err);
                 schedules.forEach(function(schedule) {
                     deleteSchedule(schedule._id, function(err, result) {
                         if (err) return console.error(err);
@@ -205,7 +148,7 @@ router.delete('/users/update/:username', function(req, res) {
             });
 
             Pledge.find({ username: username }, function(err, results) {
-                if (err) return error.server(res, err);
+                if (err) return response.JSON.error.server(res, err);
                 results.forEach(function(result) {
                     result.delete(function(err) {
                         if (err) return console.error(err);
@@ -214,7 +157,7 @@ router.delete('/users/update/:username', function(req, res) {
             });
 
             Fulfilment.find({ username: username }, function(err, results) {
-                if (err) return error.server(res, err);
+                if (err) return response.JSON.error.server(res, err);
                 results.forEach(function(result) {
                     result.delete(function(err) {
                         if (err) return console.error(err);
@@ -222,7 +165,7 @@ router.delete('/users/update/:username', function(req, res) {
                 });
             });
 
-            response.ok(res);
+            response.JSON.ok(res);
         });
     });
 });
@@ -260,22 +203,22 @@ router.get('/users/generate', function(req, res) {
 router.get('/groups/list', function(req, res) {
     // TODO - is admin
     Group.find(function(err, groups){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(groups);
     });
 });
 
 router.get('/groups/view/:name', function(req, res) {
     Group.find({ name: sanitize(req.params.name) }, function(err, group){
-        if (err) return error.server(res, err);
-        if (!group) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!group) return response.JSON.error.notfound(res);
         res.json(group);
     });
 });
 
 router.get('/groups/view/:name/members', function(req, res) {
     Group.members(sanitize(req.params.name), function(err, users){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(users);
     });
 });
@@ -286,8 +229,8 @@ router.post('/groups/new', function(req, res) {
         description: sanitize(req.body.description)
     });
     group.save(function(err, doc) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
@@ -296,8 +239,8 @@ router.post('/groups/update', function(req, res) {
         name: sanitize(req.body.name),
         description: sanitize(req.body.description)
     }, function(err, result) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
@@ -308,11 +251,11 @@ router.delete('/groups/update/:name', function(req, res) {
     Group.findOne({
         name: name
     }, function(err, group) {
-        if (err) return error.server(res, err);
-        if (!group) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!group) return response.JSON.error.notfound(res);
 
         group.delete(function(err) {
-            if (err) return error.server(res, err);
+            if (err) return response.JSON.error.server(res, err);
 
             // Remove the group from all member documents
             User.update({ groups: name }, { $pullAll: { groups: [name] } }, function(err, users) {
@@ -320,7 +263,7 @@ router.delete('/groups/update/:name', function(req, res) {
             });
 
             // Send back response
-            response.ok(res);
+            response.JSON.ok(res);
         })
     });
 });
@@ -332,36 +275,36 @@ router.delete('/groups/update/:name', function(req, res) {
 
 router.get('/schedules/list', function(req, res) {
     Schedule.find(function(err, schedules){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(schedules);
     });
 });
 
 router.get('/schedules/list/owner/:owner', function(req, res) {
     Schedule.find({ owner: sanitize(req.params.owner) }, function(err, schedules){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(schedules);
     });
 });
 
 router.get('/schedules/list/group/:group', function(req, res) {
     Schedule.group(sanitize(req.params.group), function(err, schedules){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(schedules);
     });
 });
 
 router.get('/schedules/view/:id', function(req, res) {
     Schedule.findById(sanitize(req.params.id), function(err, schedule){
-        if (err) return error.server(res, err);
-        else if (!schedule) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        else if (!schedule) return response.JSON.error.notfound(res);
         res.json(schedule);
     });
 });
 
 router.post('/schedules/new', function(req, res) {
     // TODO - is admin or current user
-    if (req.body.owner != req.user.username && !req.user.admin) return response.invalid(res);
+    if (req.body.owner != req.user.username && !req.user.admin) return response.JSON.invalid(res);
 
     var username = sanitize(req.body.owner);
 
@@ -374,11 +317,11 @@ router.post('/schedules/new', function(req, res) {
     });
 
     schedule.save(function(err, doc) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
         newPledge(username, doc._id, function(err, doc) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     });
 });
@@ -392,9 +335,9 @@ router.post('/schedules/update', function(req, res) {
         end_time: new Date(req.body.end_time),
         owner: sanitize(req.body.owner)
     }, function(err, result) {
-        if (err) return error.server(res, err);
-        if (!result) return error.notfound(res);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!result) return response.JSON.error.notfound(res);
+        response.JSON.ok(res);
     });
 });
 
@@ -423,9 +366,9 @@ router.delete('/schedules/update/:id', function(req, res) {
     // TODO - is admin or current user
 
     deleteSchedule(sanitize(req.params.id), function(err, result) {
-        if (err) return error.server(res, err);
-        if (!result) return error.notfound(res);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!result) return response.JSON.error.notfound(res);
+        response.JSON.ok(res);
     });
 });
 
@@ -464,15 +407,15 @@ router.get('/calendar', function(req, res) {
 
 router.get('/pledges/list', function(req, res) {
     Pledge.find(function(err, pledges){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(pledges);
     });
 });
 
 router.get('/pledges/view/:id', function(req, res) {
     Pledge.findById(sanitize(req.params.id), function(err, pledge){
-        if (err) return error.server(res, err);
-        if (!pledge) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!pledge) return response.JSON.error.notfound(res);
         res.json(pledge);
     });
 });
@@ -495,23 +438,23 @@ var newPledge = function(username, schedule, callback) {
 
 router.post('/pledges/new', function(req, res) {
     // TODO - is admin or current user
-    if (req.body.username != req.user.username && !req.user.admin) return response.invalid(res);
+    if (req.body.username != req.user.username && !req.user.admin) return response.JSON.invalid(res);
 
     newPledge(sanitize(req.body.username), sanitize(req.body.schedule), function(err, pledge) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
 router.delete('/pledges/update/:id', function(req, res) {
     // TODO - is admin or current user
     Pledge.findById(sanitize(req.params.id), function(err, pledge) {
-        if (err) return error.server(res, err);
-        if (!pledge) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!pledge) return response.JSON.error.notfound(res);
 
         pledge.delete(function(err) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     });
 });
@@ -521,12 +464,12 @@ router.delete('/pledges/update/schedule/:schedule/username/:username', function(
         schedule: sanitize(req.params.schedule),
         username: sanitize(req.params.username)
     }, function(err, pledge) {
-        if (err) return error.server(res, err);
-        if (!pledge) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!pledge) return response.JSON.error.notfound(res);
 
         pledge.delete(function(err) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     });
 });
@@ -536,7 +479,7 @@ router.get('/pledges/users/:schedule', function(req, res) {
     Pledge.find({
         schedule: sanitize(req.params.schedule)
     }, function(err, pledges){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(pledges.map(function(p){ return p.username; }));
     });
 });
@@ -548,7 +491,7 @@ router.get('/pledges/username/:username/now', function(req, res) {
     Pledge.find({
         username: username
     }, function(err, pledges) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
         // Use now as the start date,
         // and 15 minutes in the future as the end date.
@@ -556,7 +499,7 @@ router.get('/pledges/username/:username/now', function(req, res) {
         var soon = new Date(now.getTime() + 15*60000);
 
         Schedule.overlaps(now, soon, function(err, schedules) {
-            if (err) return error.server(res, err);
+            if (err) return response.JSON.error.server(res, err);
 
             var result = {
                 message: 'No ' + config.dictionary.schedule.noun.singular
@@ -587,7 +530,7 @@ router.get('/pledges/username/:username/now', function(req, res) {
 /* GET fulfilment listing page. */
 router.get('/fulfilments/list', function(req, res) {
     Fulfilment.find(function(err, fulfilments){
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         res.json(fulfilments);
     });
 });
@@ -595,8 +538,8 @@ router.get('/fulfilments/list', function(req, res) {
 /* GET fulfilment information */
 router.get('/fulfilments/view/:id', function(req, res) {
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment){
-        if (err) return error.server(res, err);
-        if (!fulfilment) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!fulfilment) return response.JSON.error.notfound(res);
         res.json(fulfilment);
     });
 });
@@ -609,8 +552,8 @@ router.post('/fulfilments/new', function(req, res) {
         end_time: new Date(req.body.end_time)
     });
     fulfilment.save(function(err, doc) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
@@ -621,8 +564,8 @@ router.post('/fulfilments/update', function(req, res) {
         start_time: new Date(req.body.start_time),
         end_time: new Date(req.body.end_time)
     }, function(err, result) {
-        if (err) return error.server(res, err);
-        response.ok(res);
+        if (err) return response.JSON.error.server(res, err);
+        response.JSON.ok(res);
     });
 });
 
@@ -630,20 +573,20 @@ router.post('/fulfilments/update', function(req, res) {
 router.delete('/fulfilments/update/:id', function(req, res) {
     // TODO - is admin or current user
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
-        if (err) return error.server(res, err);
-        if (!fulfilment) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!fulfilment) return response.JSON.error.notfound(res);
 
         fulfilment.delete(function(err) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     });
 });
 
 function _completes(req, res, callback) {
     Fulfilment.completes(sanitize(req.params.id), function(err, pledges){
-       if (err) return error.server(res, err);
-        if (!pledges) return error.notfound(res);
+       if (err) return response.JSON.error.server(res, err);
+        if (!pledges) return response.JSON.error.notfound(res);
         callback(pledges);
     });
 }
@@ -672,7 +615,7 @@ router.post('/fulfilments/ongoing/begin', function(req, res) {
         username: sanitize(req.body.username),
         ongoing: true
     }, function(err, fulfilment) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
         // 15 minutes
         var threshold = 15 * 60 * 1000;
@@ -706,7 +649,7 @@ router.post('/fulfilments/ongoing/begin', function(req, res) {
             ongoing: true
         });
         newf.save(function(err, doc) {
-            if (err) return error.server(res, err);
+            if (err) return response.JSON.error.server(res, err);
             return res.json({
                 message: 'OK',
                 time: 0
@@ -725,7 +668,7 @@ router.post('/fulfilments/ongoing/alive', function(req, res) {
     }, {
         end_time: new Date()
     }, function(err, result) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         if (!result) {
             return res.json({
                 message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
@@ -752,7 +695,7 @@ router.post('/fulfilments/ongoing/end', function(req, res) {
         end_time: new Date(),
         ongoing: false
     }, function(err, result) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
         if (!result) {
             return res.json({
                 message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
@@ -773,7 +716,7 @@ router.get('/fulfilments/ongoing/:username', function(req, res) {
         username: sanitize(req.params.username),
         ongoing: true
     }, function(err, result) {
-        if (err) return error.server(res, err);
+        if (err) return response.JSON.error.server(res, err);
 
         if (!result) return res.json({
             message: 'No ongoing ' + config.dictionary.fulfilment.noun.singular
@@ -794,12 +737,12 @@ router.delete('/fulfilments/ongoing/:username', function(req, res) {
         username: sanitize(req.params.username),
         ongoing: true
     }, function(err, fulfilment) {
-        if (err) return error.server(res, err);
-        if (!result) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!result) return response.JSON.error.notfound(res);
 
         fulfilment.delete(function(err) {
-            if (err) return error.server(res, err);
-            response.ok(res);
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
         });
     });
 });
@@ -812,18 +755,18 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
 
     // Find the schedule
     Schedule.findById(id, function(err, schedule) {
-        if (err) return error.server(res, err);
-        if (!schedule) return error.notfound(res);
+        if (err) return response.JSON.error.server(res, err);
+        if (!schedule) return response.JSON.error.notfound(res);
 
         // Find all fulfilments during this schedule
         Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
-            if (err) return error.server(res, err);
+            if (err) return response.JSON.error.server(res, err);
 
             // Were any of these users pledged?
             Pledge.find({
                 schedule: id
             }, function(err, pledges){
-                if (err) return error.server(res, err);
+                if (err) return response.JSON.error.server(res, err);
                                 
                 // Find the fulfilments that correspond to pledges
                 var fulfilled = [];
@@ -884,7 +827,7 @@ router.get('/feed/:user', function(req, res) {
 */
 
 router.use(function(req, res, next) {
-  error.notfound(res);
+  response.JSON.error.notfound(res);
 });
 
 /*

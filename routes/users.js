@@ -14,6 +14,11 @@ var Pledge = require('../models/pledges');
 var response = require('./response');
 var error = response.error;
 
+var middlewares = require('./middlewares');
+
+// Middleware to require authorisation for all users routes
+router.use(middlewares.isLoggedInRedirect);
+
 /* Retreive the user object and render the page */
 var userPage = function(req, res, username) {
   username = sanitize(username);

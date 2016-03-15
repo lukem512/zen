@@ -28,3 +28,22 @@ module.exports.error = {
       });
     }
 };
+
+module.exports.JSON = {
+    ok: function(res) {
+        res.json({message: 'OK'});
+    },
+    invalid: function(res) {
+        res.json({message: 'Invalid'});
+    }
+};
+
+module.exports.JSON.error = {
+    notfound: function(res) {
+        res.status(404).json({error: 'Resource not found'});
+    },
+    server: function(res, err) {
+        console.error(err);
+        res.status(500).json({error: 'Server error'});
+    }
+};
