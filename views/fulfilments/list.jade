@@ -94,7 +94,24 @@ block content
 								|  will #{dictionary.fulfilment.verb.present} 
 							else
 								|  #{dictionary.fulfilment.verb.past} 
-							| the #{dictionary.schedule.noun.singular}. 
+							| the #{dictionary.schedule.noun.singular}.
+		| Page 
+		a(href="/#{dictionary.action.noun.plural}/list/#{page}", title="This page!") #{page}
+		|  of 
+		a(href="/#{dictionary.action.noun.plural}/list/#{pages}", title="Go to the last page") #{pages}
+		| .
+		if page > 1
+			|  Go to the 
+			a(href="/#{dictionary.action.noun.plural}/list/#{page - 1}", title="Go to the previous page") previous
+			|  page.
+		if page < pages 
+			|  Go to the 
+			a(href="/#{dictionary.action.noun.plural}/list/#{page + 1}", title="Go to the next page") next
+			|  page.
+		if page > 2
+			|  Go to the 
+			a(href="/#{dictionary.action.noun.plural}", title="Go to the first page") first
+			|  page.
 
 	else
 		p

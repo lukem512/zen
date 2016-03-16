@@ -88,9 +88,19 @@ var getSchedules = function(fulfilment, username, callback) {
   });
 };
 
-/* GET list fulfilments page */
-router.get('/', function(req, res, next) {
-  Fulfilment.find({ username: req.user.username }, function(err, fulfilments) {
+var listFulfilments = function(req, res, start, n) {
+  // Start at page 1 by default
+  if (start)
+    start = Math.max(start, 1);
+  else
+    start = 1;
+
+  // Display 20 by default
+  n = n || 20;
+  n = 10;
+
+  Fulfilment.find({ username: req.user.username }).sort({ createdAt: 'desc' })
+    .skip((start - 1) * n).limit(n).exec(function(err, fulfilments) {
     if (err) return error.server(res, req, err);
 
     Schedule.find({ owner: req.user.username }, function(err, schedules) {
@@ -121,21 +131,41 @@ router.get('/', function(req, res, next) {
           }
         });
 
-        res.render('fulfilments/list', {
-          title: 'View ' + config.dictionary.action.noun.plural,
-          name: config.name,
-          organisation: config.organisation,
-          nav: config.nav(),
-          user: req.user,
-          dictionary: config.dictionary,
-          fulfilments: fulfilments,
-          statistics: statistics,
-          pledges: pledges,
-          schedules: schedules
-        });
+        Fulfilment.count({ username: req.user.username }).exec(function(err, count) {
+          if (err) return error.server(res, req, err);
+
+          res.render('fulfilments/list', {
+            title: 'View ' + config.dictionary.action.noun.plural,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            fulfilments: fulfilments,
+            statistics: statistics,
+            pledges: pledges,
+            schedules: schedules,
+            page: start,
+            pages: Math.ceil(count / n)
+          });
+        })
       })
     });
   });
+};
+
+/* GET list fulfilments page */
+router.get('/', function(req, res) {
+  listFulfilments(req, res);
+});
+
+router.get('/list', function(req, res) {
+  listFulfilments(req, res);
+});
+
+router.get('/list/:start', function(req, res) {
+  var start = sanitize(req.params.start);
+  listFulfilments(req, res, start);
 });
 
 /* GET view fulfilment page */
