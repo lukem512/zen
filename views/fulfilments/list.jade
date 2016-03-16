@@ -25,6 +25,8 @@ block content
 		#fulfilments
 			for fulfilment, i in fulfilments
 				p
+					-
+						var duration = (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize();
 					strong #{moment(fulfilment.start_time).calendar()}
 					|  you 
 					if fulfilment.ongoing
@@ -32,7 +34,7 @@ block content
 					else
 						| #{dictionary.action.verb.past} 
 					| for 
-					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{ (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize() }
+					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{duration}
 					| .
 					if schedules[i]
 						- var partial = (schedules[i].completion == 'partial');
@@ -44,8 +46,8 @@ block content
 							| #{dictionary.fulfilment.verb.present} 
 						else
 							if partial
-								| partially 
-							| #{dictionary.fulfilment.verb.past} 
+								span.more-info(data-text="You didn\'t #{dictionary.action.verb.present} for the whole of your pledged time.") partially
+							|  #{dictionary.fulfilment.verb.past} 
 						a(href="/#{dictionary.schedule.noun.plural}/view/#{schedules[i].id}") #{schedules[i].title}
 
 						-

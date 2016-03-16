@@ -97,9 +97,8 @@ var listFulfilments = function(req, res, start, n) {
   else
     start = 1;
 
-  // Display 20 by default
-  n = n || 20;
-  n = 10;
+  // Display 5 by default
+  n = n || 5;
 
   Fulfilment.find({ username: req.user.username }).sort({ start_time: 'desc' })
     .skip((start - 1) * n).limit(n).exec(function(err, fulfilments) {
