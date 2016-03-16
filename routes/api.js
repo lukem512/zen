@@ -65,7 +65,7 @@ var isSameGroupOrAdmin = function(requestingUser, resultingUser) {
 
     var authorised = requestingUser.admin;
     resultingUser.groups.some(function(g) {
-        if (requestingUser.groups.indexOf(g)) {
+        if (requestingUser.groups.indexOf(g) > -1) {
             authorised = true;
         }
         return authorised;
@@ -919,23 +919,55 @@ router.get('/feed/:username', function(req, res) {
             // Retrieve pledges, schedules and fulfilments, most-recent first
             async.parallel([
                 function(next) {
-                    Pledge.find({username: username}).sort({ createdAt: 'desc' }).exec(next);
-                },
-                // TODO - restrict to one user!
-                function(next) {
-                    Schedule.find({}).sort({ createdAt: 'desc' }).exec(next);
+                    Pledge.find({username: username}).exec(next);
                 },
                 function(next) {
-                    Fulfilment.find({username: username}).sort({ createdAt: 'desc' }).exec(next);
+                    Schedule.find({owner: username}).exec(next);
+                },
+                function(next) {
+                    Fulfilment.find({username: username}).exec(next);
                 }
-            ], function(results) {
-                console.log(results);
+            ], function(err, results) {
+
+                var resultCombined = [];
 
                 // TODO - Humanize
+                results[0].forEach(function(pledge) {
+                    var o = {
+                        type: 'pledge',
+                        html: pledge.username + ' ' + config.dictionary.pledge.verb.past + ' to ' + pledge.schedule + '.',
+                        createdAt: pledge.createdAt
+                    };
+                    resultCombined.push(o);
+                });
 
-                // TODO - Return as array
+                results[1].forEach(function(schedule) {
+                    var o = {
+                        type: 'schedule',
+                        html: schedule.owner + ' created a ' + config.dictionary.schedule.noun.singular + ' for ' + moment(schedule.start_time).calendar() + '.',
+                        createdAt: schedule.createdAt
+                    };
+                    resultCombined.push(o);
+                });
 
-                return res.json(results);
+                results[2].forEach(function(fulfilment) {
+                    var o = {
+                        type: 'fulfilment',
+                        html: fulfilment.username + ' ' + config.dictionary.action.verb.past + ' for ' + moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + '.',
+                        createdAt: fulfilment.createdAt
+                    };
+                    resultCombined.push(o);
+                });
+
+                // Sort by creation date, descending
+                resultCombined.sort(function(a, b){
+                    if (a.createdAt > b.createdAt) return -1;
+                    if (a.createdAt < b.createdAt) return 1;
+                    return 0;
+                });
+
+                // Return as array
+                return res.json(resultCombined);
             });
         } else {
             return response.JSON.invalid(res);

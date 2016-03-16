@@ -26,48 +26,17 @@ var userPage = function(req, res, username) {
     if (err) return error.server(req, res, err);
     if (!user) return error.notfound(req, res);
 
-    Pledge.find({ username: username }, function(err, pledges) {
-      if (err) return error.server(req, res, err);
+    // TODO - is requesting user in the same group?
 
-      var pledged = [];
-
-      // Find Schedule names
-      async.eachSeries(pledges, function(pledge, next){
-        Schedule.findById(pledge.schedule, function(err, schedule) {
-          if (err) return error.server(req, res, err);
-
-          if (!schedule) {
-            console.warn('Found a pledge with schedule ID of ' + pledge.schedule + ' and no matching schedule! (' + pledge._id + ')');
-            return next();
-          }
-
-          console.log(schedule.title);
-          pledged.push({
-              schedule: schedule._id,
-              title: schedule.title
-            });
-          return next();
-        });
-      }, function done() {
-
-        // Render!
-        Schedule.find({ owner: username }, function(err, schedules) {
-          if (err) return error.server(req, res, err);
-
-          // Render!
-          res.render('users/view', {
-            title: user.username,
-            name: config.name,
-            organisation: config.organisation,
-            nav: config.nav(),
-            user: req.user,
-            dictionary: config.dictionary,
-            _user: user,
-            _pledges: pledged,
-            _schedules: schedules
-          });
-        })
-      });
+    // Render!
+    res.render('users/view', {
+      title: user.username,
+      name: config.name,
+      organisation: config.organisation,
+      nav: config.nav(),
+      user: req.user,
+      dictionary: config.dictionary,
+      _user: user
     });
   })
 };

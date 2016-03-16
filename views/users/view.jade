@@ -1,41 +1,14 @@
 extends ../layout
 
 block content
+	script(src="/javascripts/ui/generic.js")
+	script(src="/javascripts/ui/users.js")
 	if _user.username == user.username
 		h1 #{title} (You)
 	else
 		h1= title
-	if _schedules.length > 0
-		#schedules
-			p
-				if _user.username == user.username
-					| You have 
-				else
-					span.text-capitalize #{_user.username} 
-					| has 
-				| created the following #{dictionary.schedule.noun.plural}: 
-				each schedule, i in _schedules
-					span.schedule
-						if i > 0
-							| , 
-						a(href="/#{dictionary.schedule.noun.singular}s/view/#{schedule.id}") #{schedule.title}
-				| .
-	if _pledges.length > 0
-		#pledges
-			p
-				if _user.username == user.username
-					| You have 
-				else
-					span.text-capitalize #{_user.username} 
-					| has 
-				| #{dictionary.pledge.verb.past} to attend the following #{dictionary.schedule.noun.plural}: 
-				each pledge, i in _pledges
-					span.schedule
-						if pledge.schedule != -1
-							if i > 0
-								| , 
-							a(href="/#{dictionary.schedule.noun.plural}/view/#{pledge.schedule}") #{pledge.title}
-				| .
+	p#message.hidden
+	p#feed
 	if _user.username == user.username
 		hr
 		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/settings'")
@@ -50,3 +23,13 @@ block content
 		button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')")
 			i.fa.fa-remove
 			| &nbsp; Delete
+
+	script.
+		$(document).ready(function(){
+			var __getFeed = function() {
+				return getFeed('#{_user.username}');
+			};
+			
+			__getFeed();
+			setInterval(__getFeed, refreshTimeInterval * 1000)
+		});
