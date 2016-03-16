@@ -152,7 +152,7 @@ $(function() {
 						return console.error(fulfilled.message);
 					};
 					var present = fulfilled.map(function(i) {return i.username});
-					var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
+					var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
 					displayPledgesPast(absent, present);
 				});
 			}
