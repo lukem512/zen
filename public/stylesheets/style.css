@@ -9,5 +9,27 @@
 }
 
 .vdivide > [class*='col-']:first-child:before {
-  display: none;
+ 	display: none;
+}
+
+.more-info {
+	display: inline;
+    position: relative;
+	border-bottom: 1px black dotted;
+}
+
+.more-info:hover {
+	cursor: pointer;
+}
+
+.more-info:hover:after {
+	background: #333;
+    background: rgba(0,0,0,.8);
+    border-radius: 5px;
+    color: #fff;
+    content: attr(data-text);
+    left: 20%;
+    padding: 5px 15px;
+    font-size: small;
+    position: absolute;
 }

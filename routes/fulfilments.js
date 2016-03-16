@@ -38,6 +38,8 @@ var getStats = function(fulfilments, schedules) {
   // Compute average time per week
   stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
 
+  console.log('Stats',stats);
+
   // Count scheduled sessions
   // Only count those in the future!
   schedules.forEach(function(s) {
@@ -99,7 +101,7 @@ var listFulfilments = function(req, res, start, n) {
   n = n || 20;
   n = 10;
 
-  Fulfilment.find({ username: req.user.username }).sort({ createdAt: 'desc' })
+  Fulfilment.find({ username: req.user.username }).sort({ start_time: 'desc' })
     .skip((start - 1) * n).limit(n).exec(function(err, fulfilments) {
     if (err) return error.server(res, req, err);
 

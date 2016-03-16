@@ -7,11 +7,11 @@ block content
 		if statistics.total > 0
 			strong #{moment.duration(statistics.total).humanize()}
 		else
-			strong 0 minutes
+			strong.more-info(data-text="Why not start now? Click the button below!") 0 minutes
 		|  in total 
 		if statistics.weeklyAverage > 0
 			| with an average of 
-			strong #{moment.duration(statistics.weeklyAverage).humanize()}
+			strong.more-info(data-text="You have logged #{fulfilments.length} sessions over #{statistics.weeks} weeks.") #{moment.duration(statistics.weeklyAverage).humanize()}
 			|  each week
 		| . You have 
 		if statistics.scheduled > 0
