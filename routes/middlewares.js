@@ -23,7 +23,8 @@ module.exports.isAdmin = function(req, res, next) {
 };
 
 module.exports.isCurrentUser = function(req, res, next) {
-    if (req.body.username != req.user.username) {
+    var username = req.body.username || req.params.username;
+    if (username != req.user.username) {
         return response.JSON.invalid(res);
     }
     else {
@@ -32,7 +33,8 @@ module.exports.isCurrentUser = function(req, res, next) {
 };
 
 module.exports.isAdminOrCurrentUser = function(req, res, next) {
-    if (req.body.username != req.user.username && !req.user.admin) {
+    var username = req.body.username || req.params.username;
+    if (username != req.user.username && !req.user.admin) {
         return response.JSON.invalid(res);
     }
     else {

@@ -58,11 +58,14 @@ router.post('/authenticate', function(req, res){
     });
 });
 
-// Middleware to require authorisation for all API routes
+// Middleware functions to check user group
 var isSameGroupOrAdmin = function(requestingUser, resultingUser) {
+    if (!requestingUser || !resultingUser) return false;
+    if (requestingUser.username === resultingUser.username) return true;
+
     var authorised = requestingUser.admin;
     resultingUser.groups.some(function(g) {
-        if (requestingUser.indexOf(g)) {
+        if (requestingUser.groups.indexOf(g)) {
             authorised = true;
         }
         return authorised;
@@ -71,12 +74,15 @@ var isSameGroupOrAdmin = function(requestingUser, resultingUser) {
 };
 
 var isSameGroupOrAdminDatabase = function(requestingUser, resultingUsername, callback) {
+    if (requestingUser.username === resultingUsername) return callback(null, true);
+
     User.findOne({ username: resultingUsername }, function(err, user) {
         if (err) return callback(err);
         callback(err, isSameGroupOrAdmin(requestingUser, user));
     });
 };
 
+// Middleware to require authorisation for all API routes
 router.use(m.isLoggedIn);
 
 /*
@@ -299,7 +305,7 @@ router.get('/schedules/list/owner/:username', function(req, res) {
                 res.json(schedules);
             });
         } else {
-            return response.JSON.error.invalid(res);
+            return response.JSON.invalid(res);
         }
     });
 });
@@ -314,7 +320,7 @@ router.get('/schedules/list/group/:group', function(req, res) {
             res.json(schedules);
         });
     } else {
-        return response.JSON.error.invalid(res);
+        return response.JSON.invalid(res);
     }
 });
 
@@ -329,7 +335,7 @@ router.get('/schedules/view/:id', function(req, res) {
             if (authorised) {
                 res.json(schedule);
             } else {
-                return response.JSON.error.invalid(res);
+                return response.JSON.invalid(res);
             }
         });
     });
@@ -498,7 +504,7 @@ router.get('/pledges/view/:id', function(req, res) {
             if (authorised) {
                 res.json(pledge);
             } else {
-                return response.JSON.error.invalid(res);
+                return response.JSON.invalid(res);
             }
         });
     });
@@ -571,6 +577,7 @@ router.get('/pledges/users/:schedule', function(req, res) {
                     schedule: schedule
                 }, function(err, pledges){
                     if (err) return response.JSON.error.server(res, err);
+
                     res.json(pledges.map(function(p){ return p.username; }));
                 });
             } else {
@@ -832,7 +839,7 @@ router.delete('/fulfilments/ongoing/:username', m.isAdminOrCurrentUser, function
         ongoing: true
     }, function(err, fulfilment) {
         if (err) return response.JSON.error.server(res, err);
-        if (!result) return response.JSON.error.notfound(res);
+        if (!fulfilment) return response.JSON.error.notfound(res);
 
         fulfilment.delete(function(err) {
             if (err) return response.JSON.error.server(res, err);
@@ -866,21 +873,25 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
                                         
                         // Find the fulfilments that correspond to pledges
                         var fulfilled = [];
-                        pledges.forEach(function(f) {
-                            fulfilments.some(function(p) {
+                        pledges.forEach(function(p) {
+                            fulfilments.some(function(f) {
                                 if (f.username == p.username) {
-                                    fulfilled.push(p.username);
+                                    var obj = {
+                                        completion: ((schedule.start_time < f.start_time || schedule.end_time > f.end_time) ? "partial" : "full"),
+                                        username: p.username
+                                    };
+
+                                    fulfilled.push(obj);
                                     return true;
                                 }
                             });
                         });
-                        
-                        // TODO - partial / fully complete
+
                         res.json(fulfilled);
                     });
                 });
             } else {
-                return response.JSON.error.invalid(res);
+                return response.JSON.invalid(res);
             }
         });
     });

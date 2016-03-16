@@ -148,8 +148,12 @@ $(function() {
 				displayPledgesFuture(pledged);
 			} else {
 				fulfilledUsers(__id, function(fulfilled) {
+					if (fulfilled.message) {
+						return console.error(fulfilled.message);
+					};
+					var present = fulfilled.map(function(i) {return i.username});
 					var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
-					displayPledgesPast(absent, fulfilled);
+					displayPledgesPast(absent, present);
 				});
 			}
 		});

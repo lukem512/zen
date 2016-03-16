@@ -114,8 +114,12 @@ var getOnlineUsers = function(id) {
 	var url = getFulfilmentsApiUrl + '/' + id;
 	getPledgedUsers(id, function(pledged) {
 		_get(url, function(fulfilled){
-			var absent = pledged.filter(function(i) {return fulfilled.indexOf(i) < 0;});
-			displayUsers(absent, fulfilled);
+			if (fulfilled.message) {
+				return console.error(fulfilled.message);
+			};
+			var present = fulfilled.map(function(i) {return i.username});
+			var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
+			displayUsers(absent, present);
 		});
 	}, function(err) {
 		console.error(err);

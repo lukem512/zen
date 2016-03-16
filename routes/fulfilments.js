@@ -143,6 +143,8 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
 
+    // TODO - Check the user is in the same group as the owner, or admin
+
     getSchedules(fulfilment, req.user.username, function(err, schedules) {
       if (err) return error.server(req, res, err);
 
@@ -165,6 +167,11 @@ router.get('/edit/:id', function(req, res, next) {
   Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
+
+    // Check the user is the owner, or admin
+    if (fulfilment.username !== req.user.username && !req.user.admin) {
+      return error.invalid(res);
+    }
 
     var startDate = moment(fulfilment.start_time);
     var endDate = moment(fulfilment.end_time);

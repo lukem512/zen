@@ -30,9 +30,6 @@ router.get('/', function(req, res, next) {
 
 /* GET new schedule page */
 router.get('/new', function(req, res, next) {
-  
-  // TODO - check user is authenticated
-
   res.render('schedules/new', {
       title: 'Create a ' + config.dictionary.schedule.noun.singular,
       name: config.name,
@@ -49,7 +46,10 @@ router.get('/edit/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
 
-    // TODO - check user is authenticated
+    // Check the user is the owner, or admin
+    if (schedule.owner !== req.user.username && !req.user.admin) {
+      return error.invalid(res);
+    }
 
     // Format the schedule date
     var startDate = moment(schedule.start_time);
@@ -77,6 +77,8 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
 
+    // TODO - Check the user is in the same group as the owner, or admin
+    
     res.render('schedules/view', {
       title: schedule.title,
       name: config.name,
