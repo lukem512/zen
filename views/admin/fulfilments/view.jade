@@ -10,9 +10,9 @@ block content
 		.form-group
 			input#inputUsername.form-control(type="text", placeholder="Username", name="username", value="#{fulfilment.username}", disabled=true)
 		.form-group
-			input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time", value="#{fulfilment.start_time}")
+			input#inputStartTime.form-control(type="text", placeholder="Start time", name="start_time", value="#{moment(fulfilment.start_time).format('DD-MM-YYYY HH:mm:ss')}")
 		.form-group
-			input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{fulfilment.end_time}")
+			input#inputEndTime.form-control(type="text", placeholder="End time", name="end_time", value="#{moment(fulfilment.end_time).format('DD-MM-YYYY HH:mm:ss')}")
 		.form-group
 			button#btnUpdate.btn.btn-success(type="button", onclick="update();")
 				i.fa.fa-save

@@ -121,7 +121,7 @@ var displayPledgesPast = function(absent, present) {
 			" " + 
 			dictionary.fulfilment.verb.past +
 			((present.length > 1 || list.you) ? " your " : " their ") +
-			dictionary.pledge.verb.past +
+			dictionary.pledge.noun.plural +
 			" to attend.";
 	}
 
