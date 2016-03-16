@@ -7,6 +7,7 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var moment = require('moment');
 var moniker = require('moniker');
+var async = require('async');
 
 var User = require('../models/users');
 var Group = require('../models/groups');
@@ -70,8 +71,6 @@ var isSameGroupOrAdmin = function(requestingUser, resultingUser) {
 };
 
 var isSameGroupOrAdminDatabase = function(requestingUser, resultingUsername, callback) {
-    console.log('requestingUser', requestingUser, 'resultingUsername', resultingUsername);
-
     User.findOne({ username: resultingUsername }, function(err, user) {
         if (err) return callback(err);
         callback(err, isSameGroupOrAdmin(requestingUser, user));
@@ -400,32 +399,80 @@ router.delete('/schedules/update/:id', m.isAdminOrCurrentUser, function(req, res
     });
 });
 
+// Fast, unique function
+// Thanks to http://stackoverflow.com/a/9229821
+function uniqFast(a) {
+    var seen = {};
+    var out = [];
+    var len = a.length;
+    var j = 0;
+    for(var i = 0; i < len; i++) {
+         var item = a[i];
+         if(seen[item] !== 1) {
+               seen[item] = 1;
+               out[j++] = item;
+         }
+    }
+    return out;
+};
+
+var getScheduleClass = function(schedule, requestingUser) {
+    // User-owned events are green, others are red.
+    // TODO - a better colouring scheme is needed
+    return (schedule.owner == requestingUser.username) ? 'bg-success' : 'bg-danger';
+};
+
+var makeCalendarFormat = function(results, requestingUser) {
+    return results.map(function(s){
+        return {
+            title: s.title,
+            description: s.description,
+            start: moment(s.start_time).format(),
+            end: moment(s.end_time).format(),
+            owner: s.owner,
+            url: '/' + config.dictionary.schedule.noun.plural + '/view/' + s._id,
+            className: getScheduleClass(s, requestingUser)
+        }
+    });
+};
+
 // retrieve events for populating the schedules calendar
 router.get('/calendar', function(req, res) {
 
-        // User-owned events are green, others are red.
-        // TODO - a better colouring scheme is needed
-        // TODO - if the user is admin, display ALL groups
+    // Admin or not?
+    if (req.user.admin) {
 
-        // Set groups to be an empty array if its null
-        req.user.groups = req.user.groups || [];
+        // Retrieve all schedules
+        Schedule.find({}, function(err, schedules) {
+            if (err) return response.JSON.error.server(res, err); 
+            res.json(makeCalendarFormat(schedules, req.user));
+        });
+    } else {     
 
-        // Retrieve all schedules for all groups the user
-        // is a member of.
-        Schedule.groups(req.user.groups, function(err, schedules) {
-            var json = schedules.map(function(s){
-                return {
-                    title: s.title,
-                    description: s.description,
-                    start: moment(s.start_time).format(),
-                    end: moment(s.end_time).format(),
-                    owner: s.owner,
-                    url: '/' + config.dictionary.schedule.noun.plural + '/view/' + s._id,
-                    className: (s.owner == req.user.username) ? 'bg-success' : 'bg-danger'
-                }
-            });
-            res.json(json);
-        })
+        async.parallel([
+            // Find schedules owner by requesting user
+            function(next) {
+                Schedule.find({ owner: req.user.username }).exec(next);
+            },
+
+            // Find schedules in the groups of the requesting user
+            function(next) {
+                req.user.groups = req.user.groups || [];
+                Schedule.groups(req.user.groups, next);
+            }
+        ], function(err, results) {
+            if (err) return response.JSON.error.server(res, err); 
+
+            // Clean results
+            var r = results[0];
+            for (var i = 1; i < results.length; i++)
+                r = r.concat(results[i]);
+            results = uniqFast(r);
+
+            // Map them into the appropriate format
+            res.json(makeCalendarFormat(results, req.user));
+        });
+    }
 });
 
 /*
