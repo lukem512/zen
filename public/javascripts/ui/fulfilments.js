@@ -11,8 +11,15 @@ var scheduleApiUrl = '/api/pledges/username';
 var getFulfilmentsApiUrl = '/api/fulfilments/users';
 var getPledgesApiUrl = '/api/pledges/users';
 
+// Configuration
+
 var aliveTimeInterval = 10;
 var refreshTimeInterval = 10;
+
+var __schedule = {
+	current: null,
+	completed: []
+};
 
 // Form validator
 
@@ -58,8 +65,16 @@ var displaySchedule = function(schedule) {
 	 	' The ' +
 	 	dictionary.schedule.noun.singular + 
 	 	((moment().diff(schedule.start_time) > 0) ? ' began ' : ' begins ') +
+	 	'<span class=\"more-info\" data-text=\"' +
+	 	moment(schedule.start_time).calendar() + 
+	 	'\">' +
 	 	moment().to(schedule.start_time) +
-	 	'.';
+	 	'</span> and finishes ' +
+	 	'<span class=\"more-info\" data-text=\"' +
+	 	moment(schedule.end_time).calendar() + 
+	 	'\">' +
+	 	moment().to(schedule.end_time) +
+	 	'</span>.';
 	 	
 	$('#schedule').html(html);
 };
@@ -67,9 +82,22 @@ var displaySchedule = function(schedule) {
 var getSchedule = function() {
 	var url = scheduleApiUrl + '/' + user + '/now';
 	_get(url, function(response){
+		// Display the schedule
 		if (response.schedule) {
 			displaySchedule(response.schedule);
 			getOnlineUsers(response.schedule._id);
+		}
+		
+		// Update the current schedule object?
+		if (__schedule.current != response.schedule.title) {
+			if (__schedule.current) {
+				__schedule.completed.push(__schedule.current);
+			}
+			__schedule.current = (response.schedule ? response.schedule.title : null);
+
+			// Play indication sound
+			var audio = new Audio('/sounds/ding.mp3');
+			audio.play();
 		}
 	}, function(err) {
 		console.error(err);
