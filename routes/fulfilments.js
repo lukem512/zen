@@ -111,7 +111,8 @@ router.get('/', function(req, res, next) {
               // Save the schedule details
               schedules[i] = {
                 id: arr[j].schedule,
-                title: arr[j].scheduleTitle
+                title: arr[j].scheduleTitle,
+                completion: arr[j].completion
               };
 
               // But remove the pledge from the array
