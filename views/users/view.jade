@@ -8,7 +8,7 @@ block content
 			h1 #{title} (You)
 		else
 			h1= title
-	p#message.hidden
+	p#message The user's activity can be seen below.
 	#feed
 	#buttons
 		if _user.username == user.username || user.admin

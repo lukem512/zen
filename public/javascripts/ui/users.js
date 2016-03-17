@@ -36,8 +36,11 @@ var displayFeed = function(feedArray) {
 				'</article>';
 		});
 	else
-		html = '<em>Nothing to see here yet!</em'
-	$('#feed').html(html);
+		html = '<em>Nothing to see here yet!</em>';
+
+	$('#feed').fadeOut(function(){
+		$('#feed').html(html).fadeIn();
+	});
 };
 
 var getFeed = function(username) {
