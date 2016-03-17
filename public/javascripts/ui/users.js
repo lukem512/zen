@@ -45,7 +45,7 @@ var displayFeed = function(feedArray) {
 
 var getFeed = function(username) {
 	var url = feedApiUrl;
-	
+
 	if (username)
 		url += '/' + username;
 
@@ -60,7 +60,7 @@ var getFeed = function(username) {
 			displayFeed(res);
 		}
 	}, function(err) {
-		$('#message').html('We are unable to refresh this user\'s details. Please check your Internet connection or try again later.');
+		$('#message').html('We are unable to refresh your feed. Please check your Internet connection or try again later.');
 		$('#message').addClass('text-danger').removeClass('hidden');
 		console.error(err);
 	});
@@ -80,7 +80,7 @@ var getFeedGroup = function(group) {
 			displayFeed(res);
 		}
 	}, function(err) {
-		$('#message').html('We are unable to refresh this user\'s details. Please check your Internet connection or try again later.');
+		$('#message').html('We are unable to refresh your feed. Please check your Internet connection or try again later.');
 		$('#message').addClass('text-danger').removeClass('hidden');
 		console.error(err);
 	});
