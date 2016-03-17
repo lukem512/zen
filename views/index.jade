@@ -11,6 +11,10 @@ block content
 					a(href="/users/#{user.username}", title="View your profile") #{user.username}
 					| , welcome back! Take a moment to catch up on what you've missed.
 				#feed
+				p#more.small.hidden
+					button#btnMore.btn.btn-success(type="button", onclick="")
+						i.fa.fa-caret-square-o-down
+						| &nbsp; More
 
 				script.
 					$(document).ready(function(){
