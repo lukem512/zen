@@ -54,7 +54,7 @@ var getFeed = function(username) {
 			displayFeed(res);
 		}
 	}, function(err) {
-		$('#message').html('We are unable to retrieve this user\'s details. Please check your Internet connection or try again later.');
+		$('#message').html('We are unable to refresh this user\'s details. Please check your Internet connection or try again later.');
 		$('#message').addClass('text-danger').removeClass('hidden');
 		console.error(err);
 	});
