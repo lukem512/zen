@@ -31,13 +31,6 @@ var displayFeed = function(feedArray) {
 	if (feedArray.length > 0)
 		feedArray.forEach(function(f) {
 			html = html + 
-				// '<article class=\"well well-sm feed-item col-xs-12\">' +
-				// '<p class=\"small text-right text-primary\">' + moment(f.createdAt).calendar() + '</p>' +
-				// '<p>' +
-				// '<i class=\"fa ' + getIcon(f) + '\" />' +
-				// '&nbsp;&nbsp;' + f.html + 
-				// '</p>' +
-				// '</article>';
 				'<article class=\"well well-sm feed-item col-xs-12\">' +
 				'<p class=\"col-xs-12 col-sm-10\">' +
 				'<span class=\"col-xs-12 col-sm-1 text-center vcenter\"><i class=\" fa ' + getIcon(f) + '\" /></span>' +
