@@ -29,6 +29,10 @@ block content
 
 	script.
 		$(document).ready(function(){
+			// Display the loading spinner
+			$('#feed').html('<p>Loading... <i class=\"fa fa-refresh fa-spin\"></p>');
+
+			// Retrieve the feed
 			var __getFeed = function() {
 				return getFeed('#{_user.username}');
 			};
