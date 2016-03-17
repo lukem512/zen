@@ -7,7 +7,7 @@ var refreshTimeInterval = 60;
 
 // Initially get 3 days of feed
 var fromTime = new Date();
-fromTime.setDate(fromTime.getDate() - 5);
+fromTime.setDate(fromTime.getDate() - 3);
 
 var getIcon = function(feedItem) {
 	switch(feedItem.type) {

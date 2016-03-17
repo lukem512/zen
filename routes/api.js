@@ -901,11 +901,14 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
  * Feed routes
 */
 
-var humanizePledge = function(pledge, callback) {
+var humanizePledge = function(pledge, requestingUser, callback) {
     Schedule.findById(pledge.schedule, function(err, schedule) {
+
+        var you = (pledge.username === requestingUser.username);
+
         var html = '<span class=\"text-capitalize\">' + 
-            '<a href=\"/users/' + pledge.username + '\" title=\"View ' + pledge.username + '\'s profile\">' +
-            pledge.username + 
+            '<a href=\"/users/' + pledge.username + '\" title=\"View ' + (you ? 'your' : (pledge.username + '\'s')) + ' profile\">' +
+            (you ? 'you' : pledge.username) + 
             '</a></span> ' + 
             config.dictionary.pledge.verb.past + 
             ' to ';
@@ -929,10 +932,12 @@ var humanizePledge = function(pledge, callback) {
     });
 };
 
-var humanizeSchedule = function(schedule) {
+var humanizeSchedule = function(schedule, requestingUser) {
+    var you = (schedule.owner === requestingUser.username);
+
     var html = '<span class=\"text-capitalize\">' +
-        '<a href=\"/users/' + schedule.owner + '\" title=\"View ' + schedule.owner + '\'s profile\">' +
-        schedule.owner + 
+        '<a href=\"/users/' + schedule.owner + '\" title=\"View ' + (you ? 'your' : (schedule.owner + '\'s')) + ' profile\">' +
+        (you ? 'you' : schedule.owner) +
         '</a></span> created a ' + 
         config.dictionary.schedule.noun.singular + 
         ' for <a href=\"/' +
@@ -948,42 +953,63 @@ var humanizeSchedule = function(schedule) {
     return html;
 };
 
-var humanizeFulfilment = function(fulfilment) {
-    if (fulfilment.ongoing) {
-        var html = '<span class=\"text-capitalize\">' +
-            '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
-            fulfilment.username + 
-            '</a></span> is ' +
-            config.dictionary.action.verb.presentParticiple +
-            ' now! They have been ' +
-            config.dictionary.action.verb.presentParticiple + ' for ' +
-            moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() +
-            '.';
-    }
-    else {
-        var html = '<span class=\"text-capitalize\">' +
-            '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
-            fulfilment.username + 
-            '</a></span> logged a ' + 
-            config.dictionary.action.noun.singular + 
-            ' of <a href=\"/' + 
-            config.dictionary.action.noun.plural + 
-            '/view/' + 
-            fulfilment._id + 
-            '\" title=\"View the ' + 
-            config.dictionary.fulfilment.noun.singular + 
-            '\">' + 
-            moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
-            '</a> that began ' +
-            moment(fulfilment.start_time).fromNow() +
-            '.';
-    }
-        
-    return html;
+var humanizeFulfilment = function(fulfilment, requestingUser, callback) {
+    fulfilment.completes(function(err, pledges) {
+        if (err) return callback(err);
+
+        var you = (fulfilment.username === requestingUser.username);
+
+        if (fulfilment.ongoing) {
+            var html = '<span class=\"text-capitalize\">' +
+                '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
+                (you ? 'you' : fulfilment.username) + 
+                '</a></span> ' +
+                (you ? 'are ' : 'is ') +
+                config.dictionary.action.verb.presentParticiple +
+                ' now! ' +
+                (you ? 'You' : 'They') + ' have been ' +
+                config.dictionary.action.verb.presentParticiple + ' for ' +
+                moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() +
+                '.';
+        }
+        else {
+            var html = '<span class=\"text-capitalize\">' +
+                '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
+                (you ? 'you' : fulfilment.username) +
+                '</a></span> logged a ' + 
+                config.dictionary.action.noun.singular + 
+                ' of <a href=\"/' + 
+                config.dictionary.action.noun.plural + 
+                '/view/' + 
+                fulfilment._id + 
+                '\" title=\"View the ' + 
+                config.dictionary.fulfilment.noun.singular + 
+                '\">' + 
+                moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
+                '</a> that began ' +
+                moment(fulfilment.start_time).fromNow() +
+                '.';
+        }
+
+        if (pledges.length) {
+            pledges.forEach(function(p){
+                if (p.username === fulfilment.username) {
+                    var completion = (p.completion === 'partial') ? 'partially ' : '';
+                    html = html + 
+                        (you ? ' You ' : ' They ') + completion + 'completed ' + 
+                        '<a href=\"/' + config.dictionary.schedule.noun.plural + '/view/'+ p.schedule + 
+                        '\" title=\"View the ' + config.dictionary.schedule.noun.singular + '\">' + 
+                        p.scheduleTitle + '</a>.';
+                }
+            });
+        }
+            
+        callback(html);
+    });
 };
 
 // Local feed; feed for specified user
-var localFeed = function(username, fromTime, callback) {
+var localFeed = function(username, fromTime, requestingUser, callback) {
 
     fromTime = new Date(fromTime);
 
@@ -1014,7 +1040,7 @@ var localFeed = function(username, fromTime, callback) {
             
             function(next) {
                 async.each(results[0], function(pledge, _callback) {
-                    humanizePledge(pledge, function(html) {
+                    humanizePledge(pledge, requestingUser, function(html) {
                         var o = {
                         type: 'pledge',
                         html: html,
@@ -1031,7 +1057,7 @@ var localFeed = function(username, fromTime, callback) {
                 results[1].forEach(function(schedule){
                     var o = {
                         type: 'schedule',
-                        html: humanizeSchedule(schedule),
+                        html: humanizeSchedule(schedule, requestingUser),
                         createdAt: schedule.createdAt
                     };
                     resultCombined.push(o);
@@ -1039,15 +1065,19 @@ var localFeed = function(username, fromTime, callback) {
                 next();
             },
             function(next) {
-                results[2].forEach(function(fulfilment) {
-                    var o = {
-                        type: 'fulfilment',
-                        html: humanizeFulfilment(fulfilment),
-                        createdAt: fulfilment.createdAt
-                    };
-                    resultCombined.push(o);
+                async.each(results[2], function(fulfilment, _callback) {
+                    humanizeFulfilment(fulfilment, requestingUser, function(html){
+                        var o = {
+                            type: 'fulfilment',
+                            html: html,
+                            createdAt: fulfilment.createdAt
+                        };
+                        resultCombined.push(o);  
+                        _callback(); 
+                    });
+                }, function done(){
+                    next();
                 });
-                next();
             }],
             function done(err) {
                 if (err) return callback(err);
@@ -1066,7 +1096,7 @@ var localFeed = function(username, fromTime, callback) {
 };
 
 // Retrieve the feeds for an array of users (or usernames)
-var localFeeds = function(users, fromTime, callback) {
+var localFeeds = function(users, fromTime, requestingUser, callback) {
     var feedCombined = [];
 
     // Retrieve the user feeds
@@ -1077,7 +1107,7 @@ var localFeeds = function(users, fromTime, callback) {
             username = u.username;
 
         // Get the user's feed
-        localFeed(username, fromTime, function(err, items) {
+        localFeed(username, fromTime, requestingUser, function(err, items) {
             if (err) return next(err);
             feedCombined = feedCombined.concat(items);
             next();
@@ -1104,7 +1134,7 @@ var _localFeed = function(req, res) {
         if (err) return response.JSON.error.server(res, err);
 
         if (authorised) {
-            localFeed(username, fromTime, function(err, feedArray) {
+            localFeed(username, fromTime, req.user, function(err, feedArray) {
                 if (err) return response.JSON.error.server(res, err);
                 res.json(feedArray);
             });
@@ -1134,7 +1164,7 @@ var _globalFeed = function(req, res) {
             if (err) return response.JSON.error.server(res, err);
 
             // Retrieve their feeds
-            localFeeds(users, fromTime, function(err, feedCombined) {
+            localFeeds(users, fromTime, req.user, function(err, feedCombined) {
                 if (err) return response.JSON.error.server(res, err);
                 res.json(feedCombined);
             });
@@ -1155,7 +1185,7 @@ var _globalFeed = function(req, res) {
             users = uniqFast(users);
 
             // Retrieve their feeds
-            localFeeds(users, fromTime, function(err, feedCombined) {
+            localFeeds(users, fromTime, req.user, function(err, feedCombined) {
                 if (err) return response.JSON.error.server(res, err);
                 res.json(feedCombined);
             });
