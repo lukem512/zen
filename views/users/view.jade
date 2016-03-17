@@ -3,26 +3,29 @@ extends ../layout
 block content
 	script(src="/javascripts/ui/generic.js")
 	script(src="/javascripts/ui/users.js")
-	if _user.username == user.username
-		h1 #{title} (You)
-	else
-		h1= title
+	#title
+		if _user.username == user.username
+			h1 #{title} (You)
+		else
+			h1= title
 	p#message.hidden
-	p#feed
-	if _user.username == user.username
-		hr
-		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/settings'")
-			i.fa.fa-cog
-			| &nbsp; Settings
-		| &nbsp;
-	if user.admin
-		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/admin/users/view/#{_user.username}'")
-			i.fa.fa-pencil
-			| &nbsp; Edit
-		| &nbsp;
-		button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')")
-			i.fa.fa-remove
-			| &nbsp; Delete
+	#feed
+	#buttons
+		if _user.username == user.username || user.admin
+			hr
+		if _user.username == user.username
+			button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/settings'")
+				i.fa.fa-cog
+				| &nbsp; Settings
+			| &nbsp;
+		if user.admin
+			button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/admin/users/view/#{_user.username}'")
+				i.fa.fa-pencil
+				| &nbsp; Edit
+			| &nbsp;
+			button#btnDelete.btn.btn-danger(type="button", onclick="del('/', '#{_user.username}')")
+				i.fa.fa-remove
+				| &nbsp; Delete
 
 	script.
 		$(document).ready(function(){

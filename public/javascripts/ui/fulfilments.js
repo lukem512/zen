@@ -96,8 +96,11 @@ var getSchedule = function() {
 			__schedule.current = (response.schedule ? response.schedule.title : null);
 
 			// Play indication sound
-			var audio = new Audio('/sounds/ding.mp3');
-			audio.play();
+			if ($('#timer').data('state') && $('#timer').data('state') != 'stopped')
+			{
+				var audio = new Audio('/sounds/ding.mp3');
+				audio.play();
+			}
 		}
 	}, function(err) {
 		console.error(err);
@@ -314,29 +317,3 @@ var toggle = function(next) {
 			break;
 	}
 };
-
-$(function() {
-	initPickers(true);
-
-	// Is there an ongoing transaction already?
-	getApiUrl = getApiUrl + '/' + user;
-	_get(getApiUrl, function(res){
-		if (res.error) {
-			$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
-	        $('#message').addClass('text-danger');
-		}
-		else {
-			if (res.time > 0 || $.urlParam('start') == 'true') {
-				toggle();
-			}
-		}
-	}, function(err) {
-		console.error(err);
-		$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
-	    $('#message').addClass('text-danger');
-	});
-
-	// A schedule soon?
-	getSchedule();
-	setInterval(getSchedule, refreshTimeInterval * 1000);
-});

@@ -29,3 +29,28 @@ block content
 			button#btnCancel.btn.btn-danger(type="button", onclick="cancel('/#{dictionary.action.noun.plural}')")
 				i.fa.fa-times
 				| &nbsp; Cancel
+	script.
+
+		$(function() {
+			// Is there an ongoing transaction already?
+			getApiUrl = getApiUrl + '/' + user;
+			_get(getApiUrl, function(res){
+				if (res.error) {
+					$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
+			        $('#message').addClass('text-danger');
+				}
+				else {
+					if (res.time > 0 || $.urlParam('start') == 'true') {
+						toggle();
+					}
+				}
+			}, function(err) {
+				console.error(err);
+				$('#message').text('We have run into a problem and cannot log your session right now. Please try again later.');
+			    $('#message').addClass('text-danger');
+			});
+
+			// Is there a schedule soon?
+			getSchedule();
+			setInterval(getSchedule, refreshTimeInterval * 1000);
+		});

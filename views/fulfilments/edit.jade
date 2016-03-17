@@ -29,3 +29,9 @@ block content
 			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
 				i.fa.fa-remove
 				| &nbsp; Delete
+
+	script.
+		
+		$(function() {
+			initPickers(true);
+		});

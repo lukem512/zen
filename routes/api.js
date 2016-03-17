@@ -901,6 +901,69 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
  * Feed routes
 */
 
+var humanizePledge = function(pledge, callback) {
+    Schedule.findById(pledge.schedule, function(err, schedule) {
+        var html = '<span class=\"text-capitalize\">' + 
+            pledge.username + 
+            '</span> ' + 
+            config.dictionary.pledge.verb.past + 
+            ' to ';
+
+        if (err || !schedule) {
+            html += 'an <em>unknown schedule</em>.';
+        }
+        else {
+            html += '<a href=\"/' + 
+                config.dictionary.schedule.noun.plural + 
+                '/view/' + 
+                schedule._id + 
+                '\" title=\"View the ' + 
+                config.dictionary.schedule.noun.singular + 
+                '\">' + 
+                schedule.title + 
+                '</a>.';
+        }
+
+        callback(html);
+    });
+};
+
+var humanizeSchedule = function(schedule) {
+    var html = '<span class=\"text-capitalize\">' + 
+        schedule.owner + 
+        '</span> created a ' + 
+        config.dictionary.schedule.noun.singular + 
+        ' for <a href=\"/' +
+        config.dictionary.schedule.noun.plural +
+        '/view/' +
+        schedule._id + 
+        '\" title=\"View the ' + 
+        config.dictionary.schedule.noun.singular + 
+        '\">' + 
+        moment(schedule.start_time).calendar() + 
+        '</a>.';
+        
+    return html;
+};
+
+var humanizeFulfilment = function(fulfilment) {
+    var html = '<span class=\"text-capitalize\">' + 
+        fulfilment.username + 
+        '</span> ' + 
+        config.dictionary.action.verb.past + 
+        ' for <a href=\"/' + 
+        config.dictionary.action.noun.plural + 
+        '/view/' + 
+        fulfilment._id + 
+        '\" title=\"View the ' + 
+        config.dictionary.fulfilment.noun.singular + 
+        '\">' + 
+        moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
+        '</a>.';
+        
+    return html;
+};
+
 router.get('/feed', function(req, res) {
     // TODO
 
@@ -932,42 +995,58 @@ router.get('/feed/:username', function(req, res) {
                 var resultCombined = [];
 
                 // TODO - Humanize
-                results[0].forEach(function(pledge) {
-                    var o = {
-                        type: 'pledge',
-                        html: pledge.username + ' ' + config.dictionary.pledge.verb.past + ' to ' + pledge.schedule + '.',
-                        createdAt: pledge.createdAt
-                    };
-                    resultCombined.push(o);
-                });
+                async.parallel([
+                    
+                    function(next) {
+                        async.each(results[0], function(pledge, callback) {
+                            humanizePledge(pledge, function(html) {
+                                var o = {
+                                type: 'pledge',
+                                html: html,
+                                createdAt: pledge.createdAt
+                            };
+                                resultCombined.push(o);
+                                callback();
+                            });
+                        }, function done() {
+                            next();
+                        });
+                    },
+                    function(next) {
+                        results[1].forEach(function(schedule){
+                            var o = {
+                                type: 'schedule',
+                                html: humanizeSchedule(schedule),
+                                createdAt: schedule.createdAt
+                            };
+                            resultCombined.push(o);
+                        });
+                        next();
+                    },
+                    function(next) {
+                        results[2].forEach(function(fulfilment) {
+                            var o = {
+                                type: 'fulfilment',
+                                html: humanizeFulfilment(fulfilment),
+                                createdAt: fulfilment.createdAt
+                            };
+                            resultCombined.push(o);
+                        });
+                        next();
+                    }],
+                    function done(err) {
+                        if (err) return response.JSON.error.server(res, err);
 
-                results[1].forEach(function(schedule) {
-                    var o = {
-                        type: 'schedule',
-                        html: schedule.owner + ' created a ' + config.dictionary.schedule.noun.singular + ' for ' + moment(schedule.start_time).calendar() + '.',
-                        createdAt: schedule.createdAt
-                    };
-                    resultCombined.push(o);
-                });
+                        // Sort by creation date, descending
+                        resultCombined.sort(function(a, b){
+                            if (a.createdAt > b.createdAt) return -1;
+                            if (a.createdAt < b.createdAt) return 1;
+                            return 0;
+                        });
 
-                results[2].forEach(function(fulfilment) {
-                    var o = {
-                        type: 'fulfilment',
-                        html: fulfilment.username + ' ' + config.dictionary.action.verb.past + ' for ' + moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + '.',
-                        createdAt: fulfilment.createdAt
-                    };
-                    resultCombined.push(o);
-                });
-
-                // Sort by creation date, descending
-                resultCombined.sort(function(a, b){
-                    if (a.createdAt > b.createdAt) return -1;
-                    if (a.createdAt < b.createdAt) return 1;
-                    return 0;
-                });
-
-                // Return as array
-                return res.json(resultCombined);
+                        // Return as array
+                        return res.json(resultCombined);
+                    });
             });
         } else {
             return response.JSON.invalid(res);

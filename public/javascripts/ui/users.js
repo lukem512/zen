@@ -5,14 +5,35 @@ var feedApiUrl = '/api/feed';
 // Refresh every 60 seconds
 var refreshTimeInterval = 60;
 
+var getIcon = function(feedItem) {
+	switch(feedItem.type) {
+		case 'schedule':
+			return 'fa-calendar-plus-o';
+
+		case 'pledge':
+			return 'fa-calendar-check-o';
+
+		case 'fulfilment':
+			return 'fa-hourglass-half';
+
+		default:
+			return 'fa-question';
+		break;
+	}
+}
+
 var displayFeed = function(feedArray) {
 	var html = '';
 	if (feedArray.length > 0)
 		feedArray.forEach(function(f) {
 			html = html + 
-				'<p class=\"feed-item\">' +
-				f.html +
-				'</p>';
+				'<article class=\"well well-sm feed-item col-xs-12\">' +
+				'<header class=\"small pull-right text-primary\">' + moment(f.createdAt).calendar() + '</header>' +
+				'<p>' +
+				'<i class=\"fa ' + getIcon(f) + '\" />' +
+				'&nbsp;&nbsp;' + f.html + 
+				'</p>' +
+				'</article>';
 		});
 	else
 		html = '<em>Nothing to see here yet!</em'
