@@ -29,28 +29,38 @@ router.get('/', function(req, res, next) {
 
 /* GET authentication page */
 router.get('/auth', function(req, res, next) {
-  res.render('authenticate', {
-  	title: 'Sign in',
-  	name: config.name,
-  	organisation: config.organisation,
-  	nav: config.nav(),
-    user: req.user,
-    dictionary: config.dictionary,
-    pages: config.pages
-  });
+  if (req.user) {
+    res.redirect('/');
+  }
+  else {
+    res.render('authenticate', {
+    	title: 'Sign in',
+    	name: config.name,
+    	organisation: config.organisation,
+    	nav: config.nav(),
+      user: req.user,
+      dictionary: config.dictionary,
+      pages: config.pages
+    });
+  }
 });
 
 /* GET sign out page */
 router.get('/end', function(req, res, next) {
-  res.render('end', {
-    title: 'Sign out',
-    name: config.name,
-    organisation: config.organisation,
-    nav: config.nav(),
-    user: req.user,
-    dictionary: config.dictionary,
-    pages: config.pages
-  });
+  if (req.user) {
+    res.redirect('/');
+  }
+  else {
+    res.render('end', {
+      title: 'Sign out',
+      name: config.name,
+      organisation: config.organisation,
+      nav: config.nav(),
+      user: req.user,
+      dictionary: config.dictionary,
+      pages: config.pages
+    });
+  }
 });
 
 /* GET settings page */

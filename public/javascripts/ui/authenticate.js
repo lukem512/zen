@@ -54,11 +54,6 @@ $(document).ready(function(){
 
 	// Remove any programming characters
 	nextUrl = nextUrl.replace(/[!'{}()*;]/g, '*');
-
-	// Is the user already auth'd?
-	if (typeof user !== 'undefined') {
-		window.location = nextUrl;
-	}
 })
 
 $(document).keypress(function(e){

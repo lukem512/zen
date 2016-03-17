@@ -8,6 +8,9 @@ block content
 	form#formEditSchedule(name="editschedule",role="form",method="post",action="/api/schedules/new")
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title", value="#{schedule.title}")
+		if user.admin
+			.form-group
+				input#inputOwner.form-control(type="text", placeholder="Owner", name="owner", value="#{schedule.owner}", disabled)
 		.row
 			.form-group.col-xs-6
 				input#inputStartDate.form-control(type="text", placeholder="Start date", name="start_date", value="#{start_date}")
