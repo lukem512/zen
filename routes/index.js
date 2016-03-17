@@ -7,18 +7,24 @@ var config = require('../config');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', {
-  	title: 'Welcome to ' + config.name,
-  	header: {
-  		content: '<h1>Are you ready to supercharge your ' + config.dictionary.action.noun.singular + ' sessions?</h1>'
-  	},
-  	name: config.name,
-  	organisation: config.organisation,
-  	nav: config.nav(),
+  var params = {
+    title: 'Activity Feed',
+    name: config.name,
+    organisation: config.organisation,
+    nav: config.nav(),
     user: req.user,
     dictionary: config.dictionary,
     pages: config.pages
-  });
+  };
+
+  if (!req.user) {
+    params.title = 'Welcome to ' + config.name;
+    params.header = {
+      content: '<h1>Are you ready to supercharge your ' + config.dictionary.action.noun.singular + ' sessions?</h1>'
+    };
+  }
+
+  res.render('index', params);
 });
 
 /* GET authentication page */

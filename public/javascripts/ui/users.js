@@ -44,7 +44,30 @@ var displayFeed = function(feedArray) {
 };
 
 var getFeed = function(username) {
-	var url = feedApiUrl + '/' + username;
+	var url = feedApiUrl;
+	
+	if (username)
+		url += '/' + username;
+
+	_get(url, function(res) {
+		if (res.message) {
+			// Not authorised
+			$('#message').html('Psst... you\'re not meant to be here!');
+			$('#message').addClass('text-danger').removeClass('hidden');
+			console.error(res.message);
+		}
+		else {
+			displayFeed(res);
+		}
+	}, function(err) {
+		$('#message').html('We are unable to refresh this user\'s details. Please check your Internet connection or try again later.');
+		$('#message').addClass('text-danger').removeClass('hidden');
+		console.error(err);
+	});
+};
+
+var getFeedGroup = function(group) {
+	var url = feedApiUrl;
 
 	_get(url, function(res) {
 		if (res.message) {

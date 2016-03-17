@@ -4,7 +4,25 @@ block content
 	.container
 		.col-lg-12
 			h1= title
-			p
-				| This is #{name}, an application that will help you #{dictionary.action.verb.present} and increase your productivity. Create a #{dictionary.schedule.noun.singular}, #{dictionary.pledge.verb.present} to #{dictionary.action.verb.present} with others and track your progress &mdash; just click  
-				a(href="/auth/") sign in
-				|  to get started!
+			if user
+				script(src="/javascripts/ui/generic.js")
+				script(src="/javascripts/ui/users.js")
+				p#message Hello 
+					a(href="/users/#{user.username}", title="View your profile") #{user.username}
+					| , welcome back! Take a moment to catch up on what you've missed.
+				#feed
+
+				script.
+					$(document).ready(function(){
+						// Display the loading spinner
+						$('#feed').html('<p>Loading... <i class=\"fa fa-refresh fa-spin\"></p>');
+
+						// Retrieve the feed
+						getFeed();
+						setInterval(getFeed, refreshTimeInterval * 1000)
+					});
+			else
+				p
+					| This is #{name}, an application that will help you #{dictionary.action.verb.present} and increase your productivity. Create a #{dictionary.schedule.noun.singular}, #{dictionary.pledge.verb.present} to #{dictionary.action.verb.present} with others and track your progress &mdash; just click  
+					a(href="/auth/") sign in
+					|  to get started!

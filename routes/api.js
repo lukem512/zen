@@ -904,8 +904,9 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
 var humanizePledge = function(pledge, callback) {
     Schedule.findById(pledge.schedule, function(err, schedule) {
         var html = '<span class=\"text-capitalize\">' + 
+            '<a href=\"/users/' + pledge.username + '\" title=\"View ' + pledge.username + '\'s profile\">' +
             pledge.username + 
-            '</span> ' + 
+            '</a></span> ' + 
             config.dictionary.pledge.verb.past + 
             ' to ';
 
@@ -929,9 +930,10 @@ var humanizePledge = function(pledge, callback) {
 };
 
 var humanizeSchedule = function(schedule) {
-    var html = '<span class=\"text-capitalize\">' + 
+    var html = '<span class=\"text-capitalize\">' +
+        '<a href=\"/users/' + schedule.owner + '\" title=\"View ' + schedule.owner + '\'s profile\">' +
         schedule.owner + 
-        '</span> created a ' + 
+        '</a></span> created a ' + 
         config.dictionary.schedule.noun.singular + 
         ' for <a href=\"/' +
         config.dictionary.schedule.noun.plural +
@@ -948,8 +950,9 @@ var humanizeSchedule = function(schedule) {
 
 var humanizeFulfilment = function(fulfilment) {
     var html = '<span class=\"text-capitalize\">' + 
+        '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
         fulfilment.username + 
-        '</span> ' + 
+        '</a></span> ' + 
         config.dictionary.action.verb.past + 
         ' for <a href=\"/' + 
         config.dictionary.action.noun.plural + 
@@ -964,14 +967,151 @@ var humanizeFulfilment = function(fulfilment) {
     return html;
 };
 
+// Retrieve the feed of a user
+var localFeed = function(username, callback) {
+    async.parallel([
+        function(next) {
+            Pledge.find({username: username}).exec(next);
+        },
+        function(next) {
+            Schedule.find({owner: username}).exec(next);
+        },
+        function(next) {
+            Fulfilment.find({username: username}).exec(next);
+        }
+    ], function(err, results) {
+
+        var resultCombined = [];
+
+        // Humanize the entries!
+        async.parallel([
+            
+            function(next) {
+                async.each(results[0], function(pledge, _callback) {
+                    humanizePledge(pledge, function(html) {
+                        var o = {
+                        type: 'pledge',
+                        html: html,
+                        createdAt: pledge.createdAt
+                    };
+                        resultCombined.push(o);
+                        _callback();
+                    });
+                }, function done() {
+                    next();
+                });
+            },
+            function(next) {
+                results[1].forEach(function(schedule){
+                    var o = {
+                        type: 'schedule',
+                        html: humanizeSchedule(schedule),
+                        createdAt: schedule.createdAt
+                    };
+                    resultCombined.push(o);
+                });
+                next();
+            },
+            function(next) {
+                results[2].forEach(function(fulfilment) {
+                    var o = {
+                        type: 'fulfilment',
+                        html: humanizeFulfilment(fulfilment),
+                        createdAt: fulfilment.createdAt
+                    };
+                    resultCombined.push(o);
+                });
+                next();
+            }],
+            function done(err) {
+                if (err) return callback(err);
+
+                // Sort by creation date, descending
+                resultCombined.sort(function(a, b){
+                    if (a.createdAt > b.createdAt) return -1;
+                    if (a.createdAt < b.createdAt) return 1;
+                    return 0;
+                });
+
+                // Return as array
+                callback(err, resultCombined);
+            });
+    });
+};
+
+// Retrieve the feeds for an array of users (or usernames)
+var localFeeds = function(users, callback) {
+    var feedCombined = [];
+
+    // Retrieve the user feeds
+    async.each(users, function(u, next) {
+        // Is the input an object or a username?
+        var username = u;
+        if (u && u.username)
+            username = u.username;
+
+        // Get the user's feed
+        localFeed(username, function(err, items) {
+            if (err) return next(err);
+            feedCombined = feedCombined.concat(items);
+            next();
+        });
+    }, function done(err) {
+        if (err) return callback(err);
+
+        // Interlace the entries in chronological order
+        feedCombined.sort(function(a, b){
+            if (a.createdAt > b.createdAt) return -1;
+            if (a.createdAt < b.createdAt) return 1;
+            return 0;
+        });
+
+        callback(err, feedCombined)
+    });
+};
+
+// TODO - feed entries more recent than a specified point
+
+// Global feed; all users in requesting user's group
 router.get('/feed', function(req, res) {
-    // TODO
+    var users = [];
 
-    // Get user feed for all users in group of requesting user
+    if (req.user.admin) {
+        // Get all the users
+        User.find({}, function(err, users) {
+            if (err) return response.JSON.error.server(res, err);
 
-    // Interlace them in chronological order
+            // Retrieve their feeds
+            localFeeds(users, function(err, feedCombined) {
+                if (err) return response.JSON.error.server(res, err);
+                res.json(feedCombined);
+            });
+        });
+    }
+    else {
+        // Get all the users from all groups of the requesting user
+        async.each(req.user.groups, function(g, callback) {
+            Group.members(g, function(err, _users) {
+                if (err) return callback(err);
+                users = users.concat(_users);
+                callback();
+            });
+        }, function done(err) {
+            if (err) return response.JSON.error.server(res, err);
+
+            // Remove duplicate users from the array
+            users = uniqFast(users);
+
+            // Retrieve their feeds
+            localFeeds(users, function(err, feedCombined) {
+                if (err) return response.JSON.error.server(res, err);
+                res.json(feedCombined);
+            });
+        });
+    }
 });
 
+// Local feed; feed for specified user
 router.get('/feed/:username', function(req, res) {
     var username = sanitize(req.params.username);
 
@@ -979,74 +1119,9 @@ router.get('/feed/:username', function(req, res) {
         if (err) return response.JSON.error.server(res, err);
 
         if (authorised) {
-            // Retrieve pledges, schedules and fulfilments, most-recent first
-            async.parallel([
-                function(next) {
-                    Pledge.find({username: username}).exec(next);
-                },
-                function(next) {
-                    Schedule.find({owner: username}).exec(next);
-                },
-                function(next) {
-                    Fulfilment.find({username: username}).exec(next);
-                }
-            ], function(err, results) {
-
-                var resultCombined = [];
-
-                // TODO - Humanize
-                async.parallel([
-                    
-                    function(next) {
-                        async.each(results[0], function(pledge, callback) {
-                            humanizePledge(pledge, function(html) {
-                                var o = {
-                                type: 'pledge',
-                                html: html,
-                                createdAt: pledge.createdAt
-                            };
-                                resultCombined.push(o);
-                                callback();
-                            });
-                        }, function done() {
-                            next();
-                        });
-                    },
-                    function(next) {
-                        results[1].forEach(function(schedule){
-                            var o = {
-                                type: 'schedule',
-                                html: humanizeSchedule(schedule),
-                                createdAt: schedule.createdAt
-                            };
-                            resultCombined.push(o);
-                        });
-                        next();
-                    },
-                    function(next) {
-                        results[2].forEach(function(fulfilment) {
-                            var o = {
-                                type: 'fulfilment',
-                                html: humanizeFulfilment(fulfilment),
-                                createdAt: fulfilment.createdAt
-                            };
-                            resultCombined.push(o);
-                        });
-                        next();
-                    }],
-                    function done(err) {
-                        if (err) return response.JSON.error.server(res, err);
-
-                        // Sort by creation date, descending
-                        resultCombined.sort(function(a, b){
-                            if (a.createdAt > b.createdAt) return -1;
-                            if (a.createdAt < b.createdAt) return 1;
-                            return 0;
-                        });
-
-                        // Return as array
-                        return res.json(resultCombined);
-                    });
+            localFeed(username, function(err, feedArray) {
+                if (err) return response.JSON.error.server(res, err);
+                res.json(feedArray);
             });
         } else {
             return response.JSON.invalid(res);
