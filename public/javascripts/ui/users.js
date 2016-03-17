@@ -5,6 +5,10 @@ var feedApiUrl = '/api/feed';
 // Refresh every 60 seconds
 var refreshTimeInterval = 60;
 
+// Initially get 3 days of feed
+var fromTime = new Date();
+fromTime.setDate(fromTime.getDate() - 5);
+
 var getIcon = function(feedItem) {
 	switch(feedItem.type) {
 		case 'schedule':
@@ -47,7 +51,9 @@ var getFeed = function(username) {
 	var url = feedApiUrl;
 
 	if (username)
-		url += '/' + username;
+		url = url + '/user/' + username;
+
+	url = url + '/from/' + fromTime;
 
 	_get(url, function(res) {
 		if (res.message) {
@@ -60,27 +66,7 @@ var getFeed = function(username) {
 			displayFeed(res);
 		}
 	}, function(err) {
-		$('#message').html('We are unable to refresh your feed. Please check your Internet connection or try again later.');
-		$('#message').addClass('text-danger').removeClass('hidden');
-		console.error(err);
-	});
-};
-
-var getFeedGroup = function(group) {
-	var url = feedApiUrl;
-
-	_get(url, function(res) {
-		if (res.message) {
-			// Not authorised
-			$('#message').html('Psst... you\'re not meant to be here!');
-			$('#message').addClass('text-danger').removeClass('hidden');
-			console.error(res.message);
-		}
-		else {
-			displayFeed(res);
-		}
-	}, function(err) {
-		$('#message').html('We are unable to refresh your feed. Please check your Internet connection or try again later.');
+		$('#message').html('We are unable to refresh the feed. Please check your Internet connection or try again later.');
 		$('#message').addClass('text-danger').removeClass('hidden');
 		console.error(err);
 	});

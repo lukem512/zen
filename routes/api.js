@@ -949,35 +949,61 @@ var humanizeSchedule = function(schedule) {
 };
 
 var humanizeFulfilment = function(fulfilment) {
-    var html = '<span class=\"text-capitalize\">' + 
-        '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
-        fulfilment.username + 
-        '</a></span> ' + 
-        config.dictionary.action.verb.past + 
-        ' for <a href=\"/' + 
-        config.dictionary.action.noun.plural + 
-        '/view/' + 
-        fulfilment._id + 
-        '\" title=\"View the ' + 
-        config.dictionary.fulfilment.noun.singular + 
-        '\">' + 
-        moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
-        '</a>.';
+    if (fulfilment.ongoing) {
+        var html = '<span class=\"text-capitalize\">' +
+            '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
+            fulfilment.username + 
+            '</a></span> is ' +
+            config.dictionary.action.verb.presentParticiple +
+            ' now! They have been ' +
+            config.dictionary.action.verb.presentParticiple + ' for ' +
+            moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() +
+            '.';
+    }
+    else {
+        var html = '<span class=\"text-capitalize\">' +
+            '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + fulfilment.username + '\'s profile\">' +
+            fulfilment.username + 
+            '</a></span> logged a ' + 
+            config.dictionary.action.noun.singular + 
+            ' of <a href=\"/' + 
+            config.dictionary.action.noun.plural + 
+            '/view/' + 
+            fulfilment._id + 
+            '\" title=\"View the ' + 
+            config.dictionary.fulfilment.noun.singular + 
+            '\">' + 
+            moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
+            '</a> that began ' +
+            moment(fulfilment.start_time).fromNow() +
+            '.';
+    }
         
     return html;
 };
 
-// Retrieve the feed of a user
-var localFeed = function(username, callback) {
+// Local feed; feed for specified user
+var localFeed = function(username, fromTime, callback) {
+
+    fromTime = new Date(fromTime);
+
+    // No fromTime specified?
+    if (!fromTime || isNaN(fromTime.getTime())) {
+        // Use three days in the past
+        var threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        fromTime = threeDaysAgo;
+    }
+
     async.parallel([
         function(next) {
-            Pledge.find({username: username}).exec(next);
+            Pledge.find({username: username, createdAt: { $gte: fromTime } }).exec(next);
         },
         function(next) {
-            Schedule.find({owner: username}).exec(next);
+            Schedule.find({owner: username, createdAt: { $gte: fromTime }}).exec(next);
         },
         function(next) {
-            Fulfilment.find({username: username}).exec(next);
+            Fulfilment.find({username: username, createdAt: { $gte: fromTime }}).exec(next);
         }
     ], function(err, results) {
 
@@ -1040,7 +1066,7 @@ var localFeed = function(username, callback) {
 };
 
 // Retrieve the feeds for an array of users (or usernames)
-var localFeeds = function(users, callback) {
+var localFeeds = function(users, fromTime, callback) {
     var feedCombined = [];
 
     // Retrieve the user feeds
@@ -1051,7 +1077,7 @@ var localFeeds = function(users, callback) {
             username = u.username;
 
         // Get the user's feed
-        localFeed(username, function(err, items) {
+        localFeed(username, fromTime, function(err, items) {
             if (err) return next(err);
             feedCombined = feedCombined.concat(items);
             next();
@@ -1070,11 +1096,37 @@ var localFeeds = function(users, callback) {
     });
 };
 
-// TODO - feed entries more recent than a specified point
+var _localFeed = function(req, res) {
+    var username = sanitize(req.params.username);
+    var fromTime = sanitize(req.params.from);
+
+    isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
+        if (err) return response.JSON.error.server(res, err);
+
+        if (authorised) {
+            localFeed(username, fromTime, function(err, feedArray) {
+                if (err) return response.JSON.error.server(res, err);
+                res.json(feedArray);
+            });
+        } else {
+            return response.JSON.invalid(res);
+        }
+    });
+};
+
+router.get('/feed/user/:username/from/:from', function(req, res) {
+    _localFeed(req, res);
+});
+
+router.get('/feed/user/:username', function(req, res) {
+    _localFeed(req, res);
+});
 
 // Global feed; all users in requesting user's group
-router.get('/feed', function(req, res) {
+var _globalFeed = function(req, res) {
     var users = [];
+
+    var fromTime = sanitize(req.params.from);
 
     if (req.user.admin) {
         // Get all the users
@@ -1082,7 +1134,7 @@ router.get('/feed', function(req, res) {
             if (err) return response.JSON.error.server(res, err);
 
             // Retrieve their feeds
-            localFeeds(users, function(err, feedCombined) {
+            localFeeds(users, fromTime, function(err, feedCombined) {
                 if (err) return response.JSON.error.server(res, err);
                 res.json(feedCombined);
             });
@@ -1103,30 +1155,20 @@ router.get('/feed', function(req, res) {
             users = uniqFast(users);
 
             // Retrieve their feeds
-            localFeeds(users, function(err, feedCombined) {
+            localFeeds(users, fromTime, function(err, feedCombined) {
                 if (err) return response.JSON.error.server(res, err);
                 res.json(feedCombined);
             });
         });
     }
+};
+
+router.get('/feed', function(req, res) {
+    _globalFeed(req, res);
 });
 
-// Local feed; feed for specified user
-router.get('/feed/:username', function(req, res) {
-    var username = sanitize(req.params.username);
-
-    isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
-        if (err) return response.JSON.error.server(res, err);
-
-        if (authorised) {
-            localFeed(username, function(err, feedArray) {
-                if (err) return response.JSON.error.server(res, err);
-                res.json(feedArray);
-            });
-        } else {
-            return response.JSON.invalid(res);
-        }
-    });
+router.get('/feed/from/:from', function(req, res) {
+    _globalFeed(req, res);
 });
 
 /*
