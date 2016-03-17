@@ -20,6 +20,9 @@ var response = require('./response');
 
 var config = require('../config');
 
+var pastScheduleError = 'Cannot delete past schedules';
+var notAuthorisedError = 'Not authorised';
+
 /*
  * Authentication functions.
 */
@@ -156,7 +159,7 @@ router.delete('/users/update/:username', m.isAdmin, function(req, res) {
             Schedule.find( { owner: username }, function(err, schedules) {
                 if (err) return response.JSON.error.server(res, err);
                 schedules.forEach(function(schedule) {
-                    deleteSchedule(schedule._id, function(err, result) {
+                    deleteSchedule(schedule._id, req.user, function(err, result) {
                         if (err) return console.error(err);
                         if (!result) return console.error('Unable to locate schedule ' + schedule._id);
                     });
@@ -341,6 +344,11 @@ router.get('/schedules/view/:id', function(req, res) {
     });
 });
 
+// Is the schedule in the past?
+var schedulePast = function(schedule) {
+    return (moment().diff(schedule.end_time) > 0);
+};
+
 router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
     var username = sanitize(req.body.username);
 
@@ -351,6 +359,10 @@ router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
         end_time: new Date(req.body.end_time),
         owner: username
     });
+
+    if (schedulePast(schedule) && !requestingUser.admin) {
+        return response.JSON.invalid(res);
+    }
 
     schedule.save(function(err, doc) {
         if (err) return response.JSON.error.server(res, err);
@@ -363,22 +375,41 @@ router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
 });
 
 router.post('/schedules/update', m.isAdminOrCurrentUser, function(req, res) {
-    Schedule.findByIdAndUpdate(sanitize(req.body.id), {
-        title: sanitize(req.body.title),
-        description: sanitize(req.body.description),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time),
-        owner: sanitize(req.body.owner)
-    }, function(err, result) {
+    Schedule.findById(sanitize(req.body.id), function(err, schedule) {
         if (err) return response.JSON.error.server(res, err);
-        if (!result) return response.JSON.error.notfound(res);
-        response.JSON.ok(res);
+
+        // Check the schedule isn't in the past
+        if (schedulePast(schedule) && !requestingUser.admin) {
+            return response.JSON.invalid(res);
+        }
+
+        schedule.update({
+            title: sanitize(req.body.title),
+            description: sanitize(req.body.description),
+            start_time: new Date(req.body.start_time),
+            end_time: new Date(req.body.end_time),
+            owner: sanitize(req.body.owner)
+        }, function(err, result) {
+            if (err) return response.JSON.error.server(res, err);
+            if (!result) return response.JSON.error.notfound(res);
+            response.JSON.ok(res);
+        });
     });
 });
 
-var deleteSchedule = function(id, callback) {
+var deleteSchedule = function(id, requestingUser, callback) {
     Schedule.findById(id, function(err, schedule) {
         if (err || !schedule) return callback(err);
+
+        // Check for Admin, or current User
+        if (schedule.owner != requestingUser.username && !requestingUser.admin) {
+            return callback(notAuthorisedError);
+        }
+
+        // Check the schedule isn't in the past
+        if (schedulePast(schedule) && !requestingUser.admin) {
+            return callback(pastScheduleError);
+        }
 
         schedule.delete(function(err) {
             if (err) return callback(err);
@@ -397,9 +428,20 @@ var deleteSchedule = function(id, callback) {
     });
 };
 
-router.delete('/schedules/update/:id', m.isAdminOrCurrentUser, function(req, res) {
-    deleteSchedule(sanitize(req.params.id), function(err, result) {
-        if (err) return response.JSON.error.server(res, err);
+router.delete('/schedules/update/:id', function(req, res) {
+    deleteSchedule(sanitize(req.params.id), req.user, function(err, result) {
+        if (err) {
+            switch (err) {
+                case pastScheduleError:
+                    return response.JSON.invalid(res);
+
+                case notAuthorisedError:
+                    res.status(403).json({message: notAuthorisedError});
+
+                default:
+                    return response.JSON.error.server(res, err);
+            }
+        }
         if (!result) return response.JSON.error.notfound(res);
         response.JSON.ok(res);
     });
@@ -538,6 +580,8 @@ router.delete('/pledges/update/:id', m.isAdminOrCurrentUser, function(req, res) 
         if (err) return response.JSON.error.server(res, err);
         if (!pledge) return response.JSON.error.notfound(res);
 
+        // TODO - can't delete a pledge for a past schedule
+
         pledge.delete(function(err) {
             if (err) return response.JSON.error.server(res, err);
             response.JSON.ok(res);
@@ -545,13 +589,20 @@ router.delete('/pledges/update/:id', m.isAdminOrCurrentUser, function(req, res) 
     });
 });
 
-router.delete('/pledges/update/schedule/:schedule/username/:username', m.isAdminOrCurrentUser, function(req, res) {
+router.delete('/pledges/update/schedule/:schedule/username/:username', function(req, res) {
     Pledge.findOne({
         schedule: sanitize(req.params.schedule),
         username: sanitize(req.params.username)
     }, function(err, pledge) {
         if (err) return response.JSON.error.server(res, err);
         if (!pledge) return response.JSON.error.notfound(res);
+
+        // Check for Admin, or current User
+        if (pledge.username != req.user.username && !req.user.admin) {
+            return res.status(403).json({message: notAuthorisedError});
+        }
+
+        // TODO - can't delete a pledge for a past schedule
 
         pledge.delete(function(err) {
             if (err) return response.JSON.error.server(res, err);
@@ -668,22 +719,57 @@ router.post('/fulfilments/new', m.isAdminOrCurrentUser, function(req, res) {
     });
 });
 
+var recentFulfilment = function(fulfilment) {
+
+    // Is the end in the future?
+    if (moment().diff(fulfilment.end_time) < 0 || fulfilment.ongoing)
+        return true;
+
+    // Was it created recently?
+    if (moment().diff(fulfilment.createdAt, 'minutes') < 15)
+        return true;
+
+    return false;
+};
+
 router.post('/fulfilments/update', m.isAdminOrCurrentUser, function(req, res) {
-    Fulfilment.findByIdAndUpdate(sanitize(req.body.id), {
-        username: sanitize(req.body.username),
-        start_time: new Date(req.body.start_time),
-        end_time: new Date(req.body.end_time)
-    }, function(err, result) {
+    Fulfilment.findById(sanitize(req.body.id), function(err, fulfilment) {
         if (err) return response.JSON.error.server(res, err);
-        response.JSON.ok(res);
+        if (!fulfilment) return response.JSON.error.notfound(res);
+        
+        // A fulfilment should only be modifiable for a small amount of time
+        // after creating it
+        if (!recentFulfilment(fulfilment)) {
+            return response.JSON.invalid(res);
+        }
+
+        fulfilment.update({
+            username: sanitize(req.body.username),
+            start_time: new Date(req.body.start_time),
+            end_time: new Date(req.body.end_time)
+        }, function(err, result) {
+            if (err) return response.JSON.error.server(res, err);
+            response.JSON.ok(res);
+        });
     });
 });
 
 /* DELETE to fulfilment update service */
-router.delete('/fulfilments/update/:id', m.isAdminOrCurrentUser, function(req, res) {
+router.delete('/fulfilments/update/:id', function(req, res) {
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment) {
         if (err) return response.JSON.error.server(res, err);
         if (!fulfilment) return response.JSON.error.notfound(res);
+
+        // Check for current user or admin
+        if (fulfilment.username != req.user.username && !req.user.admin) {
+            return res.status(403).json({message: notAuthorisedError});
+        }
+
+        // A fulfilment should only be modifiable for a small amount of time
+        // after creating it
+        if (!recentFulfilment(fulfilment)) {
+            return response.JSON.invalid(res);
+        }
 
         fulfilment.delete(function(err) {
             if (err) return response.JSON.error.server(res, err);
@@ -692,6 +778,7 @@ router.delete('/fulfilments/update/:id', m.isAdminOrCurrentUser, function(req, r
     });
 });
 
+// TODO - restrict to those pledges in the group of the requesting user
 function _completes(req, res, callback) {
     Fulfilment.completes(sanitize(req.params.id), function(err, pledges){
        if (err) return response.JSON.error.server(res, err);
@@ -700,16 +787,14 @@ function _completes(req, res, callback) {
     });
 }
 
-// pledges completed by fulfilment
-// TODO - restrict to those pledges in the group of the requesting user
+// Pledges completed by fulfilment
 router.get('/fulfilments/view/:id/completes', function(req, res) {
     _completes(req, res, function(pledges){
         res.json(pledges);
     });
 });
 
-// pledges of specified completion status by fulfilment
-// TODO - restrict to those pledges in the group of the requesting user
+// Pledges of specified completion status by fulfilment
 router.get('/fulfilments/view/:id/completes/:status', function(req, res) {
     _completes(req, res, function(pledges){
         res.json(pledges.filter(function(p){

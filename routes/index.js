@@ -47,7 +47,7 @@ router.get('/auth', function(req, res, next) {
 
 /* GET sign out page */
 router.get('/end', function(req, res, next) {
-  if (req.user) {
+  if (!req.user) {
     res.redirect('/');
   }
   else {

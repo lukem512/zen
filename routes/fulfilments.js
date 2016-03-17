@@ -38,8 +38,6 @@ var getStats = function(fulfilments, schedules) {
   // Compute average time per week
   stats.weeklyAverage = (stats.weeks > 0) ? (stats.total / stats.weeks) : stats.total;
 
-  console.log('Stats',stats);
-
   // Count scheduled sessions
   // Only count those in the future!
   schedules.forEach(function(s) {
