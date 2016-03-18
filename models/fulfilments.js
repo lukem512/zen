@@ -55,6 +55,7 @@ Schedule.during(fulfilment.start_time, fulfilment.end_time, function(err, schedu
 
     // Find pledges and add completion status
     Pledge.find({
+      username: fulfilment.username,
       schedule: { $in: schedules.map(function(s){
         return s._id;
       }) }

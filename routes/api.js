@@ -1322,6 +1322,9 @@ var _globalFeed = function(req, res) {
             // Remove duplicate users from the array
             users = uniqFast(users);
 
+            // Add the user to the array
+            users.push(req.user);
+
             // Retrieve their feeds
             localFeeds(users, fromTime, req.user, function(err, feedCombined) {
                 if (err) return response.JSON.error.server(res, err);
