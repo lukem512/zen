@@ -117,17 +117,18 @@ var displayUsers = function(absent, present) {
 		html =
 			html +
 			presentList.html +
-			((absent.length > 1) ? " are " : " is ") + 
+			((absentList.n > 1 || list.you) ? " are " : " is ") + 
 			"online!";
 	}
 
 	var absentList = listUsers(absent, true);
 	if (absentList.n > 0) {
+		var 
 		html =
 			html +
 			((html.length > 0) ? " " : "") +
 			absentList.html +
-			((absent.length > 1) ? " are " : " is ") + 
+			((absentList.n > 1 || list.you) ? " are " : " is ") + 
 			"not online.";
 	}
 

@@ -477,8 +477,6 @@ var makeCalendarFormat = function(results, requestingUser, callback) {
         getScheduleClass(s, requestingUser, function(err, scheduleClass) {
             if (err) return next(err);
 
-
-
             formatted.push ({
                 title: s.title,
                 description: s.description,

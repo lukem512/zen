@@ -69,7 +69,7 @@ var add = function(next) {
 var update = function(next, id) {
 	var next = next || listViewUrl;
 	var dates = makeDates();
-	var id = id || $('#scheduleId').text();
+	var id = id || window.__id;
 	var owner = $('#inputOwner').find(":selected").text() || $('#inputOwner').val();
 	if (validate() && dates.start.isValid() && dates.end.isValid()){
 		var params = {
@@ -86,25 +86,35 @@ var update = function(next, id) {
 
 var del = function(next, id) {
 	var next = next || listViewUrl;
-	var id = id || $('#scheduleId').text();
+	var id = id || window.__id;
 	_del(updateApiUrl, next, id);
 };
 
 var displayPledgesFuture = function(users) {
+	var you = false;
+	users.some(function(u) { if (u == user) { you = true; } return you; });
 
-	var list = listUsers(users);
-
-	var html =
-		((users.length) ? "" : "Nobody") +
-		list.html +
-		((users.length > 1 || list.you) ? " have " : " has ") +
-		dictionary.pledge.verb.past +
-		" to attend.";
+	var html = "";
+	var list = listUsers(users, true);
+	if (list.n == 0) {
+		html = "<em>Nobody" +
+			(you ? " else" : "") +
+			" has " +
+			dictionary.pledge.verb.past +
+			" to attend.</em>";
+	}
+	else {
+		html = list.html +
+			((list.n > 1) ? " have " : " has ") +
+			(you ? "also " : "") +
+			dictionary.pledge.verb.past +
+			" to attend.";
+	}
 
 	$('#pledges').html(html);
 
 	// Change button state
-	if (list.you) {
+	if (you) {
 		$('#btnJoin').addClass('hidden');
 		$('#btnLeave').removeClass('hidden');
 	}
@@ -113,24 +123,24 @@ var displayPledgesFuture = function(users) {
 var displayPledgesPast = function(absent, present) {
 	var html = "";
 
-	if (present.length > 0) {
-		var list = listUsers(present);
+	var presentList = listUsers(present);
+	if (presentList.n > 0) {
 		html =
 			html +
 			list.html +
 			" " + 
 			dictionary.fulfilment.verb.past +
-			((present.length > 1 || list.you) ? " your " : " their ") +
+			((presentList.you) ? " your " : " their ") +
 			dictionary.pledge.noun.plural +
 			" to attend.";
 	}
 
-	if (absent.length > 0) {
-		var list = listUsers(absent);
+	var absentList = listUsers(absent);
+	if (absentList.n > 0) {
 		html =
 			html +
 			((html.length > 0) ? " " : "") +
-			list.html +
+			absentList.html +
 			" did not attend this " + 
 			dictionary.schedule.noun.singular +
 			".";
