@@ -91,22 +91,21 @@ var del = function(next, id) {
 };
 
 var displayPledgesFuture = function(users) {
-	var you = false;
-	users.some(function(u) { if (u == user) { you = true; } return you; });
+
+	// TODO - remove the owner of the schedule from the list, not you.
 
 	var html = "";
-	var list = listUsers(users, true);
+	var list = listUsers(users);
 	if (list.n == 0) {
 		html = "<em>Nobody" +
-			(you ? " else" : "") +
+			(list.you ? " else" : "") +
 			" has " +
 			dictionary.pledge.verb.past +
 			" to attend.</em>";
 	}
 	else {
 		html = list.html +
-			((list.n > 1) ? " have " : " has ") +
-			(you ? "also " : "") +
+			((list.n > 1 || list.you) ? " have " : " has ") +
 			dictionary.pledge.verb.past +
 			" to attend.";
 	}
@@ -114,7 +113,7 @@ var displayPledgesFuture = function(users) {
 	$('#pledges').html(html);
 
 	// Change button state
-	if (you) {
+	if (list.you) {
 		$('#btnJoin').addClass('hidden');
 		$('#btnLeave').removeClass('hidden');
 	}

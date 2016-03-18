@@ -117,7 +117,7 @@ var displayUsers = function(absent, present) {
 		html =
 			html +
 			presentList.html +
-			((absentList.n > 1 || list.you) ? " are " : " is ") + 
+			((presentList.n > 1 || presentList.you) ? " are " : " is ") + 
 			"online!";
 	}
 
@@ -128,7 +128,7 @@ var displayUsers = function(absent, present) {
 			html +
 			((html.length > 0) ? " " : "") +
 			absentList.html +
-			((absentList.n > 1 || list.you) ? " are " : " is ") + 
+			((absentList.n > 1 || absentList.you) ? " are " : " is ") + 
 			"not online.";
 	}
 
