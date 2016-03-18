@@ -6,6 +6,16 @@ var config = require('../config');
 */
 
 module.exports.error = {
+    prohibited: function(req, res) {
+        return res.status(404).render('403', {
+          title: 'Error 403',
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          dictionary: config.dictionary,
+          user: req.user
+        });
+    },
     notfound: function(req, res) {
         return res.status(404).render('404', {
           title: 'Error 404',

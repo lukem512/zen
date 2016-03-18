@@ -22,6 +22,7 @@ var config = require('../config');
 
 var pastScheduleError = 'Cannot delete past schedules';
 var notAuthorisedError = 'Not authorised';
+var notFoundError = 'Not found';
 
 /*
  * Authentication functions.
@@ -349,6 +350,14 @@ var schedulePast = function(schedule) {
     return (moment().diff(schedule.end_time) > 0);
 };
 
+var schedulePastDatabase = function(scheduleId, callback) {
+    Schedule.findById(scheduleId, function(err, schedule) {
+        if (err) callback(err);
+        if (!schedule) callback(err, notFoundError);
+        callback(err, schedulePast(schedule));
+    });
+};
+
 router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
     var username = sanitize(req.body.username);
 
@@ -367,7 +376,7 @@ router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
     schedule.save(function(err, doc) {
         if (err) return response.JSON.error.server(res, err);
 
-        newPledge(username, doc._id, function(err, doc) {
+        newPledge(username, doc._id, req.user, function(err, doc) {
             if (err) return response.JSON.error.server(res, err);
             response.JSON.ok(res);
         });
@@ -553,39 +562,87 @@ router.get('/pledges/view/:id', function(req, res) {
 });
 
 // Create a new pledge
-var newPledge = function(username, schedule, callback) {
+var newPledge = function(username, schedule, requestingUser, callback) {
     // Create Pledge object
     var pledgeObj = {
         username: username,
         schedule: schedule
     };
 
-    // Add a new pledge, if one does not already exist
-    Pledge.findOne(pledgeObj, function(err, existing) {
-        if (err) return callback(err, existing);
-        var pledge = new Pledge(pledgeObj);
-        pledge.save(callback);
-    });
-}
+    // Can't pledge to a past schedule
+    schedulePastDatabase(schedule, function(err, past) {
+        if (err) return callback(err);
+
+        // Only let an admin do that!
+        if (past && !requestingUser.admin) {
+            return callback(pastScheduleError);
+        }
+
+        // Add a new pledge, if one does not already exist
+        Pledge.findOne(pledgeObj, function(err, existing) {
+            if (err) return callback(err, existing);
+            var pledge = new Pledge(pledgeObj);
+            pledge.save(callback);
+        });
+    })
+};
 
 router.post('/pledges/new', m.isAdminOrCurrentUser, function(req, res) {
-    newPledge(sanitize(req.body.username), sanitize(req.body.schedule), function(err, pledge) {
-        if (err) return response.JSON.error.server(res, err);
+    newPledge(sanitize(req.body.username), sanitize(req.body.schedule), req.user, function(err, pledge) {
+        if (err) {
+            switch (err) {
+                case notFoundError:
+                    return res.status(404).json({ message: config.dictionary.schedule.noun.singular + ' not found' });
+
+                case pastScheduleError:
+                    return res.status(403).json({ message: pastScheduleError });
+
+                default:
+                    return response.JSON.error.server(res, err);
+            }
+        }
         response.JSON.ok(res);
     });
 });
 
-router.delete('/pledges/update/:id', m.isAdminOrCurrentUser, function(req, res) {
-    Pledge.findById(sanitize(req.params.id), function(err, pledge) {
-        if (err) return response.JSON.error.server(res, err);
-        if (!pledge) return response.JSON.error.notfound(res);
+var deletePledge = function(req, res, pledge) {
+    // Check for Admin, or current User
+    if (pledge.username != req.user.username && !req.user.admin) {
+        return res.status(403).json({message: notAuthorisedError});
+    }
 
-        // TODO - can't delete a pledge for a past schedule
+    // Can't delete a pledge for a past schedule
+    schedulePastDatabase(pledge.schedule, function(err, past) {
+        if (err) {
+            switch (err) {
+                case notFoundError:
+                    return res.status(404).json({ message: config.dictionary.schedule.noun.singular + ' not found' });
+
+                case pastScheduleError:
+                    return res.status(403).json({ message: pastScheduleError });
+
+                default:
+                    return response.JSON.error.server(res, err);
+            }
+        }
+
+        // Only let an admin do that!
+        if (past && !req.user.admin) {
+            return res.status(403).json({ message: pastScheduleError });
+        }
 
         pledge.delete(function(err) {
             if (err) return response.JSON.error.server(res, err);
             response.JSON.ok(res);
         });
+    });
+};
+
+router.delete('/pledges/update/:id', m.isAdminOrCurrentUser, function(req, res) {
+    Pledge.findById(sanitize(req.params.id), function(err, pledge) {
+        if (err) return response.JSON.error.server(res, err);
+        if (!pledge) return esponse.JSON.error.notfound(res);
+        deletePledge(req, res, pledge);
     });
 });
 
@@ -596,18 +653,7 @@ router.delete('/pledges/update/schedule/:schedule/username/:username', function(
     }, function(err, pledge) {
         if (err) return response.JSON.error.server(res, err);
         if (!pledge) return response.JSON.error.notfound(res);
-
-        // Check for Admin, or current User
-        if (pledge.username != req.user.username && !req.user.admin) {
-            return res.status(403).json({message: notAuthorisedError});
-        }
-
-        // TODO - can't delete a pledge for a past schedule
-
-        pledge.delete(function(err) {
-            if (err) return response.JSON.error.server(res, err);
-            response.JSON.ok(res);
-        });
+        deletePledge(req, res, pledge);
     });
 });
 
@@ -831,7 +877,6 @@ router.post('/fulfilments/ongoing/begin', m.isAdminOrCurrentUser, function(req, 
 
         // Initially, set the fulfilment to 10s
         var start_date = new Date();
-
         var initial_time = 10; // seconds
         var end_date = new Date();
         end_date.setSeconds(start_date.getSeconds() + initial_time);
@@ -840,7 +885,8 @@ router.post('/fulfilments/ongoing/begin', m.isAdminOrCurrentUser, function(req, 
             username: sanitize(req.body.username),
             start_time: start_date,
             end_time: end_date,
-            ongoing: true
+            ongoing: true,
+            real_time: true
         });
         newf.save(function(err, doc) {
             if (err) return response.JSON.error.server(res, err);

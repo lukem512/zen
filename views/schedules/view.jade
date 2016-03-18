@@ -33,6 +33,8 @@ block content
 			| &rdquo;
 	p#pledges
 
+	p#created.small This #{dictionary.schedule.noun.singular} was created on #{moment(schedule.createdAt).format('Do MMMM YYYY')} at #{moment(schedule.createdAt).format('hh:mm A')}.
+
 	#message.hidden
 	#buttons
 		if !past || user.admin

@@ -20,6 +20,10 @@ var FulfilmentSchema = new mongoose.Schema({
   ongoing: {
     type: Boolean,
     default: false
+  },
+  real_time: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

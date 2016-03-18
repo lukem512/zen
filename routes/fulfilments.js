@@ -200,7 +200,12 @@ router.get('/edit/:id', function(req, res, next) {
 
     // Check the user is the owner, or admin
     if (fulfilment.username !== req.user.username && !req.user.admin) {
-      return error.invalid(res);
+      return error.prohibited(req, res);
+    }
+
+    // Check the fulfilment was not made in real time
+    if (fulfilment.real_time && !req.user.admin) {
+      return error.prohibited(req, res);
     }
 
     var startDate = moment(fulfilment.start_time);
