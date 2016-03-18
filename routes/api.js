@@ -1006,6 +1006,7 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
 
 var humanizePledge = function(pledge, requestingUser, callback) {
     Schedule.findById(pledge.schedule, function(err, schedule) {
+        if (err) return callback(err);
 
         var you = (pledge.username === requestingUser.username);
 
@@ -1041,19 +1042,28 @@ var humanizeSchedule = function(schedule, requestingUser) {
     var html = '<span class=\"text-capitalize\">' +
         '<a href=\"/users/' + schedule.owner + '\" title=\"View ' + (you ? 'your' : (schedule.owner + '\'s')) + ' profile\">' +
         (you ? 'you' : schedule.owner) +
-        '</a></span> created a ' + 
-        config.dictionary.schedule.noun.singular + 
-        ' for <a href=\"/' +
+        '</a></span> created <a href=\"/' +
         config.dictionary.schedule.noun.plural +
         '/view/' +
         schedule._id + 
         '\" title=\"View the ' + 
         config.dictionary.schedule.noun.singular + 
-        '\">' + 
+        '\">' +
+        schedule.title +
+        '</a> for ' + 
         moment(schedule.start_time).calendar() + 
-        '</a>.';
+        '.';
+
+    if (schedule.description) {
+        html = html +
+            ' ' +
+            (you ? 'You' : 'They') +
+            ' described it as &ldquo;' +
+            '<em>' + schedule.description + '</em>' +
+            '&rdquo;.';
         
     return html;
+    }
 };
 
 var humanizeFulfilment = function(fulfilment, requestingUser, callback) {
