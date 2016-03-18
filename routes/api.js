@@ -1061,9 +1061,9 @@ var humanizeSchedule = function(schedule, requestingUser) {
             ' described it as &ldquo;' +
             '<em>' + schedule.description + '</em>' +
             '&rdquo;.';
-        
-    return html;
     }
+
+    return html;
 };
 
 var humanizeFulfilment = function(fulfilment, requestingUser, callback) {
