@@ -10,11 +10,20 @@ block content
         .form-group
             input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", title="Password")
             input#inputUserPassGen.form-control.hidden(type="text", placeholder="Password", name="userpass", title="Password")
+        p Groups
         .form-group
-            each group, i in groups
-                label= group.name
-                    input.form-control(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
-                | &nbsp; &nbsp; &nbsp;
+            if groups.length == 0
+                p
+                    em There are no groups.
+            else
+                each group, i in groups
+                    label= group.name
+                        input.form-control(type='checkbox', checked=false, name="usergroups", value="#{group.name}")
+                    | &nbsp; &nbsp; &nbsp;
+        p Privileges
+        .form-group
+            label Admin
+                input#inputAdmin.form-control(type="checkbox", checked=false, value="Admin")
         hr
         .form-group
             button#btnSubmit.btn.btn-success(type="button", onclick="add()", title="Create a new user")

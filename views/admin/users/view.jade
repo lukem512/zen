@@ -11,15 +11,23 @@ block content
 			input#inputUserName.form-control(type="text", placeholder="Username", name="username", value="#{_user.username}", title="Username")
 		.form-group
 			input#inputUserPass.form-control(type="password", placeholder="Password", name="userpass", value="#{_user.password}", title="Password")
+		p Groups
 		.form-group
-			each group, i in groups
-				label
-					if _user.groups && _user.groups.indexOf(group.name) > -1
-						input.form-control(type="checkbox", checked="checked", name="usergroups", value="#{group.name}")
-					else
-						input.form-control(type="checkbox", name="usergroups", value="#{group.name}")
-					= group.name
-				&nbsp; &nbsp; &nbsp;
+			if groups.length == 0
+				p
+					em There are no groups.
+			else
+				each group, i in groups
+					label= group.name
+						if _user.groups && _user.groups.indexOf(group.name) > -1
+							input.form-control(type="checkbox", checked="checked", name="usergroups", value="#{group.name}")
+						else
+							input.form-control(type="checkbox", name="usergroups", value="#{group.name}")
+					&nbsp; &nbsp; &nbsp;
+		p Privileges
+		.form-group
+			label Admin
+				input#inputAdmin.form-control(type="checkbox", checked=false, value="Admin")
 		hr
 		.form-group
 			button#btnUpdate.btn.btn-success(type="button", onclick="update();", title="Update this user")

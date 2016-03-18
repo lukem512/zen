@@ -21,7 +21,8 @@ var add = function() {
 		var params = {
 			"username": $('#inputUserName').val(),
 			"userpass": $('#inputUserPass').val(),
-			"usergroups": groups()
+			"usergroups": groups(),
+			"admin": $('#inputAdmin').is(':checked')
 		};
 		_update(addApiUrl, listViewUrl, params);
 	}
@@ -32,7 +33,8 @@ var update = function() {
 		var params = {
 			"id": $('#userId').text(),
 			"username": $('#inputUserName').val(),
-			"usergroups": groups()
+			"usergroups": groups(),
+			"admin": $('#inputAdmin').is(':checked')
 		};
 
 		if (window.__passwordChanged) {

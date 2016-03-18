@@ -40,7 +40,7 @@ var displayFeed = function(feedArray) {
 				'</article>';
 		});
 	else
-		html = '<em>Nothing to see here yet!</em>';
+		html = '<p><em>Nothing to see here yet!</em></p>';
 
 	$('#feed').fadeOut(function(){
 		$('#feed').html(html).fadeIn();

@@ -106,15 +106,19 @@ router.post('/users/update', m.isAdminOrCurrentUser, function(req, res) {
         var update = {};
 
         if (req.body.username) {
-            update['username'] = sanitize(req.body.username);
+            update.username = sanitize(req.body.username);
         }
 
         if (req.body.userpass) {
-            update['password'] = bcrypt.hashSync(sanitize(req.body.userpass));
+            update.password = bcrypt.hashSync(sanitize(req.body.userpass));
         }
 
         if (req.body['usergroups[]']) {
-            update['groups'] = sanitize(req.body['usergroups[]']);
+            update.groups = sanitize(req.body['usergroups[]']);
+        }
+
+        if (req.body.admin) {
+            update.admin = sanitize(req.body.admin);
         }
 
         User.findByIdAndUpdate(sanitize(req.body.id), update, function(err, result) {
