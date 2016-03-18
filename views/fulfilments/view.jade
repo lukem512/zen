@@ -30,19 +30,33 @@ block content
 						| and 
 				a(href="/#{dictionary.schedule.noun.plural}/view/#{schedule._id}", title="View this #{dictionary.schedule.noun.singular}") #{schedule.title}
 			| .
-	p#created.small This #{dictionary.fulfilment.noun.singular} was created on #{moment(fulfilment.createdAt).format('Do MMMM YYYY')} at #{moment(fulfilment.createdAt).format('hh:mm A')}.
 
 	if fulfilment.username == user.username || user.admin
 		hr
-		if fulfilment.ongoing
-			button#btnResume.btn.btn-success(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/now?start=true'")
-				i.fa.fa-play
-				| &nbsp; Resume
-			| &nbsp;
-		button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/edit/#{fulfilment.id}'", disabled="#{fulfilment.real_time && !user.admin}")
-			i.fa.fa-pencil
-			| &nbsp; Edit
-		| &nbsp;
-		button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
-			i.fa.fa-remove
-			| &nbsp; Delete
+
+		p#created.small
+			| This #{dictionary.fulfilment.noun.singular} was created on #{moment(fulfilment.createdAt).format('Do MMMM YYYY')} at #{moment(fulfilment.createdAt).format('hh:mm A')}.
+
+			if fulfilment.real_time
+				|  You cannot change #{dictionary.fulfilment.noun.plural} made using #{name}.
+			else if !fulfilment.recent
+				| You cannot change or remove old #{dictionary.fulfilment.noun.plural}.
+
+			if fulfilment.ongoing
+				button#btnResume.btn.btn-success(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/now?start=true'")
+					i.fa.fa-play
+					| &nbsp; Resume
+				| &nbsp;
+
+			br
+
+		if (fulfilment.recent || user.admin)
+			if (!fulfilment.real_time || user.admin)
+				button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.action.noun.plural}/edit/#{fulfilment.id}'")
+					i.fa.fa-pencil
+					| &nbsp; Edit
+				| &nbsp;
+
+			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.action.noun.plural}', '#{fulfilment.id}')")
+				i.fa.fa-remove
+				| &nbsp; Delete

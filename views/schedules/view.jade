@@ -33,12 +33,14 @@ block content
 			| &rdquo;
 	p#pledges
 
+	hr
+
 	p#created.small This #{dictionary.schedule.noun.singular} was created on #{moment(schedule.createdAt).format('Do MMMM YYYY')} at #{moment(schedule.createdAt).format('hh:mm A')}.
+	
+	bre
 
 	#message.hidden
 	#buttons
-		if !past || user.admin
-			hr
 		if (schedule.owner != user.username) && !past
 			button#btnJoin.btn.btn-success(type="button", onclick="join(window.location, '#{schedule.id}')")
 				i.fa.fa-calendar-check-o

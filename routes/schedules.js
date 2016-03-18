@@ -11,10 +11,10 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
-var middlewares = require('./middlewares');
+var m = require('./middlewares');
 
 // Middleware to require authorisation for all schedules routes
-router.use(middlewares.isLoggedInRedirect);
+router.use(m.isLoggedInRedirect);
 
 /* GET list schedules page */
 router.get('/', function(req, res, next) {
@@ -77,17 +77,25 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
 
-    // TODO - Check the user is in the same group as the owner, or admin
-    
-    res.render('schedules/view', {
-      title: schedule.title,
-      name: config.name,
-      organisation: config.organisation,
-      nav: config.nav(),
-      user: req.user,
-      dictionary: config.dictionary,
-      schedule: schedule,
-      past: (moment().diff(moment(schedule.end_time)) > 0)
+    // Check the user is in the same group as the user, or admin
+    m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
+      if (err) return error.server(req, res, err);
+
+      if (authorised) {
+        res.render('schedules/view', {
+          title: schedule.title,
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          user: req.user,
+          dictionary: config.dictionary,
+          schedule: schedule,
+          past: (moment().diff(moment(schedule.end_time)) > 0)
+        });
+      }
+      else {
+        return error.prohibited(req, res);
+      }
     });
   });
 });

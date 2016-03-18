@@ -18,6 +18,8 @@ var Fulfilment = require('../models/fulfilments');
 var m = require('./middlewares');
 var response = require('./response');
 
+var fulfilmentHelpers = require('./fulfilments/helpers');
+
 var config = require('../config');
 
 var pastScheduleError = 'Cannot delete past schedules';
@@ -61,30 +63,6 @@ router.post('/authenticate', function(req, res){
         }
     });
 });
-
-// Middleware functions to check user group
-var isSameGroupOrAdmin = function(requestingUser, resultingUser) {
-    if (!requestingUser || !resultingUser) return false;
-    if (requestingUser.username === resultingUser.username) return true;
-
-    var authorised = requestingUser.admin;
-    resultingUser.groups.some(function(g) {
-        if (requestingUser.groups.indexOf(g) > -1) {
-            authorised = true;
-        }
-        return authorised;
-    });
-    return authorised;
-};
-
-var isSameGroupOrAdminDatabase = function(requestingUser, resultingUsername, callback) {
-    if (requestingUser.username === resultingUsername) return callback(null, true);
-
-    User.findOne({ username: resultingUsername }, function(err, user) {
-        if (err) return callback(err);
-        callback(err, isSameGroupOrAdmin(requestingUser, user));
-    });
-};
 
 // Middleware to require authorisation for all API routes
 router.use(m.isLoggedIn);
@@ -300,7 +278,7 @@ router.get('/schedules/list', m.isAdmin, function(req, res) {
 router.get('/schedules/list/owner/:username', function(req, res) {
     var username = sanitize(req.params.username);
 
-    isSameGroupOrAdmin(req.user, user, function(err, authorised) {
+    m._isSameGroupOrAdmin(req.user, user, function(err, authorised) {
         if (err) return response.JSON.error.server(res, err);
         
         if (authorised) {
@@ -333,7 +311,7 @@ router.get('/schedules/view/:id', function(req, res) {
         if (err) return response.JSON.error.server(res, err);
         if (!schedule) return response.JSON.error.notfound(res);
 
-        isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
+        m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
             if (err) return response.JSON.error.server(res, err);
 
             if (authorised) {
@@ -388,17 +366,24 @@ router.post('/schedules/update', m.isAdminOrCurrentUser, function(req, res) {
         if (err) return response.JSON.error.server(res, err);
 
         // Check the schedule isn't in the past
-        if (schedulePast(schedule) && !requestingUser.admin) {
+        if (schedulePast(schedule) && !req.user.admin) {
             return response.JSON.invalid(res);
         }
 
-        schedule.update({
+        var obj = {
             title: sanitize(req.body.title),
             description: sanitize(req.body.description),
             start_time: new Date(req.body.start_time),
-            end_time: new Date(req.body.end_time),
-            owner: sanitize(req.body.owner)
-        }, function(err, result) {
+            end_time: new Date(req.body.end_time)
+        };
+
+        var owner = sanitize(req.body.owner);
+        if (owner) {
+            console.log('CHANGING OWNER TO ' + owner);
+            obj.owner = owner;
+        }
+
+        schedule.update(obj, function(err, result) {
             if (err) return response.JSON.error.server(res, err);
             if (!result) return response.JSON.error.notfound(res);
             response.JSON.ok(res);
@@ -549,7 +534,7 @@ router.get('/pledges/view/:id', function(req, res) {
         if (err) return response.JSON.error.server(res, err);
         if (!pledge) return response.JSON.error.notfound(res);
 
-        isSameGroupOrAdminDatabase(req.user, pledge.username, function(err, authorised) {
+        m._isSameGroupOrAdminDatabase(req.user, pledge.username, function(err, authorised) {
             if (err) return response.JSON.error.server(res, err);
 
             if (authorised) {
@@ -666,7 +651,7 @@ router.get('/pledges/users/:schedule', function(req, res) {
         if (err) return response.JSON.error.server(res, err);
         if (!result) return response.JSON.error.notfound(res);
 
-        isSameGroupOrAdminDatabase(req.user, result.owner, function(err, authorised) {
+        m._isSameGroupOrAdminDatabase(req.user, result.owner, function(err, authorised) {
             if (err) return response.JSON.error.server(res, err);
 
             if (authorised) {
@@ -689,7 +674,7 @@ router.get('/pledges/users/:schedule', function(req, res) {
 router.get('/pledges/username/:username/now', function(req, res) {
     var username = sanitize(req.params.username);
 
-    isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
+    m._isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
         if (err) return response.JSON.error.server(res, err);
         
         if (authorised) {
@@ -765,19 +750,6 @@ router.post('/fulfilments/new', m.isAdminOrCurrentUser, function(req, res) {
     });
 });
 
-var recentFulfilment = function(fulfilment) {
-
-    // Is the end in the future?
-    if (moment().diff(fulfilment.end_time) < 0 || fulfilment.ongoing)
-        return true;
-
-    // Was it created recently?
-    if (moment().diff(fulfilment.createdAt, 'minutes') < 15)
-        return true;
-
-    return false;
-};
-
 router.post('/fulfilments/update', m.isAdminOrCurrentUser, function(req, res) {
     Fulfilment.findById(sanitize(req.body.id), function(err, fulfilment) {
         if (err) return response.JSON.error.server(res, err);
@@ -785,7 +757,7 @@ router.post('/fulfilments/update', m.isAdminOrCurrentUser, function(req, res) {
         
         // A fulfilment should only be modifiable for a small amount of time
         // after creating it
-        if (!recentFulfilment(fulfilment)) {
+        if (!fulfilmentHelpers.recentFulfilment(fulfilment)) {
             return response.JSON.invalid(res);
         }
 
@@ -813,7 +785,7 @@ router.delete('/fulfilments/update/:id', function(req, res) {
 
         // A fulfilment should only be modifiable for a small amount of time
         // after creating it
-        if (!recentFulfilment(fulfilment)) {
+        if (!fulfilmentHelpers.recentFulfilment(fulfilment)) {
             return response.JSON.invalid(res);
         }
 
@@ -988,7 +960,7 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
         if (err) return response.JSON.error.server(res, err);
         if (!schedule) return response.JSON.error.notfound(res);
 
-        isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
+        m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
             if (err) return response.JSON.error.server(res, err);
 
             if (authorised) {
@@ -1261,7 +1233,7 @@ var _localFeed = function(req, res) {
     var username = sanitize(req.params.username);
     var fromTime = sanitize(req.params.from);
 
-    isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
+    m._isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
         if (err) return response.JSON.error.server(res, err);
 
         if (authorised) {

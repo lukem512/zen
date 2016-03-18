@@ -13,10 +13,12 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
-var middlewares = require('./middlewares');
+var helpers = require('./fulfilments/helpers')
+
+var m = require('./middlewares');
 
 // Middleware to require authorisation for all fulfilments routes
-router.use(middlewares.isLoggedInRedirect);
+router.use(m.isLoggedInRedirect);
 
 var getStats = function(fulfilments, schedules) {
   var stats = {
@@ -173,22 +175,32 @@ router.get('/view/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
 
-    // TODO - Check the user is in the same group as the owner, or admin
-
-    getSchedules(fulfilment, req.user.username, function(err, schedules) {
+    // Check the user is in the same group as the user, or admin
+    m._isSameGroupOrAdminDatabase(req.user, fulfilment.username, function(err, authorised) {
       if (err) return error.server(req, res, err);
 
-      res.render('fulfilments/view', {
-        title: 'View ' + config.dictionary.action.noun.singular,
-        name: config.name,
-        organisation: config.organisation,
-        nav: config.nav(),
-        user: req.user,
-        dictionary: config.dictionary,
-        fulfilment: fulfilment,
-        schedules: schedules
-      });
-    });
+      if (authorised) {
+        getSchedules(fulfilment, req.user.username, function(err, schedules) {
+          if (err) return error.server(req, res, err);
+
+          // Add the recent flag
+          fulfilment.recent = helpers.recentFulfilment(fulfilment);
+
+          res.render('fulfilments/view', {
+            title: 'View ' + config.dictionary.action.noun.singular,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            fulfilment: fulfilment,
+            schedules: schedules
+          });
+        });
+      } else {
+        return error.prohibited(req, res);
+      }
+    })
   });
 });
 
@@ -198,14 +210,21 @@ router.get('/edit/:id', function(req, res, next) {
     if (err) return error.server(req, res, err);
     if (!fulfilment) return error.notfound(req, res);
 
-    // Check the user is the owner, or admin
-    if (fulfilment.username !== req.user.username && !req.user.admin) {
-      return error.prohibited(req, res);
-    }
+    if (!req.user.admin) {
+      // Check the user is the owner
+      if (fulfilment.username !== req.user.username) {
+        return error.prohibited(req, res);
+      }
 
-    // Check the fulfilment was not made in real time
-    if (fulfilment.real_time && !req.user.admin) {
-      return error.prohibited(req, res);
+      // Check the fulfilment was not made in real time
+      if (fulfilment.real_time) {
+        return error.prohibited(req, res);
+      }
+
+      // Check that the fulfilment was made recently
+      if (!helpers.recentFulfilment(fulfilment)) {
+        return error.prohibited(req, res);
+      }
     }
 
     var startDate = moment(fulfilment.start_time);

@@ -1,6 +1,32 @@
+var User = require('../models/users');
 
 var response = require('./response');
 
+// Middleware helper functions to check user group
+module.exports._isSameGroupOrAdmin = function(requestingUser, resultingUser) {
+    if (!requestingUser || !resultingUser) return false;
+    if (requestingUser.username === resultingUser.username) return true;
+
+    var authorised = requestingUser.admin;
+    resultingUser.groups.some(function(g) {
+        if (requestingUser.groups.indexOf(g) > -1) {
+            authorised = true;
+        }
+        return authorised;
+    });
+    return authorised;
+};
+
+module.exports._isSameGroupOrAdminDatabase = function(requestingUser, resultingUsername, callback) {
+    if (requestingUser.username === resultingUsername || requestingUser.admin) return callback(null, true);
+
+    User.findOne({ username: resultingUsername }, function(err, user) {
+        if (err) return callback(err);
+        callback(err, module.exports._isSameGroupOrAdmin(requestingUser, user));
+    });
+};
+
+// Actual middleware functions
 module.exports.isLoggedIn = function(req, res, next) {
     if (req.authentication.success) {
         next();
