@@ -458,23 +458,40 @@ function uniqFast(a) {
     return out;
 };
 
-var getScheduleClass = function(schedule, requestingUser) {
-    // User-owned events are green, others are red.
-    // TODO - a better colouring scheme is needed
-    return (schedule.owner == requestingUser.username) ? 'bg-success' : 'bg-danger';
+var getScheduleClass = function(schedule, requestingUser, callback) {
+    Pledge.findOne({
+        schedule: schedule._id, 
+        username: requestingUser.username
+    }, function(err, pledge) {
+        if (err) return callback(err);
+
+        // Pledged schedules are green, others are read
+        callback(err, (pledge ? 'bg-success' : 'bg-danger'));
+    });
 };
 
-var makeCalendarFormat = function(results, requestingUser) {
-    return results.map(function(s){
-        return {
-            title: s.title,
-            description: s.description,
-            start: moment(s.start_time).format(),
-            end: moment(s.end_time).format(),
-            owner: s.owner,
-            url: '/' + config.dictionary.schedule.noun.plural + '/view/' + s._id,
-            className: getScheduleClass(s, requestingUser)
-        }
+var makeCalendarFormat = function(results, requestingUser, callback) {
+    var formatted = [];
+
+    async.each(results, function(s, next) {
+        getScheduleClass(s, requestingUser, function(err, scheduleClass) {
+            if (err) return next(err);
+
+
+
+            formatted.push ({
+                title: s.title,
+                description: s.description,
+                start: moment(s.start_time).format(),
+                end: moment(s.end_time).format(),
+                owner: s.owner,
+                url: '/' + config.dictionary.schedule.noun.plural + '/view/' + s._id,
+                className: scheduleClass
+            });
+            next();
+        });
+    }, function(err) {
+        callback(err, formatted)
     });
 };
 
@@ -487,7 +504,10 @@ router.get('/calendar', function(req, res) {
         // Retrieve all schedules
         Schedule.find({}, function(err, schedules) {
             if (err) return response.JSON.error.server(res, err); 
-            res.json(makeCalendarFormat(schedules, req.user));
+            makeCalendarFormat(schedules, req.user, function(err, format) {
+                if (err) return response.JSON.error.server(res, err); 
+                res.json(format);
+            });
         });
     } else {     
 
