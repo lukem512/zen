@@ -14,7 +14,7 @@ var groups = function(){
 	return $('input[type=checkbox]:checked').map(function(_, el) {
 	    return $(el).val();
 	}).get();
-}
+};
 
 var add = function() {
 	if (validate()){
@@ -32,9 +32,13 @@ var update = function() {
 		var params = {
 			"id": $('#userId').text(),
 			"username": $('#inputUserName').val(),
-			"userpass": $('#inputUserPass').val(),
 			"usergroups": groups()
 		};
+
+		if (window.__passwordChanged) {
+			params.userpass = $('#inputUserPass').val();
+		}
+
 		_update(updateApiUrl, listViewUrl, params);
 	}
 };

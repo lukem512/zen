@@ -29,3 +29,10 @@ block content
 			button#btnDelete.btn.btn-danger(type="button", onclick="del();", title="Delete this user")
 				i.fa.fa-remove
 				| &nbsp; Delete
+
+	script.
+		// Watch for changes on the password
+		window.__passwordChanged = false;
+		$("#inputUserPass").change(function() {
+			window.__passwordChanged = true;
+		});
