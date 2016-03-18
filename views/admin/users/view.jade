@@ -27,7 +27,7 @@ block content
 		p Privileges
 		.form-group
 			label Admin
-				input#inputAdmin.form-control(type="checkbox", checked=false, value="Admin")
+				input#inputAdmin.form-control(type="checkbox", checked=_user.admin, value="Admin")
 		hr
 		.form-group
 			button#btnUpdate.btn.btn-success(type="button", onclick="update();", title="Update this user")
