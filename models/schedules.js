@@ -60,6 +60,7 @@ ScheduleSchema.statics.group = function(group, callback) {
   var schedules = this;
   Group.members(group, function(err, users){
     if (err) return callback(err);
+    if (!users) return callback(err, []);
     var usernames = users.map(function(u){
       return u.username;
     });

@@ -534,7 +534,10 @@ router.get('/calendar', function(req, res) {
             results = uniqFast(r);
 
             // Map them into the appropriate format
-            res.json(makeCalendarFormat(results, req.user));
+            makeCalendarFormat(results, req.user, function(err, format) {
+                if (err) return response.JSON.error.server(res, err); 
+                res.json(format);
+            });
         });
     }
 });
@@ -1309,7 +1312,7 @@ var _globalFeed = function(req, res) {
         // Get all the users from all groups of the requesting user
         async.each(req.user.groups, function(g, callback) {
             Group.members(g, function(err, _users) {
-                if (err) return callback(err);
+                if (err || !_users) return callback(err);
                 users = users.concat(_users);
                 callback();
             });
