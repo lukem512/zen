@@ -694,7 +694,7 @@ router.get('/pledges/users/:schedule', function(req, res) {
     });
 });
 
-// Return an active schedule that the user has pledged to.
+// Return the active schedules that the user has pledged to.
 // The schedule can be active now or starting soon.
 router.get('/pledges/username/:username/now', function(req, res) {
     var username = sanitize(req.params.username);
@@ -716,23 +716,16 @@ router.get('/pledges/username/:username/now', function(req, res) {
                 Schedule.overlaps(now, soon, function(err, schedules) {
                     if (err) return response.JSON.error.server(res, err);
 
-                    var result = {
-                        message: 'No ' + config.dictionary.schedule.noun.singular
-                    };
-
-                    schedules.some(function(s) {
-                        pledges.some(function(p) {
+                    var results = []
+                    schedules.forEach(function(s) {
+                        pledges.forEach(function(p) {
                             if (p.schedule == s._id) {
-                                result = {
-                                    message: 'OK',
-                                    schedule: s
-                                };
-                                return true;
+                                results.push(s);
                             }
                         });
                     });
 
-                    return res.json(result);
+                    return res.json(results);
                 })
             });
         } else {

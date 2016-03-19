@@ -53,56 +53,91 @@ var validate = function() {
 
 // Schedule functionality
 
-var displaySchedule = function(schedule) {
-	var html = 
-		'You are ' + 
-		dictionary.pledge.verb.past +
-		' to ' +
-		'<a href=\"/'+dictionary.schedule.noun.plural+'/view/'+schedule._id+'\" target=\"_blank\" title=\"View ' + dictionary.schedule.noun.singular + ' in a new tab\">' +
-		schedule.title +
-	    '</a>.';
+var displaySchedule = function(schedules) {
 
-	 html = html +
-	 	' The ' +
-	 	dictionary.schedule.noun.singular + 
-	 	((moment().diff(schedule.start_time) > 0) ? ' began ' : ' begins ') +
-	 	'<span class=\"more-info\" data-text=\"' +
-	 	moment(schedule.start_time).calendar() + 
-	 	'\">' +
-	 	moment().to(schedule.start_time) +
-	 	'</span> and finishes ' +
-	 	'<span class=\"more-info\" data-text=\"' +
-	 	moment(schedule.end_time).calendar() + 
-	 	'\">' +
-	 	moment().to(schedule.end_time) +
-	 	'</span>.';
+	var html = '';
+
+	if (schedules.length) {
+		html = 
+			'You are ' + 
+			dictionary.pledge.verb.past +
+			' to';
+
+		var next = schedules[0];
+		for (var i = 0; i < schedules.length; i++) {
+			if (i == schedules.length - 1 && schedules.length > 1) {
+                html += ' and ';
+            }
+            else if (i < schedules.length - 1 && i > 0) {
+                html += ', ';
+            }
+            else {
+                html += ' ';
+            }
+
+            var schedule = schedules[i];
+            if (schedule.start_time < next.start_time) next = schedule;
+
+			html = html + 
+				'<a href=\"/'+dictionary.schedule.noun.plural+'/view/'+schedule._id+'\" target=\"_blank\" title=\"View ' + dictionary.schedule.noun.singular + ' in a new tab\">' +
+				schedule.title +
+			    '</a>';
+		}
+		html += '.';
+
+		html = html +
+		 	' The ' +
+		 	((schedules.length > 1) ? 'first ' : '') +
+		 	dictionary.schedule.noun.singular + 
+		 	((moment().diff(next.start_time) > 0) ? ' began ' : ' begins ') +
+		 	'<span class=\"more-info\" data-text=\"' +
+		 	moment(next.start_time).calendar() + 
+		 	'\">' +
+		 	moment().to(next.start_time) +
+		 	'</span> and finishes ' +
+		 	'<span class=\"more-info\" data-text=\"' +
+		 	moment(next.end_time).calendar() + 
+		 	'\">' +
+		 	moment().to(next.end_time) +
+		 	'</span>.';
+	}
 	 	
 	$('#schedule').html(html);
 };
 
+var dingQueue = {};
+
+var playDing = function() {
+	if ($('#timer').data('state') && $('#timer').data('state') !== 'stopped')
+	{
+		var audio = new Audio('/sounds/ding.mp3');
+		audio.play();
+	}
+}
+
 var getSchedule = function() {
 	var url = scheduleApiUrl + '/' + user + '/now';
-	_get(url, function(response){
-		// Display the schedule
-		if (response.schedule) {
-			displaySchedule(response.schedule);
-			getOnlineUsers(response.schedule._id);
-		}
-		
-		// Update the current schedule object?
-		if (__schedule.current != response.schedule.title) {
-			if (__schedule.current) {
-				__schedule.completed.push(__schedule.current);
-			}
-			__schedule.current = (response.schedule ? response.schedule.title : null);
+	_get(url, function(schedules){
+		displaySchedule(schedules);
 
-			// Play indication sound
-			if ($('#timer').data('state') && $('#timer').data('state') != 'stopped')
-			{
-				var audio = new Audio('/sounds/ding.mp3');
-				audio.play();
+		// Set timeouts for 'ding's
+		schedules.forEach(function(s){
+			if (!dingQueue[s._id]) {
+				var startDiff = (moment().diff(s.start_time));
+				if (startDiff < 0) {
+					startDiff = startDiff * -1;
+					setTimeout(playDing, startDiff);
+				}
+
+				var endDiff = (moment().diff(s.end_time));
+				if (endDiff < 0) {
+					endDiff = endDiff * -1;
+					setTimeout(playDing, endDiff);
+				}
+
+				dingQueue[s._id] = true;
 			}
-		}
+		});
 	}, function(err) {
 		console.error(err);
 	});
