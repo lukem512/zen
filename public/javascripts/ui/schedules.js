@@ -126,7 +126,7 @@ var displayPledgesPast = function(absent, present) {
 	if (presentList.n > 0) {
 		html =
 			html +
-			list.html +
+			presentList.html +
 			" " + 
 			dictionary.fulfilment.verb.past +
 			((presentList.you) ? " your " : " their ") +
