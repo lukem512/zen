@@ -35,7 +35,7 @@ block content
 		hr
 
 		p#created.small
-			| This #{dictionary.fulfilment.noun.singular} was created on #{moment(fulfilment.createdAt).format('Do MMMM YYYY')} at #{moment(fulfilment.createdAt).format('hh:mm A')}.
+			| This #{dictionary.fulfilment.noun.singular} was created on #{moment(fulfilment.createdAt).format('Do MMMM YYYY')} at #{moment(fulfilment.createdAt).format('h:mm A')}.
 
 			if fulfilment.real_time
 				|  You cannot change #{dictionary.fulfilment.noun.plural} made using #{name}.
