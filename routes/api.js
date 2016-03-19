@@ -754,11 +754,25 @@ router.get('/fulfilments/list', m.isAdmin, function(req, res) {
     });
 });
 
+/* GET fulfilment listing page for specified user */
+router.get('/fulfilments/list/:username', m.isAdminOrCurrentUser, function(req, res) {
+    Fulfilment.find({ username: sanitize(req.params.username) }, function(err, fulfilments){
+        if (err) return response.JSON.error.server(res, err);
+        res.json(fulfilments);
+    });
+});
+
 /* GET fulfilment information */
 router.get('/fulfilments/view/:id', function(req, res) {
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment){
         if (err) return response.JSON.error.server(res, err);
         if (!fulfilment) return response.JSON.error.notfound(res);
+
+        // Check for current user or admin
+        if (fulfilment.username != req.user.username && !req.user.admin) {
+            return res.status(403).json({message: notAuthorisedError});
+        }
+
         res.json(fulfilment);
     });
 });
@@ -976,28 +990,25 @@ router.delete('/fulfilments/ongoing/:username', m.isAdminOrCurrentUser, function
     });
 });
 
-// Return the users that have fulfilled a pledge to attend a given schedule
-router.get('/fulfilments/users/:schedule', function(req, res) {
-    var id = sanitize(req.params.schedule);
-
+var getScheduleFulfilments = function(id, requestingUser, callback) {
     // Find the schedule
     Schedule.findById(id, function(err, schedule) {
-        if (err) return response.JSON.error.server(res, err);
-        if (!schedule) return response.JSON.error.notfound(res);
+        if (err) return callback(err);
+        if (!schedule) return callback(notFoundError);
 
-        m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
-            if (err) return response.JSON.error.server(res, err);
+        m._isSameGroupOrAdminDatabase(requestingUser, schedule.owner, function(err, authorised) {
+            if (err) return callback(err);
 
             if (authorised) {
                 // Find all fulfilments during this schedule
                 Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
-                    if (err) return response.JSON.error.server(res, err);
+                    if (err) return callback(err);
 
                     // Were any of these users pledged?
                     Pledge.find({
                         schedule: id
                     }, function(err, pledges){
-                        if (err) return response.JSON.error.server(res, err);
+                        if (err) return callback(err);
                                         
                         // Find the fulfilments that correspond to pledges
                         var fulfilled = [];
@@ -1006,7 +1017,8 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
                                 if (f.username == p.username) {
                                     var obj = {
                                         completion: ((schedule.start_time < f.start_time || schedule.end_time > f.end_time) ? "partial" : "full"),
-                                        username: p.username
+                                        username: p.username,
+                                        owner: schedule.owner
                                     };
 
                                     fulfilled.push(obj);
@@ -1015,13 +1027,33 @@ router.get('/fulfilments/users/:schedule', function(req, res) {
                             });
                         });
 
-                        res.json(fulfilled);
+                        return callback(err, fulfilled);
                     });
                 });
             } else {
-                return response.JSON.invalid(res);
+                return callback(notAuthorisedError);
             }
         });
+    });
+}
+
+// Return the users that have fulfilled a pledge to attend a given schedule
+router.get('/fulfilments/users/:schedule', function(req, res) {
+    var id = sanitize(req.params.schedule);
+    getScheduleFulfilments(id, req.user, function(err, fulfilments) {
+        if (err) {
+            switch (err) {
+                case notFoundError:
+                    return response.JSON.error.notfound(res);
+
+                case notAuthorisedError:
+                    return response.JSON.error.prohibited(res);
+
+                default:
+                    return response.JSON.error.server(res, err);
+            }
+        }
+        res.json(fulfilments);
     });
 });
 
@@ -1092,57 +1124,180 @@ var humanizeSchedule = function(schedule, requestingUser) {
 };
 
 var humanizeFulfilment = function(fulfilment, requestingUser, callback) {
+
+    // Find all pledges that are completed by the fulfilment
     fulfilment.completes(function(err, pledges) {
         if (err) return callback(err);
 
-        var you = (fulfilment.username === requestingUser.username);
+        var schedules = [];
 
-        if (fulfilment.ongoing) {
-            var html = '<span class=\"text-capitalize\">' +
-                '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
-                (you ? 'you' : fulfilment.username) + 
-                '</a></span> ' +
-                (you ? 'are ' : 'is ') +
-                config.dictionary.action.verb.presentParticiple +
-                ' now! ' +
-                (you ? 'You' : 'They') + ' have been ' +
-                config.dictionary.action.verb.presentParticiple + ' for ' +
-                moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() +
-                '.';
-        }
-        else {
-            var html = '<span class=\"text-capitalize\">' +
-                '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
-                (you ? 'you' : fulfilment.username) +
-                '</a></span> logged a ' + 
-                config.dictionary.action.noun.singular + 
-                ' of <a href=\"/' + 
-                config.dictionary.action.noun.plural + 
-                '/view/' + 
-                fulfilment._id + 
-                '\" title=\"View the ' + 
-                config.dictionary.fulfilment.noun.singular + 
-                '\">' + 
-                moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
-                '</a> that began ' +
-                moment(fulfilment.start_time).fromNow() +
-                '.';
-        }
+        async.each(pledges, function(p, next) {
 
-        if (pledges.length) {
-            pledges.forEach(function(p){
-                if (p.username === fulfilment.username) {
-                    var completion = (p.completion === 'partial') ? 'partially ' : '';
-                    html = html + 
-                        (you ? ' You ' : ' They ') + completion + 'completed ' + 
-                        '<a href=\"/' + config.dictionary.schedule.noun.plural + '/view/'+ p.schedule + 
-                        '\" title=\"View the ' + config.dictionary.schedule.noun.singular + '\">' + 
-                        p.scheduleTitle + '</a>.';
-                }
+            // TODO - this can be added to fulfilment.completes directly
+            if (p.username !== fulfilment.username) {
+                return next();
+            }
+
+            // Get completion status of other pledged users
+            getScheduleFulfilments(p.schedule, requestingUser, function(err, fulfilments) {
+                if (err) return next(err);
+
+                schedules.push({
+                    id: p.schedule,
+                    title: p.scheduleTitle,
+                    fulfilments: fulfilments
+                });
+                next();
             });
-        }
-            
-        callback(html);
+        }, function done(err) {
+            if (err) return callback(err);
+
+            var you = (requestingUser.username === fulfilment.username);
+
+            var html = "";
+            if (fulfilment.ongoing) {
+                html = '<span class=\"text-capitalize\">' +
+                    '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
+                    (you ? 'you' : fulfilment.username) + 
+                    '</a></span> ' +
+                    (you ? 'are ' : 'is ') +
+                    config.dictionary.action.verb.presentParticiple +
+                    ' now! ' +
+                    (you ? 'You' : 'They') + ' have been ' +
+                    config.dictionary.action.verb.presentParticiple + ' for ' +
+                    moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() +
+                    '.';
+            }
+            else {
+                var html = '<span class=\"text-capitalize\">' +
+                    '<a href=\"/users/' + fulfilment.username + '\" title=\"View ' + (you ? 'your' : (fulfilment.username + '\'s')) + ' profile\">' +
+                    (you ? 'you' : fulfilment.username) +
+                    '</a></span> logged a ' + 
+                    config.dictionary.action.noun.singular + 
+                    ' of <a href=\"/' + 
+                    config.dictionary.action.noun.plural + 
+                    '/view/' + 
+                    fulfilment._id + 
+                    '\" title=\"View the ' + 
+                    config.dictionary.fulfilment.noun.singular + 
+                    '\">' + 
+                    moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time)).humanize() + 
+                    '</a> that began ' +
+                    moment(fulfilment.start_time).fromNow() +
+                    '.';
+
+                    schedules.forEach(function(s) {
+
+                    // Is it not you?
+                    // Did the user complete it?
+                    var userCompletion = '';
+
+                    // Store other fulfilled users
+                    var partial = [];
+                    var full = [];
+
+                    s.fulfilments.forEach(function(f) {
+                        var _user = (f.username === fulfilment.username);
+
+                        if (_user) {
+                            userCompletion = f.completion;
+                        }
+                        else {
+                            if (f.completion === 'partial')
+                                partial.push(f.username);
+                            else
+                                full.push(f.username);
+                        }
+                    });
+
+                    var vocab = {
+                        they: 'They',
+                        their: 'their',
+                        completion: (userCompletion == 'partial') ? 'partially' : 'completely',
+                        otherCompletion: (userCompletion == 'partial') ? 'completely' : 'partially'
+                    };
+
+                    if (you) {
+                        vocab.they = 'You';
+                        vocab.their = 'your';
+                    }
+
+                    // Display the fulfilment user's pledge status first
+                    html = html +
+                        ' ' + vocab.they + ' ' + vocab.completion +
+                        ' ' + config.dictionary.fulfilment.verb.past + ' ' + vocab.their + ' ' +
+                        config.dictionary.pledge.noun.singular + ' to ' +
+                        '<a href=\"/' + config.dictionary.schedule.noun.plural + '/view/'+ s.id + 
+                        '\" title=\"View the ' + config.dictionary.schedule.noun.singular + '\">' + 
+                        s.title + '</a>';
+
+                    // Followed by other user's with the same pledge status 
+                    var sameCompletion = full;
+                    var otherCompletion = partial;
+
+                    if (userCompletion === 'partial') {
+                        sameCompletion = partial;
+                        otherCompletion = full;
+                    }
+
+                    for (var i = 0; i < sameCompletion.length; i++) {
+                        if (i == sameCompletion.length - 1 && sameCompletion.length > 1) {
+                            html += ' and ';
+                        }
+                        else if (i < sameCompletion.length - 1 && i > 0) {
+                            html += ', ';
+                        }
+                        else {
+                            html += ' with ';
+                        }
+
+                        var _you = (sameCompletion[i] === requestingUser.username);
+
+                        html = html +
+                            '<a href=\"/users/' + sameCompletion[i] + '\">' +
+                            (_you ? 'you' : sameCompletion[i]) +
+                            '</a>';
+                    }
+                    html += '.';
+
+                    // Then the other pledges last
+                    var youFound = false;
+                    for (var i = 0; i < otherCompletion.length; i++) {
+                        if (i == otherCompletion.length - 1 && otherCompletion.length > 1) {
+                            html += ' and ';
+                        }
+                        else if (i < otherCompletion.length - 1 && i > 0) {
+                            html += ', ';
+                        }
+                        else {
+                            html += ' ';
+                        }
+
+                        var _you = (otherCompletion[i] === requestingUser.username);
+                        if (_you) {
+                            youFound = true;
+                        }
+
+                        html = html +
+                            '<a href=\"/users/' + otherCompletion[i] + '\">' +
+                            ((i == 0) ? '<span class=\"text-capitalize\">' : '') +
+                            (_you ? 'you' : otherCompletion[i]) +
+                            ((i == 0) ? '</span>' : '') +
+                            '</a>';
+                    }
+
+                    if (otherCompletion.length) {
+                        html = html +
+                            ' ' + vocab.otherCompletion + ' ' + config.dictionary.fulfilment.verb.past + 
+                            (youFound ? ' your ' : ' their ') +
+                            ((otherCompletion.length > 1) ? config.dictionary.pledge.noun.plural : config.dictionary.pledge.noun.singular) +
+                            '.';
+                    }
+                });
+            }
+
+            callback(err, html);
+        });
     });
 };
 
@@ -1167,15 +1322,14 @@ var localFeed = function(username, fromTime, requestingUser, callback) {
             Schedule.find({owner: username, createdAt: { $gte: fromTime }}).exec(next);
         },
         function(next) {
-            Fulfilment.find({username: username, createdAt: { $gte: fromTime }}).exec(next);
+            fulfilmentsFeed(username, fromTime, requestingUser, next);
         }
     ], function(err, results) {
 
         var resultCombined = [];
 
         // Humanize the entries!
-        async.parallel([
-            
+        async.parallel([     
             function(next) {
                 async.each(results[0], function(pledge, _callback) {
                     humanizePledge(pledge, requestingUser, function(html) {
@@ -1203,19 +1357,8 @@ var localFeed = function(username, fromTime, requestingUser, callback) {
                 next();
             },
             function(next) {
-                async.each(results[2], function(fulfilment, _callback) {
-                    humanizeFulfilment(fulfilment, requestingUser, function(html){
-                        var o = {
-                            type: 'fulfilment',
-                            html: html,
-                            createdAt: fulfilment.createdAt
-                        };
-                        resultCombined.push(o);  
-                        _callback(); 
-                    });
-                }, function done(){
-                    next();
-                });
+                resultCombined = resultCombined.concat(results[2]);
+                next();
             }],
             function done(err) {
                 if (err) return callback(err);
@@ -1290,6 +1433,60 @@ router.get('/feed/user/:username', function(req, res) {
     _localFeed(req, res);
 });
 
+var fulfilmentsFeed = function(username, fromTime, requestingUser, callback) {
+    fromTime = new Date(fromTime);
+
+    // No fromTime specified?
+    if (!fromTime || isNaN(fromTime.getTime())) {
+        // Use three days in the past
+        var threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        fromTime = threeDaysAgo;
+    }
+
+    Fulfilment.find({username: username, createdAt: { $gte: fromTime }}).sort({createdAt: 'desc'}).exec(function(err, fulfilments) {
+        if (err) return callback(err);
+        var results = [];
+        async.each(fulfilments, function(fulfilment, next) {
+            humanizeFulfilment(fulfilment, requestingUser, function(err, html){
+                if (err) return next(err);
+
+                var o = {
+                    type: 'fulfilment',
+                    html: html,
+                    createdAt: fulfilment.createdAt
+                };
+                results.push(o);  
+                next(); 
+            });
+        }, function done(err){
+            callback(err, results);
+        });
+    });
+};
+
+var _fulfilmentsFeed = function(req, res) {
+    var username = sanitize(req.params.username);
+    var fromTime = sanitize(req.params.from);
+
+    m._isSameGroupOrAdminDatabase(req.user, username, function(err, authorised) {
+        if (err) return response.JSON.error.server(res, err);
+
+        if (authorised) {
+            fulfilmentsFeed(username, fromTime, req.user, function(err, feedArray) {
+                if (err) return response.JSON.error.server(res, err);
+                res.json(feedArray);
+            });
+        } else {
+            return response.JSON.invalid(res);
+        }
+    });
+};
+
+router.get('/feed/user/:username/fulfilments', function(req, res) {
+    _fulfilmentsFeed(req, res);
+});
+
 // Global feed; all users in requesting user's group
 var _globalFeed = function(req, res) {
     var users = [];
@@ -1319,11 +1516,13 @@ var _globalFeed = function(req, res) {
         }, function done(err) {
             if (err) return response.JSON.error.server(res, err);
 
+            // Add the user to the array
+            users.push(req.user);
+
             // Remove duplicate users from the array
             users = uniqFast(users);
 
-            // Add the user to the array
-            users.push(req.user);
+            console.log('Getting feed for ', users.map(function(u){ return u.username}));
 
             // Retrieve their feeds
             localFeeds(users, fromTime, req.user, function(err, feedCombined) {

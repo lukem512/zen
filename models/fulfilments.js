@@ -37,7 +37,7 @@ FulfilmentSchema.statics.overlaps = function(start_time, end_time, callback) {
 };
 
 var _completes = function(fulfilment, callback) {
-Schedule.during(fulfilment.start_time, fulfilment.end_time, function(err, schedules){
+  Schedule.during(fulfilment.start_time, fulfilment.end_time, function(err, schedules){
     if (err) return callback(err);
 
     // Add meta data to schedules
@@ -55,7 +55,6 @@ Schedule.during(fulfilment.start_time, fulfilment.end_time, function(err, schedu
 
     // Find pledges and add completion status
     Pledge.find({
-      username: fulfilment.username,
       schedule: { $in: schedules.map(function(s){
         return s._id;
       }) }

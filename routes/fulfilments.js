@@ -24,7 +24,8 @@ var getStats = function(fulfilments, schedules) {
   var stats = {
     total: 0,
     weeks: 0,
-    scheduled: 0
+    scheduled: 0,
+    fulfilments: fulfilments.length
   };
 
   // Count filfilled sessions
@@ -110,47 +111,15 @@ var listFulfilments = function(req, res, start, n) {
       // Make statistics object
       var statistics = getStats(fulfilments, schedules);
 
-      // Find all the pledges that this completes
-      getCompletedPledges(fulfilments, function(pledges) {
-
-        // Clean pledges object
-        var schedules = [];
-
-        pledges.forEach(function(arr, i) {
-          for (j = arr.length - 1; j >= 0; j -= 1) {
-            if (arr[j].username == req.user.username) {
-              // Save the schedule details
-              schedules[i] = {
-                id: arr[j].schedule,
-                title: arr[j].scheduleTitle,
-                completion: arr[j].completion
-              };
-
-              // But remove the pledge from the array
-              arr.splice(j, 1);
-            }
-          }
-        });
-
-        Fulfilment.count({ username: req.user.username }).exec(function(err, count) {
-          if (err) return error.server(res, req, err);
-
-          res.render('fulfilments/list', {
-            title: 'View ' + config.dictionary.action.noun.plural,
-            name: config.name,
-            organisation: config.organisation,
-            nav: config.nav(),
-            user: req.user,
-            dictionary: config.dictionary,
-            fulfilments: fulfilments,
-            statistics: statistics,
-            pledges: pledges,
-            schedules: schedules,
-            page: start,
-            pages: Math.ceil(count / n)
-          });
-        })
-      })
+      res.render('fulfilments/list', {
+        title: 'View ' + config.dictionary.action.noun.plural,
+        name: config.name,
+        organisation: config.organisation,
+        nav: config.nav(),
+        user: req.user,
+        dictionary: config.dictionary,
+        statistics: statistics
+      });
     });
   });
 };

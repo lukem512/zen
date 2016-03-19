@@ -1,6 +1,9 @@
 extends ../layout
 
 block content
+	script(src="/javascripts/ui/generic.js")
+	script(src="/javascripts/ui/users.js")
+	script(src="/javascripts/ui/fulfilments.js")
 	h1= dictionary.action.noun.plural
 	p
 		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for around 
@@ -11,7 +14,7 @@ block content
 		|  in total 
 		if statistics.weeklyAverage > 0
 			| with an average of 
-			strong.more-info(data-text="You have logged #{fulfilments.length} sessions over #{statistics.weeks} weeks.") #{moment.duration(statistics.weeklyAverage).humanize()}
+			strong #{moment.duration(statistics.weeklyAverage).humanize()}
 			|  each week
 		| . You have 
 		if statistics.scheduled > 0
@@ -21,105 +24,7 @@ block content
 			| no 
 		a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
 		|  coming up.
-	if fulfilments.length > 0
-		#fulfilments
-			for fulfilment, i in fulfilments
-				p
-					-
-						var duration = (moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time))).humanize();
-					strong #{moment(fulfilment.start_time).calendar()}
-					|  you 
-					if fulfilment.ongoing
-						| are currently #{dictionary.action.verb.presentParticiple} and have been 
-					else
-						| #{dictionary.action.verb.past} 
-					| for 
-					a(href="/#{dictionary.action.noun.plural}/view/#{fulfilment.id}") #{duration}
-					| .
-					if schedules[i]
-						- var partial = (schedules[i].completion == 'partial');
 
-						|  This 
-						if fulfilment.ongoing
-							if partial
-								| partially 
-							| #{dictionary.fulfilment.verb.present} 
-						else
-							if partial
-								span.more-info(data-text="You didn\'t #{dictionary.action.verb.present} for the whole of your pledged time.") partially
-							|  #{dictionary.fulfilment.verb.past} 
-						a(href="/#{dictionary.schedule.noun.plural}/view/#{schedules[i].id}") #{schedules[i].title}
-
-						-
-							var fullPledges = [];
-							var partialPledges = [];
-
-							pledges[i].forEach(function(p) {
-								if (p.completion == 'partial') {
-									partialPledges.push(p);
-								} else {
-									fullPledges.push(p);
-								}
-							});
-
-							var samePledges = fullPledges;
-							var otherPledges = partialPledges;
-
-							if (partial) {
-								samePledges = partialPledges;
-								otherPledges = fullPledges;
-							}
-
-						if samePledges.length > 0
-							|  with 
-							for pledge, j in samePledges
-								if j > 0
-									if j < (samePledges.length - 1)
-										| , 
-									else
-										|  and 
-								a.text-capitalize(href="/users/#{pledge.username}") #{pledge.username}
-						| .
-
-						if otherPledges.length > 0
-							| 
-							for pledge, j in otherPledges
-								if j > 0
-									if j < (otherPledges.length - 1)
-										| , 
-									else
-										|  and 
-								a.text-capitalize(href="/users/#{pledge.username}") #{pledge.username}
-							if !partial
-								|  partially 
-							if fulfilment.ongoing
-								|  will #{dictionary.fulfilment.verb.present} 
-							else
-								|  #{dictionary.fulfilment.verb.past} 
-							| the #{dictionary.schedule.noun.singular}.
-		if pages > 1
-			#page.small
-				| Page 
-				a(href="/#{dictionary.action.noun.plural}/list/#{page}", title="This page!") #{page}
-				|  of 
-				a(href="/#{dictionary.action.noun.plural}/list/#{pages}", title="Go to the last page") #{pages}
-				| .
-				if page > 1
-					|  Go to the 
-					a(href="/#{dictionary.action.noun.plural}/list/#{page - 1}", title="Go to the previous page") previous
-					|  page.
-				if page < pages 
-					|  Go to the 
-					a(href="/#{dictionary.action.noun.plural}/list/#{page + 1}", title="Go to the next page") next
-					|  page.
-				if page > 2
-					|  Go to the 
-					a(href="/#{dictionary.action.noun.plural}", title="Go to the first page") first
-					|  page.
-
-	else
-		p
-			em You have not logged any #{dictionary.action.noun.plural} sessions yet! To do so, click the button below.
 	hr
 	form
 		.form-group

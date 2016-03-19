@@ -49,6 +49,9 @@ module.exports.JSON = {
 };
 
 module.exports.JSON.error = {
+    prohibited: function(res) {
+        res.status(403).json({error: 'Not authorised'});
+    },
     notfound: function(res) {
         res.status(404).json({error: 'Resource not found'});
     },

@@ -1,3 +1,4 @@
+var listApiUrl= '/api/fulfilments/list';
 var addApiUrl = '/api/fulfilments/new';
 var updateApiUrl = '/api/fulfilments/update';
 
@@ -138,7 +139,7 @@ var displayUsers = function(absent, present) {
 var getPledgedUsers = function(id, callback) {
 	var url = getPledgesApiUrl + '/' + id;
 	_get(url, callback, function(err) {
-		console.error(err);
+		console.error('Could not get pledged users', err);
 	});
 };
 
@@ -146,15 +147,17 @@ var getOnlineUsers = function(id) {
 	var url = getFulfilmentsApiUrl + '/' + id;
 	getPledgedUsers(id, function(pledged) {
 		_get(url, function(fulfilled){
-			if (fulfilled.message) {
-				return console.error(fulfilled.message);
-			};
+
+			// TODO - this returns users that have fulfilled their pledges,
+			// not that are necessarily online!
+			
+			if (fulfilled.message) return console.error(fulfilled.message);
 			var present = fulfilled.map(function(i) {return i.username});
 			var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
 			displayUsers(absent, present);
+		}, function(err) {
+			console.error('Could not get online users', err);
 		});
-	}, function(err) {
-		console.error(err);
 	});
 };
 
@@ -288,7 +291,7 @@ var toggle = function(next) {
 					        }, function(err) {
 					        	console.error(err);
 					        	hadError = true;
-					        	$('#message').text('We are unable to save your progress - is your Internet connection having trouble? Retrying in ' + aliveTimeInterval + ' seconds.');
+					        	$('#message').text('We are unable to save your progress. Please check your Internet connection. Retrying in ' + aliveTimeInterval + ' seconds.');
 					        	$('#message').removeClass('text-success');
 					        	$('#message').addClass('text-danger');
 					        });
