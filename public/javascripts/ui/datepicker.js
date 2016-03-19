@@ -46,7 +46,7 @@ var initPickers = function(past) {
 	var timeParams = {
 		scrollDefault: 'now',
 		timeFormat: 'H:i',
-		step: 15
+		step: 5
 	};
 	$('#inputStartTime').timepicker(timeParams);
 	$('#inputEndTime').timepicker(timeParams);
