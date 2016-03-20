@@ -89,7 +89,10 @@ router.get('/view/:id', function(req, res, next) {
     m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {
       if (err) return error.server(req, res, err);
 
+      var diff = moment().diff(moment(schedule.start_time), 'minutes');
+
       var past = (moment().diff(moment(schedule.end_time)) > 0);
+      var soon = (0 < diff && diff > 15);
       var ongoing = (!past && (moment().diff(moment(schedule.start_time)) > 0));
 
       if (authorised) {
@@ -102,6 +105,7 @@ router.get('/view/:id', function(req, res, next) {
           dictionary: config.dictionary,
           schedule: schedule,
           past: past,
+          soon: soon,
           ongoing: ongoing
         });
       }

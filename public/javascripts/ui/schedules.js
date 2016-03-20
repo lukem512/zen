@@ -134,6 +134,24 @@ var fulfil = function() {
 	window.location = '/' + dictionary.action.noun.plural + '/now';
 };
 
+var displaySoon = function(you) {
+	if (window.__ongoing || window.__soon) {
+		var now = 
+			"This " + dictionary.schedule.noun.singular +
+			((window.__ongoing) ? " began " : " begins ") +
+			moment(window.__start_time).fromNow() + ".";
+
+		if (you) {
+			$('#btnFulfil').removeClass('hidden');
+			$('#btnJoin').addClass('hidden');
+			$('#btnLeave').removeClass('hidden');
+
+			now += ' Would you like to <a href=\"/'+dictionary.action.noun.plural+'/now\">' + dictionary.action.verb.present + ' now</a> to complete your ' + dictionary.pledge.noun.singular + '?'
+		}
+		$('#now').html(now).removeClass('hidden');
+	}
+};
+
 var displayPledgesFuture = function(users) {
 
 	// TODO - remove the owner of the schedule from the list, not you.
@@ -146,16 +164,11 @@ var displayPledgesFuture = function(users) {
 		dictionary.pledge.verb.past +
 		" to attend.";
 
+	displaySoon(list.you);
 	$('#pledges').html(html);
-
-	// Change button state
-	if (list.you) {
-		$('#btnJoin').addClass('hidden');
-		$('#btnLeave').removeClass('hidden');
-	}
 };
 
-var displayPledgesPast = function(absent, present, ongoing) {
+var displayPledgesPast = function(absent, present) {
 	var html = "";
 
 	var presentList = listUsers(present);
@@ -176,7 +189,7 @@ var displayPledgesPast = function(absent, present, ongoing) {
 			html +
 			((html.length > 0) ? " " : "") +
 			absentList.html + " " +
-			(ongoing
+			(window.__ongoing
 				? (((absentList.n > 1 || absentList.you) ? "have" : "has") + " not yet attended")
 				: "did not attend") +
 			" this " + 
@@ -184,21 +197,7 @@ var displayPledgesPast = function(absent, present, ongoing) {
 			".";
 	}
 
-	if (ongoing) {
-		var now = 
-			"This " + dictionary.schedule.noun.singular +
-			" is happening now!";
-
-		if (absentList.you) {
-			$('#btnFulfil').removeClass('hidden');
-			$('#btnJoin').addClass('hidden');
-			$('#btnLeave').removeClass('hidden');
-
-			now += ' Would you like to <a href=\"/'+dictionary.action.noun.plural+'/now\">' + dictionary.action.verb.present + ' now</a> to complete your ' + dictionary.pledge.noun.singular + '?'
-		}
-		$('#now').html(now).removeClass('hidden');
-	}
-
+	displaySoon(absentList.you);
 	$('#pledges').html(html);
 };
 
@@ -213,7 +212,7 @@ $(function() {
 					};
 					var present = fulfilled.map(function(i) {return i.username});
 					var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
-					displayPledgesPast(absent, present, window.__ongoing);
+					displayPledgesPast(absent, present);
 				});
 			}
 			else {
