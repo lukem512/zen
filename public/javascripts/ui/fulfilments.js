@@ -354,20 +354,23 @@ var toggle = function(next) {
 	switch (state) {
 		case 'running':
 			$('#timer').timer('pause');
-			$('#btnStart').removeClass('hidden');
-			$('#btnPause').addClass('hidden');
+			$('#btnStart').attr('disabled', false);
+			// $('#btnStart').removeClass('hidden');
+			// $('#btnPause').addClass('hidden');
 			break;
 
 		case 'paused':
 			$('#timer').timer('resume');
-			$('#btnStart').addClass('hidden');
-			$('#btnPause').removeClass('hidden');
+			$('#btnStart').attr('disabled', true);
+			// $('#btnStart').addClass('hidden');
+			// $('#btnPause').removeClass('hidden');
 			break;
 
 		case 'stopped':
 			$('#timer').timer('restart');
-			$('#btnStart').addClass('hidden');
-			$('#btnPause').removeClass('hidden');
+			$('#btnStart').attr('disabled', true);
+			// $('#btnStart').addClass('hidden');
+			// $('#btnPause').removeClass('hidden');
 			break;
 
 		default:
@@ -410,8 +413,10 @@ var toggle = function(next) {
 					    },
 					    repeat: true
 					});
-					$('#btnStart').addClass('hidden');
-					$('#btnPause').removeClass('hidden');
+
+					$('#btnStart').attr('disabled', true);
+					// $('#btnStart').addClass('hidden');
+					// $('#btnPause').removeClass('hidden');
 					$('#btnStop').attr('disabled', false);
 
 					// Update the schedule
