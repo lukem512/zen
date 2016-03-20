@@ -6,6 +6,7 @@ block content
 	script(src='/javascripts/ui/datepicker.js')
 	script(src='/javascripts/ui/schedules.js')
 	form#formEditSchedule(name="editschedule",role="form",method="post",action="/api/schedules/new")
+	p#message.hidden
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title", value="#{schedule.title}")
 		if user.admin

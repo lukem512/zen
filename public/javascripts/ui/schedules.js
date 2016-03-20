@@ -12,7 +12,47 @@ var listViewUrl = '/admin/schedules/list';
 
 var validate = function() {
     return _validate(function(){
-        // TODO
+    	// Validate title
+    	if ($('#inputTitle').val() == '') {
+    		$('#inputTitle').addClass('has-error');
+    		_message('You must enter a title.', true);
+    		return false;
+    	}
+
+    	// Validate dates
+        var dates = makeDates();
+        if (!dates.start.isValid()) {
+        	$('#inputStartDate').addClass('has-error');
+        	$('#inputStartTime').addClass('has-error');
+        	_message('The start date is not valid.', true);
+        	return false;
+        }
+        if (!dates.end.isValid()) {
+        	$('#inputEndDate').addClass('has-error');
+        	$('#inputEndTime').addClass('has-error');
+        	_message('The end date is not valid.', true);
+        	return false;
+        }
+        if (dates.start.isAfter(dates.end) || dates.start.isSame(dates.end)) {
+        	$('#inputStartDate').addClass('has-error');
+        	$('#inputStartTime').addClass('has-error');
+        	$('#inputEndDate').addClass('has-error');
+        	$('#inputEndTime').addClass('has-error');
+        	_message('The end date must be after the start date.', true);
+        	return false;
+        }
+        if (dates.start.isBefore(moment())) {
+        	$('#inputStartDate').addClass('has-error');
+        	$('#inputStartTime').addClass('has-error');
+        	_message('The ' + dictionary.fulfilment.noun.singular + ' must be in the future!', true);
+        	return false;
+        }
+        if (dates.end.isBefore(moment())) {
+        	$('#inputEndDate').addClass('has-error');
+        	$('#inputEndTime').addClass('has-error');
+        	_message('The ' + dictionary.fulfilment.noun.singular + ' must be in the future!', true);
+        	return false;
+        }
         return true;
     })
 };

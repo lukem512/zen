@@ -327,9 +327,18 @@ router.get('/schedules/view/:id', function(req, res) {
     });
 });
 
+// Are the times valid?
+var timesValid = function(start_time, end_time) {
+    return (moment(start_time).diff(end_time) < 0);
+};
+
+var timePast = function(time) {
+    return (moment().diff(time) > 0);
+};
+
 // Is the schedule in the past?
 var schedulePast = function(schedule) {
-    return (moment().diff(schedule.end_time) > 0);
+    return timePast(schedule.end_time);
 };
 
 var schedulePastDatabase = function(scheduleId, callback) {
@@ -352,6 +361,10 @@ router.post('/schedules/new', m.isAdminOrCurrentUser, function(req, res) {
     });
 
     if (schedulePast(schedule) && !requestingUser.admin) {
+        return response.JSON.invalid(res);
+    }
+
+    if (!timesValid(schedule.start_time, schedule.end_time)) {
         return response.JSON.invalid(res);
     }
 
@@ -381,9 +394,12 @@ router.post('/schedules/update', m.isAdminOrCurrentUser, function(req, res) {
             end_time: new Date(req.body.end_time)
         };
 
+        if (!timesValid(obj.start_time, obj.end_time)) {
+            return response.JSON.invalid(res);
+        }
+
         var owner = sanitize(req.body.owner);
         if (owner) {
-            console.log('CHANGING OWNER TO ' + owner);
             obj.owner = owner;
         }
 
@@ -739,6 +755,10 @@ router.get('/pledges/username/:username/now', function(req, res) {
  * Users can create schedules, visible to their group.
 */
 
+var fulfilmentFuture = function(fulfilment) {
+    return (!timePast(fulfilment.start_time));
+};
+
 /* GET fulfilment listing page. */
 router.get('/fulfilments/list', m.isAdmin, function(req, res) {
     Fulfilment.find(function(err, fulfilments){
@@ -776,6 +796,15 @@ router.post('/fulfilments/new', m.isAdminOrCurrentUser, function(req, res) {
         start_time: new Date(req.body.start_time),
         end_time: new Date(req.body.end_time)
     });
+
+    if (!timesValid(fulfilment.start_time, fulfilment.end_time)) {
+        return response.JSON.invalid(res);
+    }
+
+    if (fulfilmentFuture(fulfilment)) {
+        return response.JSON.invalid(res);
+    }
+
     fulfilment.save(function(err, doc) {
         if (err) return response.JSON.error.server(res, err);
         response.JSON.ok(res);
@@ -790,6 +819,14 @@ router.post('/fulfilments/update', m.isAdminOrCurrentUser, function(req, res) {
         // A fulfilment should only be modifiable for a small amount of time
         // after creating it
         if (!fulfilmentHelpers.recentFulfilment(fulfilment)) {
+            return response.JSON.invalid(res);
+        }
+
+        if (!timesValid(fulfilment.start_time, fulfilment.end_time)) {
+            return response.JSON.invalid(res);
+        }
+
+        if (fulfilmentFuture(fulfilment)) {
             return response.JSON.invalid(res);
         }
 
@@ -818,6 +855,14 @@ router.delete('/fulfilments/update/:id', function(req, res) {
         // A fulfilment should only be modifiable for a small amount of time
         // after creating it
         if (!fulfilmentHelpers.recentFulfilment(fulfilment)) {
+            return response.JSON.invalid(res);
+        }
+
+        if (!timesValid(fulfilment.start_time, fulfilment.end_time)) {
+            return response.JSON.invalid(res);
+        }
+
+        if (fulfilmentFuture(fulfilment)) {
             return response.JSON.invalid(res);
         }
 
@@ -1514,8 +1559,6 @@ var _globalFeed = function(req, res) {
 
             // Remove duplicate users from the array
             users = uniqFast(users);
-
-            console.log('Getting feed for ', users.map(function(u){ return u.username}));
 
             // Retrieve their feeds
             localFeeds(users, fromTime, req.user, function(err, feedCombined) {

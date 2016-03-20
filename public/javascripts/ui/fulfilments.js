@@ -39,12 +39,24 @@ var validate = function() {
         	_message('The end date is not valid.', true);
         	return false;
         }
-        if (dates.start > dates.end) {
+        if (dates.start.isAfter(dates.end) || dates.start.isSame(dates.end)) {
         	$('#input.start_date').addClass('has-error');
         	$('#input.start_time').addClass('has-error');
         	$('#input.end_date').addClass('has-error');
         	$('#input.end_time').addClass('has-error');
         	_message('The end date must be after the start date.', true);
+        	return false;
+        }
+        if (dates.start.isAfter(moment())) {
+        	$('#input.start_date').addClass('has-error');
+        	$('#input.start_time').addClass('has-error');
+        	_message('The ' + dictionary.fulfilment.noun.singular + ' must be in the past!', true);
+        	return false;
+        }
+        if (dates.end.isAfter(moment())) {
+        	$('#input.end_date').addClass('has-error');
+        	$('#input.end_time').addClass('has-error');
+        	_message('The ' + dictionary.fulfilment.noun.singular + ' must be in the past!', true);
         	return false;
         }
         return true;

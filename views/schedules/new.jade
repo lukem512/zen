@@ -8,6 +8,7 @@ block content
 	script(src='/javascripts/ui/datepicker.js')
 	script(src='/javascripts/ui/schedules.js')
 	form#formAddSchedule(name="addschedule",role="form",method="post",action="/api/schedules/new")
+	p#message.hidden
 		.form-group
 			input#inputTitle.form-control(type="text", placeholder="Title", name="title")
 		.row
