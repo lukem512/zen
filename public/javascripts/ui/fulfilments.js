@@ -8,6 +8,8 @@ var endApiUrl = '/api/fulfilments/ongoing/end';
 var getApiUrl = '/api/fulfilments/ongoing';
 var deleteApiUrl = '/api/fulfilments/ongoing';
 
+var getOnlineApiUrl = '/api/fulfilments/ongoing/users';
+
 var scheduleApiUrl = '/api/pledges/username';
 var getFulfilmentsApiUrl = '/api/fulfilments/users';
 var getPledgesApiUrl = '/api/pledges/users';
@@ -102,16 +104,19 @@ var displaySchedule = function(schedules) {
 		 	((schedules.length > 1) ? 'first ' : '') +
 		 	dictionary.schedule.noun.singular + 
 		 	((moment().diff(next.start_time) > 0) ? ' began ' : ' begins ') +
-		 	'<span class=\"more-info\" data-text=\"' +
+		 	'<span class=\"more-info dotted\" data-text=\"' +
 		 	moment(next.start_time).calendar() + 
 		 	'\">' +
 		 	moment().to(next.start_time) +
 		 	'</span> and finishes ' +
-		 	'<span class=\"more-info\" data-text=\"' +
+		 	'<span class=\"more-info dotted\" data-text=\"' +
 		 	moment(next.end_time).calendar() + 
 		 	'\">' +
 		 	moment().to(next.end_time) +
 		 	'</span>.';
+
+		// Display online users
+		getOnlineUsers(next._id);
 	}
 	 	
 	$('#schedule').html(html);
@@ -157,30 +162,25 @@ var getSchedule = function() {
 
 // User functionality
 
-var displayUsers = function(absent, present) {
-	var html = "";
+var displayUser = function(username, online) {
+	var className = (online ? 'text-success' : 'text-danger');
+	var html = 
+		"<span class=\"" + className + " more-info\" data-text=\"" + 
+		((username === user) ? 'You are ' : username + ' is ') +
+		(online ? "" : "not ") + "online\">&bull; " +
+		"<a href=\"/users/" + username + "\" title=\"View " + 
+		((username === user) ? 'your' : username + '\'s') + 
+		" profile\" class=\"text-capitalize\">" + 
+		((username === user ? 'you' : username)) + "</a></span>";
+	return html;
+}
 
-	var presentList = listUsers(present, true);
-	if (presentList.n > 0) {
-		html =
-			html +
-			presentList.html +
-			((presentList.n > 1 || presentList.you) ? " are " : " is ") + 
-			"online!";
-	}
+var displayUserOffline = function(username) {
+	return displayUser(username, false);
+};
 
-	var absentList = listUsers(absent, true);
-	if (absentList.n > 0) {
-		var 
-		html =
-			html +
-			((html.length > 0) ? " " : "") +
-			absentList.html +
-			((absentList.n > 1 || absentList.you) ? " are " : " is ") + 
-			"not online.";
-	}
-
-	$('#users').html(html);
+var displayUserOnline = function(username) {
+	return displayUser(username, true);
 };
 
 var getPledgedUsers = function(id, callback) {
@@ -190,21 +190,72 @@ var getPledgedUsers = function(id, callback) {
 	});
 };
 
-var getOnlineUsers = function(id) {
+var getFulfilledUsers = function(id, callback) {
 	var url = getFulfilmentsApiUrl + '/' + id;
-	getPledgedUsers(id, function(pledged) {
-		_get(url, function(fulfilled){
+	_get(url, function(fulfilled){
+		callback(fulfilled);
+	}, function(err) {
+		console.error('Could not get fulfilled users', err);
+	});
+};
 
-			// TODO - this returns users that have fulfilled their pledges,
-			// not that are necessarily online!
-			
-			if (fulfilled.message) return console.error(fulfilled.message);
-			var present = fulfilled.map(function(i) {return i.username});
-			var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
-			displayUsers(absent, present);
-		}, function(err) {
-			console.error('Could not get online users', err);
+var displayUsers = function(absent, present, fulfilled) {
+
+	// Hide the table if there is nothing to show
+	if (absent.length == 0 && present.length == 0) {
+		$('#ut').addClass('hidden');
+		return;
+	}
+	else if ($('#ut').hasClass('hidden')) {
+		$('#ut').removeClass('hidden');
+	}
+
+	// Empty the table
+	$('#ut-body').empty();
+
+	// Display the present users
+	present.forEach(function(username) {
+		var completion = '';
+		fulfilled.some(function(f){
+			if (f.username === username) {
+				completion = f.completion;
+				return true;
+			};
 		});
+		var onlineString = displayUserOnline(username);
+		var completionString = (completion === '' ? '' : ' (<span class=\"text-capitalize\">' + completion + 'ly</span> complete)');
+		var html = '<tr id=\"'+ username + '\"><td>' + onlineString + completionString + '</td></tr>';
+		$('#ut > tbody:last-child').append(html);
+	});
+
+	// And the absent ones
+	absent.forEach(function(username) {
+		var completion = '';
+		fulfilled.some(function(f){
+			if (f.username === username) {
+				completion = f.completion;
+				return true;
+			};
+		});
+		var onlineString = displayUserOffline(username);
+		var completionString = (completion === '' ? '' : ' (<span class=\"text-capitalize\">' + completion + 'ly complete</span>)');
+		var html = '<tr id=\"'+ username + '\"><td>' + onlineString + completionString + '</td></tr>';
+		$('#ut > tbody:last-child').append(html);
+	});
+};
+
+var getOnlineUsers = function(id) {
+	var url = '/api/fulfilments/ongoing/users' + '/' + id;
+	_get(url, function(results){
+		if (results.message) return console.error(results.message);
+
+		getFulfilledUsers(id, function(fulfilled) {
+			var present = results.online;
+			var absent = results.pledged.filter(function(i) {return present.indexOf(i) < 0;});
+			displayUsers(absent, present, fulfilled);
+		});
+	}, function(err) {
+		console.error('Could not get online users', err);
 	});
 };
 
@@ -348,6 +399,9 @@ var toggle = function(next) {
 					$('#btnStart').addClass('hidden');
 					$('#btnPause').removeClass('hidden');
 					$('#btnStop').attr('disabled', false);
+
+					// Update the schedule
+					getSchedule();
 
 					// Set up message when user navigates away
 					window.onbeforeunload = function (e) {

@@ -18,10 +18,13 @@
     float: none;
 }
 
+.dotted { 
+	border-bottom: 1px black dotted;
+}
+
 .more-info {
 	display: inline;
     position: relative;
-	border-bottom: 1px black dotted;
 }
 
 .more-info:hover {

@@ -10,7 +10,7 @@ block content
 		if statistics.total > 0
 			strong #{moment.duration(statistics.total).humanize()}
 		else
-			strong.more-info(data-text="Why not start now? Click the button below!") 0 minutes
+			strong.more-info.dotted(data-text="Why not start now? Click the button below!") 0 minutes
 		|  in total 
 		if statistics.weeklyAverage > 0
 			| with an average of 

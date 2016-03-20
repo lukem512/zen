@@ -1028,6 +1028,64 @@ router.delete('/fulfilments/ongoing/:username', m.isAdminOrCurrentUser, function
     });
 });
 
+var getSchedulePledgersOnline = function(id, requestingUser, callback) {
+    // Find the schedule
+    Schedule.findById(id, function(err, schedule) {
+        if (err) return callback(err);
+        if (!schedule) return callback(notFoundError);
+
+        m._isSameGroupOrAdminDatabase(requestingUser, schedule.owner, function(err, authorised) {
+            if (err) return callback(err);
+
+            if (authorised) {
+
+                // Find users pledged to the schedule.
+                Pledge.find({schedule: id}, function(err, pledges) {
+                    if (err) return callback(err);
+
+                    var results = {
+                        pledged: pledges.map(function(p) { return p.username })
+                    };
+
+                    // Find pledged users that are online
+                    Fulfilment.find({
+                        username: { $in: results.pledged },
+                        ongoing: true
+                    }, function(err, fulfilments) {
+                        if (err) return callback(err);
+
+                        results.online = fulfilments.map(function(f) { return f.username });
+                        callback(err, results);
+                    });
+                });
+            }
+            else {
+                return callback(notAuthorisedError);
+            }
+        });
+    });
+};
+
+// Return the users that have fulfilled a pledge to attend a given schedule
+router.get('/fulfilments/ongoing/users/:schedule', function(req, res) {
+    var id = sanitize(req.params.schedule);
+    getSchedulePledgersOnline(id, req.user, function(err, users) {
+        if (err) {
+            switch (err) {
+                case notFoundError:
+                    return response.JSON.error.notfound(res);
+
+                case notAuthorisedError:
+                    return response.JSON.error.prohibited(res);
+
+                default:
+                    return response.JSON.error.server(res, err);
+            }
+        }
+        res.json(users);
+    });
+});
+
 var getScheduleFulfilments = function(id, requestingUser, callback) {
     // Find the schedule
     Schedule.findById(id, function(err, schedule) {

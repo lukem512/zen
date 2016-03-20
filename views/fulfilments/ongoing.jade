@@ -4,8 +4,15 @@ block content
 	h1= title
 	p#message Press the button below to begin your #{dictionary.action.noun.singular} session.
 	p#schedule
-	h1#timer
-	p#users
+	.row
+		.col-xs-12.col-sm-6.text-center
+			h1#timer 00:00:00
+		.col-xs-12.col-sm-6
+			table#ut.table
+				thead
+					tr 
+						th Pledged Users
+				tbody#ut-body
 	hr
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/datepicker.js')
