@@ -16,6 +16,16 @@ module.exports.error = {
           user: req.user
         });
     },
+    deleted: function(req, res) {
+        return res.status(404).render('deleted', {
+          title: 'Resource Deleted',
+          name: config.name,
+          organisation: config.organisation,
+          nav: config.nav(),
+          dictionary: config.dictionary,
+          user: req.user
+        });
+    },
     notfound: function(req, res) {
         return res.status(404).render('404', {
           title: 'Error 404',

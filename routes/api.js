@@ -311,7 +311,7 @@ router.get('/schedules/list/group/:group', function(req, res) {
 });
 
 router.get('/schedules/view/:id', function(req, res) {
-    Schedule.findById(sanitize(req.params.id), function(err, schedule){
+    Schedule.findById(sanitize(req.params.id)).select('+deleted').exec(function(err, schedule){
         if (err) return response.JSON.error.server(res, err);
         if (!schedule) return response.JSON.error.notfound(res);
 

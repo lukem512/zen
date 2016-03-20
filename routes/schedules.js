@@ -42,9 +42,13 @@ router.get('/new', function(req, res, next) {
 
 /* GET edit schedule page */
 router.get('/edit/:id', function(req, res, next) {
-  Schedule.findById(sanitize(req.params.id), function(err, schedule){
+  Schedule.findById(sanitize(req.params.id)).select('+deleted').exec(function(err, schedule){
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
+
+    if (schedule.deleted  && !req.user.admin) {
+      return error.deleted(req, res);
+    }
 
     // Check the user is the owner, or admin
     if (schedule.owner !== req.user.username && !req.user.admin) {
@@ -73,9 +77,13 @@ router.get('/edit/:id', function(req, res, next) {
 
 /* GET view schedule page */
 router.get('/view/:id', function(req, res, next) {
-  Schedule.findById(sanitize(req.params.id), function(err, schedule){
+  Schedule.findById(sanitize(req.params.id)).select('+deleted').exec(function(err, schedule){
     if (err) return error.server(req, res, err);
     if (!schedule) return error.notfound(req, res);
+
+    if (schedule.deleted  && !req.user.admin) {
+      return error.deleted(req, res);
+    }
 
     // Check the user is in the same group as the user, or admin
     m._isSameGroupOrAdminDatabase(req.user, schedule.owner, function(err, authorised) {

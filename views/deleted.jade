@@ -1,0 +1,11 @@
+extends layout
+
+block content
+	h1= title
+
+	p.text-danger This resource has been deleted.
+	
+	p
+		| Please go 
+		a(href='#', onclick='window.history.back();') back
+		|  and find another page.

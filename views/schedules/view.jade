@@ -10,6 +10,9 @@ block content
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
 
+	if schedule.deleted
+		p.text-danger This resource has been deleted.
+
 	p
 		a#user.text-capitalize(href="/users/#{schedule.owner}")
 			if schedule.owner != user.username
@@ -54,9 +57,10 @@ block content
 				i.fa.fa-pencil
 				| &nbsp; Edit
 			| &nbsp;
-			button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')")
-				i.fa.fa-remove
-				| &nbsp; Delete
+			if !schedule.deleted
+				button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')")
+					i.fa.fa-remove
+					| &nbsp; Delete
 		script.
 			$(function() {
 				var startDate = moment('#{schedule.start_time}');
