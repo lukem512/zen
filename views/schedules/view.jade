@@ -6,6 +6,7 @@ block content
 	script.
 		window.__id = '#{schedule.id}';
 		window.__past = #{past};
+		window.__ongoing = #{ongoing};
 
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
@@ -35,6 +36,7 @@ block content
 			em= schedule.description
 			| &rdquo;
 	p#pledges
+	p#now.hidden
 
 	hr
 
@@ -44,6 +46,11 @@ block content
 
 	#message.hidden
 	#buttons
+		if (ongoing)
+			button#btnFulfil.btn.btn-success.hidden(type="button", onclick="fulfil()")
+				i.fa.fa-hourglass-half
+				| &nbsp; Complete
+			| &nbsp;
 		if (schedule.owner != user.username) && !past
 			button#btnJoin.btn.btn-success(type="button", onclick="join(window.location, '#{schedule.id}')")
 				i.fa.fa-calendar-check-o

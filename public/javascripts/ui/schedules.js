@@ -130,25 +130,21 @@ var del = function(next, id) {
 	_del(updateApiUrl, next, id);
 };
 
+var fulfil = function() {
+	window.location = '/' + dictionary.action.noun.plural + '/now';
+};
+
 var displayPledgesFuture = function(users) {
 
 	// TODO - remove the owner of the schedule from the list, not you.
 
 	var html = "";
 	var list = listUsers(users);
-	if (list.n == 0) {
-		html = "<em>Nobody" +
-			(list.you ? " else" : "") +
-			" has " +
-			dictionary.pledge.verb.past +
-			" to attend.</em>";
-	}
-	else {
-		html = list.html +
-			((list.n > 1 || list.you) ? " have " : " has ") +
-			dictionary.pledge.verb.past +
-			" to attend.";
-	}
+
+	html = list.html +
+		((list.n > 1 || list.you) ? " have " : " has ") +
+		dictionary.pledge.verb.past +
+		" to attend.";
 
 	$('#pledges').html(html);
 
@@ -159,7 +155,7 @@ var displayPledgesFuture = function(users) {
 	}
 };
 
-var displayPledgesPast = function(absent, present) {
+var displayPledgesPast = function(absent, present, ongoing) {
 	var html = "";
 
 	var presentList = listUsers(present);
@@ -179,10 +175,28 @@ var displayPledgesPast = function(absent, present) {
 		html =
 			html +
 			((html.length > 0) ? " " : "") +
-			absentList.html +
-			" did not attend this " + 
+			absentList.html + " " +
+			(ongoing
+				? (((absentList.n > 1 || absentList.you) ? "have" : "has") + " not yet attended")
+				: "did not attend") +
+			" this " + 
 			dictionary.schedule.noun.singular +
 			".";
+	}
+
+	if (ongoing) {
+		var now = 
+			"This " + dictionary.schedule.noun.singular +
+			" is happening now!";
+
+		if (absentList.you) {
+			$('#btnFulfil').removeClass('hidden');
+			$('#btnJoin').addClass('hidden');
+			$('#btnLeave').removeClass('hidden');
+
+			now += ' Would you like to <a href=\"/'+dictionary.action.noun.plural+'/now\">' + dictionary.action.verb.present + ' now</a> to complete your ' + dictionary.pledge.noun.singular + '?'
+		}
+		$('#now').html(now).removeClass('hidden');
 	}
 
 	$('#pledges').html(html);
@@ -191,19 +205,19 @@ var displayPledgesPast = function(absent, present) {
 $(function() {
 	var __id = window.__id || false;
 	if (__id) {
-		var future = !(window.__past);
 		pledgedUsers(__id, function(pledged) {
-			if (future) {
-				displayPledgesFuture(pledged);
-			} else {
+			if (window.__past || window.__ongoing) {
 				fulfilledUsers(__id, function(fulfilled) {
 					if (fulfilled.message) {
 						return console.error(fulfilled.message);
 					};
 					var present = fulfilled.map(function(i) {return i.username});
 					var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
-					displayPledgesPast(absent, present);
+					displayPledgesPast(absent, present, window.__ongoing);
 				});
+			}
+			else {
+				displayPledgesFuture(pledged);
 			}
 		});
 	};

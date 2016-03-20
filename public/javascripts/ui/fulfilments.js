@@ -199,15 +199,26 @@ var getFulfilledUsers = function(id, callback) {
 	});
 };
 
+var showUsersTable = function() {
+	if ($('#ut').hasClass('hidden')) {
+		$('#ut').removeClass('hidden');
+	}
+};
+
+var hideUsersTable = function() {
+	if (!$('#ut').hasClass('hidden')) {
+		$('#ut').addClass('hidden');
+	}
+};
+
 var displayUsers = function(absent, present, fulfilled) {
 
 	// Hide the table if there is nothing to show
 	if (absent.length == 0 && present.length == 0) {
-		$('#ut').addClass('hidden');
-		return;
+		return hideUsersTable()
 	}
-	else if ($('#ut').hasClass('hidden')) {
-		$('#ut').removeClass('hidden');
+	else {
+		showUsersTable();
 	}
 
 	// Empty the table
@@ -247,7 +258,10 @@ var displayUsers = function(absent, present, fulfilled) {
 var getOnlineUsers = function(id) {
 	var url = '/api/fulfilments/ongoing/users' + '/' + id;
 	_get(url, function(results){
-		if (results.message) return console.error(results.message);
+		if (results.message){
+			hideUsersTable();
+			return console.error(results.message);
+		}
 
 		getFulfilledUsers(id, function(fulfilled) {
 			var present = results.online;
