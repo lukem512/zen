@@ -14,10 +14,10 @@ var Pledge = require('../models/pledges');
 var response = require('./response');
 var error = response.error;
 
-var middlewares = require('./middlewares');
+var m = require('./middlewares');
 
 // Middleware to require authorisation for all users routes
-router.use(middlewares.isLoggedInRedirect);
+router.use(m.isLoggedInRedirect);
 
 /* Retreive the user object and render the page */
 var userPage = function(req, res, username) {
@@ -26,7 +26,10 @@ var userPage = function(req, res, username) {
     if (err) return error.server(req, res, err);
     if (!user) return error.notfound(req, res);
 
-    // TODO - is requesting user in the same group?
+    // Is requesting user in the same group?
+    if (!m._isSameGroupOrAdmin(req.user, user)) {
+      return error.prohibited(req, res);
+    }
 
     // Render!
     res.render('users/view', {
