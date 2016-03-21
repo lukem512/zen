@@ -1,28 +1,28 @@
 var config = {
 	// The name of the application
-	name: 'Zen',
+	name: process.env.zenName || 'Zen',
 
 	// The organisation running the application
-	organisation: 'Luke Mitchell',
-	email: 'hi@lukemitchell.co',
+	organisation: process.env.zenOrganisation || 'Luke Mitchell',
+	email: process.env.zenEmail || 'hi@lukemitchell.co',
 
 	database: {
 		// The URI used to connect to your mongo database.
-		uri: 'mongodb://zen:password@ds031213.mongolab.com:31213/heroku_0zqsl9g7'
+		uri: process.env.zenDatabaseUri || 'mongodb://zen:password@ds031213.mongolab.com:31213/heroku_0zqsl9g7'
 	},
 
 	token: {
 		// This is used to encrypt client connections.
 		// Change this to something secure.
-		secret: 'super_secure_string_here'
+		secret: process.env.zenTokenSecret || 'super_secure_string_here'
 	},
 
 	admin: {
 		// The initial admin credentials.
 		// These should be changed as soon as possible
 		// after installation, via the admin panel or the users settings.
-		username: 'admin',
-		password: 'change_me'
+		username: process.env.zenAdminUsername || 'admin',
+		password: process.env.zenAdminPassword || 'change_me'
 	},
 
   	// Pages to create. These are not included in the navigation
