@@ -18,6 +18,7 @@ module.exports._isSameGroupOrAdmin = function(requestingUser, resultingUser) {
 };
 
 module.exports._isSameGroupOrAdminDatabase = function(requestingUser, resultingUsername, callback) {
+    if (!requestingUser || !resultingUsername) return false;
     if (requestingUser.username === resultingUsername || requestingUser.admin) return callback(null, true);
 
     User.findOne({ username: resultingUsername }, function(err, user) {

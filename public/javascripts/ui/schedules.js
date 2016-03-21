@@ -138,17 +138,19 @@ var displaySoon = function(you) {
 	if (window.__ongoing || window.__soon) {
 		var now = 
 			"This " + dictionary.schedule.noun.singular +
-			((window.__ongoing) ? " began " : " begins ") +
+			((window.__past || window.__ongoing) ? " began " : " begins ") +
 			moment(window.__start_time).fromNow() + ".";
 
 		if (you) {
 			$('#btnFulfil').removeClass('hidden');
-			$('#btnJoin').addClass('hidden');
-			$('#btnLeave').removeClass('hidden');
-
 			now += ' Would you like to <a href=\"/'+dictionary.action.noun.plural+'/now\">' + dictionary.action.verb.present + ' now</a> to complete your ' + dictionary.pledge.noun.singular + '?'
 		}
 		$('#now').html(now).removeClass('hidden');
+	}
+
+	if (you) {
+		$('#btnJoin').addClass('hidden');
+		$('#btnLeave').removeClass('hidden');
 	}
 };
 
@@ -197,7 +199,7 @@ var displayPledgesPast = function(absent, present) {
 			".";
 	}
 
-	displaySoon(absentList.you);
+	displaySoon(presentList.you);
 	$('#pledges').html(html);
 };
 
