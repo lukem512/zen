@@ -15,7 +15,10 @@ var auth = function() {
 	    type: 'POST',
 	    success: function(res) {
 	    	// Set a cookie with an expiry 1 day from now
-	    	$.cookie("token", res.token, { expires: 1 });
+	    	if (!document.cookie) {
+	    		console.log('Adding token cookie manually');
+	    		$.cookie("token", res.token, { expires: 1 });
+	    	}
 
 	    	// Redirect to main page
 	    	window.location = nextUrl;
@@ -26,6 +29,7 @@ var auth = function() {
 	    		_message(e.responseJSON.message, true);
 	    	}
 	    	else {
+	    		console.error(e);
 	    		_message('An error occurred whilst logging in.', true);
 	    	}
 	    }

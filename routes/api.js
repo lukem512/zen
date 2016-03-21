@@ -54,6 +54,7 @@ router.post('/authenticate', function(req, res){
                     algorithm: 'HS256',
                     expiresIn: 60*60*24
                 });
+                res.cookie('token', token, { expires: new Date(Date.now() + (24*60*60*1000)), httpOnly: true });
                 res.json({
                     success: true,
                     message: 'Signed in successfully!',
@@ -62,6 +63,11 @@ router.post('/authenticate', function(req, res){
             }
         }
     });
+});
+
+router.post('/end', function(req, res){
+    res.clearCookie('token');
+    response.JSON.ok(res);
 });
 
 // Middleware to require authorisation for all API routes
