@@ -25,7 +25,8 @@ var getStats = function(fulfilments, schedules) {
     total: 0,
     weeks: 0,
     scheduled: 0,
-    fulfilments: fulfilments.length
+    fulfilments: fulfilments.length,
+    schedules: schedules.length
   };
 
   // Count filfilled sessions

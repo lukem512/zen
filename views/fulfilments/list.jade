@@ -6,17 +6,24 @@ block content
 	script(src="/javascripts/ui/fulfilments.js")
 	h1= dictionary.action.noun.plural
 	p
-		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for around 
+		| These are your completed #{dictionary.action.noun.singular} sessions. You have #{dictionary.action.verb.past} for  
 		if statistics.total > 0
 			strong #{moment.duration(statistics.total).humanize()}
 		else
 			strong.more-info.dotted(data-text="Why not start now? Click the button below!") 0 minutes
-		|  in total 
+		|  in total
+		if statistics.fulfilments > 0
+			|  and have logged 
+			strong #{statistics.fulfilments}
+			|  #{dictionary.action.noun.singular} session
+			if statistics.fulfilments > 1
+				| s
+		| .
 		if statistics.weeklyAverage > 0
-			| with an average of 
+			|  Your weekly average is 
 			strong #{moment.duration(statistics.weeklyAverage).humanize()}
-			|  each week
-		| . You have 
+			| .
+		|  You have 
 		if statistics.scheduled > 0
 			strong #{moment.duration(statistics.scheduled).humanize()}
 			|  of 
