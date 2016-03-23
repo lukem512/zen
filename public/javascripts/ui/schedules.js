@@ -155,7 +155,7 @@ var displaySoon = function(you) {
 			((window.__past || window.__ongoing) ? " began " : " begins ") +
 			moment(window.__start_time).fromNow() + ".";
 
-		if (you) {
+		if (you && !window.__past) {
 			$('#btnFulfil').removeClass('hidden');
 			now += ' Would you like to <a href=\"/'+dictionary.action.noun.plural+'/now\">' + dictionary.action.verb.present + ' now</a> to complete your ' + dictionary.pledge.noun.singular + '?'
 		}
