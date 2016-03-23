@@ -11,8 +11,9 @@ var newDateUrl = function(base, start, end) {
 	// Check the start date is valid.
 	// Use today if it is not.
 	if (!_isMoment(start)) {
+		console.log('Start is not a valid Moment object');
 		if (!moment(start, dateFormat).isValid())
-			start = moment(start);
+			start = moment();
 	}
 
 	var url = base + '?date=' + start.format(dateFormat);
