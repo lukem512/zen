@@ -60,7 +60,7 @@ router.get('/edit/:id', function(req, res, next) {
     var endDate = moment(schedule.end_time);
 
     if (startDate.isAfter(moment()) && !req.user.admin) {
-      return error.prohibited();
+      return error.prohibited(req, res);
     }
 
     res.render('schedules/edit', {
