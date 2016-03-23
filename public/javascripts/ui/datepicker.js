@@ -92,8 +92,7 @@ var initPickers = function(past) {
 	    	// Don't change if the end time has already been set
 	    	var endTime = $('#inputEndTime').timepicker('getTime');
 	    	if (!endTime){
-	    		var startTime = new Date($(this).timepicker('getTime'));
-	    		$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + 15 * 60000));
+	    		_setAhead();
 	    	}
 	    	timeSet = true;
 	    }
