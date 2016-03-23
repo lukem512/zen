@@ -3,6 +3,12 @@
 var dateFormat = 'DD-MM-YYYY';
 var timeFormat = 'HH:mm';
 
+var _setAhead = function(minutes) {
+	minutes = minutes || 15;
+	var startTime = new Date($('#inputStartTime').timepicker('getTime'));
+	$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + minutes * 60000));
+};
+
 var initPickers = function(past) {
 	var dateSet = false;
 
@@ -59,16 +65,16 @@ var initPickers = function(past) {
 		var startTime = $('#inputStartTime').timepicker('getTime');
 		var endTime = $('#inputEndTime').timepicker('getTime');
 		if (moment(startTime).isAfter(endTime)) {
-			var startTime = new Date($('#inputStartTime').timepicker('getTime'));
-			$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + 15 * 60000));
+			_setAhead();
 		}
 	});
 
 	$('#inputEndTime').on('changeTime', function(){
 		var startTime = $('#inputStartTime').timepicker('getTime');
 		var endTime = $('#inputEndTime').timepicker('getTime');
-		if (moment(startTime).isBefore(endTime)) {
-			alert('error');
+		if (moment(startTime).isAfter(endTime)) {
+			_message('The end time must be after the start time.', true);
+			_setAhead();
 		}
 	});
 
