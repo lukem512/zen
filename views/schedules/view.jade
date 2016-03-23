@@ -9,7 +9,7 @@ block content
 		window.__past = #{past};
 		window.__ongoing = #{ongoing};
 		window.__soon = #{soon};
-		window.__schedule = JSON.parse('!{JSON.stringify(schedule)}');
+		window.__schedule = !{JSON.stringify(schedule)};
 
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
@@ -54,6 +54,11 @@ block content
 			button#btnFulfil.btn.btn-success.text-capitalize.hidden(type="button", onclick="fulfil()")
 				i.fa.fa-hourglass-half
 				| &nbsp; #{dictionary.action.verb.present} now
+			| &nbsp;
+		if (past)
+			button#btnLog.btn.btn-success.text-capitalize.hidden(type="button", onclick="log()")
+				i.fa.fa-file-o
+				| &nbsp; Log #{dictionary.action.noun.singular}
 			| &nbsp;
 		if (schedule.owner != user.username) && !past
 			button#btnJoin.btn.btn-success(type="button", onclick="join(window.location, '#{schedule.id}')")

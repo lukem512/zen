@@ -56,11 +56,20 @@ var initPickers = function(past) {
 	$('#inputEndTime').timepicker(timeParams);
 
 	$('#inputStartTime').on('changeTime', function(){
-		// TODO - if the time is ahead of endTime, remove value of endTime
+		var startTime = $('#inputStartTime').timepicker('getTime');
+		var endTime = $('#inputEndTime').timepicker('getTime');
+		if (moment(startTime).isAfter(endTime)) {
+			var startTime = new Date($('#inputStartTime').timepicker('getTime'));
+			$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + 15 * 60000));
+		}
 	});
 
 	$('#inputEndTime').on('changeTime', function(){
-		// TODO - if the time is before startTime, show an error
+		var startTime = $('#inputStartTime').timepicker('getTime');
+		var endTime = $('#inputEndTime').timepicker('getTime');
+		if (moment(startTime).isBefore(endTime)) {
+			alert('error');
+		}
 	});
 
 	if ($.urlParam('time')) {

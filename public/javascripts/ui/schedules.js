@@ -134,6 +134,12 @@ var fulfil = function() {
 	window.location = '/' + dictionary.action.noun.plural + '/now';
 };
 
+var log = function() {
+	var start = moment(window.__schedule.start_time);
+	var end = moment(window.__schedule.end_time);
+	window.location = newDateUrl('/' + dictionary.action.noun.plural + '/log', start, end);
+};
+
 var duplicate = function() {
 	var start = moment(window.__schedule.start_time);
 	var end = moment(window.__schedule.end_time);
@@ -208,6 +214,11 @@ var displayPledgesPast = function(absent, present) {
 	}
 
 	displaySoon(presentList.you);
+
+	if (absentList.you) {
+		$('$btnLog').removeClass('hidden');
+	}
+
 	$('#pledges').html(html);
 };
 
