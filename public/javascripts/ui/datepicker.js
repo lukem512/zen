@@ -75,6 +75,8 @@ var initPickers = function(past) {
 		if (moment(startTime).isAfter(endTime)) {
 			_message('The end time must be after the start time.', true);
 			_setAhead();
+		} else {
+			$('#message').addClass('hidden');
 		}
 	});
 
