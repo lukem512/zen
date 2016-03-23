@@ -39,7 +39,7 @@ var nakedUrl = function() {
 };
 
 var calendarUrl = function(date, view) {
-	return newDateUrl(nakedUrl(), start) + '&view=' + view;
+	return newDateUrl(nakedUrl(), date) + '&view=' + view;
 };
 
 var newScheduleUrl = function(start, end, title, description) {
