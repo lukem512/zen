@@ -43,6 +43,10 @@ var initPickers = function(past) {
 		$('#inputEndDate').datepicker('setDate', $.urlParam('date'));
 	}
 
+	if ($.urlParam('enddate')) {
+		$('#inputEndDate').datepicker('setDate', $.urlParam('enddate'));
+	}
+
 	var timeParams = {
 		scrollDefault: 'now',
 		timeFormat: 'H:i',
@@ -61,6 +65,10 @@ var initPickers = function(past) {
 
 	if ($.urlParam('time')) {
 		$('#inputStartTime').timepicker('setTime', $.urlParam('time'));
+	}
+
+	if ($.urlParam('endtime')) {
+		$('#inputEndTime').timepicker('setTime', $.urlParam('endtime'));
 	}
 
 	var timeSet = false;

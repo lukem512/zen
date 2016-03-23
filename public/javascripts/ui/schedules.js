@@ -134,6 +134,14 @@ var fulfil = function() {
 	window.location = '/' + dictionary.action.noun.plural + '/now';
 };
 
+var duplicate = function() {
+	var start = moment(window.__schedule.start_time);
+	var end = moment(window.__schedule.end_time);
+	var title = window.__schedule.title;
+	var description = window.__schedule.description;
+	window.location = newScheduleUrl(start, end, title, description);
+};
+
 var displaySoon = function(you) {
 	if (window.__ongoing || window.__soon) {
 		var now = 

@@ -9,9 +9,11 @@ block content
 		window.__past = #{past};
 		window.__ongoing = #{ongoing};
 		window.__soon = #{soon};
+		window.__schedule = JSON.parse('!{JSON.stringify(schedule)}');
 
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/schedules.js')
+	script(src='/javascripts/ui/calendar.js')
 
 	if schedule.deleted
 		p.text-danger This resource has been deleted.
@@ -49,9 +51,9 @@ block content
 	#message.hidden
 	#buttons
 		if (ongoing)
-			button#btnFulfil.btn.btn-success.hidden(type="button", onclick="fulfil()")
+			button#btnFulfil.btn.btn-success.text-capitalize.hidden(type="button", onclick="fulfil()")
 				i.fa.fa-hourglass-half
-				| &nbsp; Complete
+				| &nbsp; #{dictionary.action.verb.present} now
 			| &nbsp;
 		if (schedule.owner != user.username) && !past
 			button#btnJoin.btn.btn-success(type="button", onclick="join(window.location, '#{schedule.id}')")
@@ -70,6 +72,11 @@ block content
 				button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')")
 					i.fa.fa-remove
 					| &nbsp; Delete
+		if (schedule.owner == user.username) || user.admin
+			| &nbsp;
+			button#btnDuplicate.btn.btn-warning(type="button", onclick="duplicate()")
+				i.fa.fa-copy
+				| &nbsp; Duplicate
 		script.
 			$(function() {
 				var startDate = moment('#{schedule.start_time}');

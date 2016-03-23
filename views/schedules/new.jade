@@ -33,3 +33,12 @@ block content
 			button#btnCancel.btn.btn-danger(type="button", onclick="window.history.back()")
 				i.fa.fa-times
 				| &nbsp; Cancel
+
+	script.
+		if ($.urlParam('title')) {
+			$('#inputTitle').val(decodeURIComponent($.urlParam('title')));
+		}
+
+		if ($.urlParam('description')) {
+			$('#inputDescription').val(decodeURIComponent($.urlParam('description')));
+		}
