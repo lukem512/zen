@@ -216,7 +216,7 @@ var displayPledgesPast = function(absent, present) {
 	displaySoon(presentList.you);
 
 	if (absentList.you) {
-		$('$btnLog').removeClass('hidden');
+		$('#btnLog').removeClass('hidden');
 	}
 
 	$('#pledges').html(html);
