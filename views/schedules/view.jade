@@ -68,7 +68,7 @@ block content
 				i.fa.fa-calendar-times-o
 				| &nbsp; Leave
 			| &nbsp;
-		if ((schedule.owner == user.username) && !past) || user.admin
+		if ((schedule.owner == user.username) && !past && !ongoing) || user.admin
 			button#btnEdit.btn.btn-primary(type="button", onclick="window.location='/#{dictionary.schedule.noun.plural}/edit/#{schedule.id}'")
 				i.fa.fa-pencil
 				| &nbsp; Edit

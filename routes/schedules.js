@@ -59,6 +59,10 @@ router.get('/edit/:id', function(req, res, next) {
     var startDate = moment(schedule.start_time);
     var endDate = moment(schedule.end_time);
 
+    if (startDate.isAfter(moment()) && !req.user.admin) {
+      return error.prohibited();
+    }
+
     res.render('schedules/edit', {
         title: 'Edit a ' + config.dictionary.schedule.noun.singular,
         name: config.name,
