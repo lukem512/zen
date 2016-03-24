@@ -19,7 +19,7 @@ var install = function() {
 
 	// Check for lock file
 	if (fs.existsSync(lockFile)) {
-		return console.log('Installation has already been performed! Please remove the file ' + lockFile + ' if you wish to run installation again.');
+		return console.log('Installation has already been performed!\nPlease remove the file ' + lockFile + ' if you wish to run installation again.');
 	}
 
 	// Check for existing admin

@@ -17,10 +17,13 @@ var config = require('./config');
 
 // database connection
 var mongoose = require('mongoose');
-mongoose.connect(config.database.uri);
+var db = mongoose.createConnection(config.database.uri);
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
+db.on('error', function(err) {
+  console.error('Connection to database failed.', err);
+  process.exit(1);
+});
+
 db.once('open', function() {
   console.log('Connection to database successful.')
 });
@@ -34,6 +37,7 @@ var app = express();
 
 // set up locals for templating
 app.locals.moment = require('moment');
+app.locals.moment.locale(config.locale);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

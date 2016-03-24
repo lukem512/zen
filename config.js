@@ -6,9 +6,12 @@ var config = {
 	organisation: process.env.zenOrganisation || 'Luke Mitchell',
 	email: process.env.zenEmail || 'hi@lukemitchell.co',
 
+	// Date locale for moment.js
+	locale: 'en-gb',
+
 	database: {
 		// The URI used to connect to your mongo database.
-		uri: process.env.zenDatabaseUri || 'mongodb://zen:password@localhost:31213/zen'
+		uri: process.env.zenDatabaseUri || 'mongodb://zen:password@localhost:27017/zen'
 	},
 
 	token: {

@@ -5,7 +5,6 @@ var sanitize = require('mongo-sanitize');
 
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-var moment = require('moment');
 var moniker = require('moniker');
 var async = require('async');
 
@@ -15,12 +14,16 @@ var Schedule = require('../models/schedules');
 var Pledge = require('../models/pledges');
 var Fulfilment = require('../models/fulfilments');
 
-var m = require('./middlewares');
 var response = require('./response');
 
 var fulfilmentHelpers = require('./fulfilments/helpers');
 
 var config = require('../config');
+
+var m = require('./middlewares');
+
+var moment = require('moment');
+moment.locale(config.locale);
 
 var pastScheduleError = 'Cannot delete past schedules';
 var notAuthorisedError = 'Not authorised';

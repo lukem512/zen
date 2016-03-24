@@ -2,10 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
-var moment = require('moment');
 var async = require('async');
-
-var config = require('../config');
 
 var User = require('../models/users');
 var Schedule = require('../models/schedules');
@@ -14,7 +11,12 @@ var Pledge = require('../models/pledges');
 var response = require('./response');
 var error = response.error;
 
+var config = require('../config');
+
 var m = require('./middlewares');
+
+var moment = require('moment');
+moment.locale(config.locale);
 
 // Middleware to require authorisation for all users routes
 router.use(m.isLoggedInRedirect);

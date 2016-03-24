@@ -14,6 +14,8 @@ var middlewares = require('./middlewares');
 
 var config = require('../config');
 
+moment.locale(config.locale);
+
 // Middleware to require authorisation for all admin routes
 router.use(middlewares.isLoggedIn);
 router.use(middlewares.isAdmin);

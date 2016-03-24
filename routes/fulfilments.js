@@ -2,10 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
-var moment = require('moment');
 var async = require('async');
-
-var config = require('../config');
 
 var Fulfilment = require('../models/fulfilments');
 var Schedule = require('../models/schedules');
@@ -13,9 +10,14 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
-var helpers = require('./fulfilments/helpers')
+var helpers = require('./fulfilments/helpers');
+
+var config = require('../config');
 
 var m = require('./middlewares');
+
+var moment = require('moment');
+moment.locale(config.locale);
 
 // Middleware to require authorisation for all fulfilments routes
 router.use(m.isLoggedInRedirect);

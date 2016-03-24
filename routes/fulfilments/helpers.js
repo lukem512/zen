@@ -1,4 +1,7 @@
+var config = require('../../config');
+
 var moment = require('moment');
+moment.locale(config.locale);
 
 module.exports.recentFulfilment = function(fulfilment) {
 
