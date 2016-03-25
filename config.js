@@ -7,7 +7,7 @@ var config = {
 	email: process.env.zenEmail || 'hi@lukemitchell.co',
 
 	// Date locale for moment.js
-	locale: 'en-gb',
+	locale: process.env.zenLocale || 'en-gb',
 
 	database: {
 		// The URI used to connect to your mongo database.
