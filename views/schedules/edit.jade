@@ -39,3 +39,9 @@ block content
 				button#btnDelete.btn.btn-danger(type="button", onclick="del('/#{dictionary.schedule.noun.plural}', '#{schedule.id}')")
 					i.fa.fa-remove
 					| &nbsp; Delete
+
+	script.
+		
+		$(function() {
+			initPickers();
+		});

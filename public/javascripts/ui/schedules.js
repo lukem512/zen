@@ -221,30 +221,3 @@ var displayPledgesPast = function(absent, present) {
 
 	$('#pledges').html(html);
 };
-
-$(function() {
-	var __id = window.__id || false;
-	if (__id) {
-		pledgedUsers(__id, function(pledged) {
-			if (window.__past || window.__ongoing) {
-				fulfilledUsers(__id, function(fulfilled) {
-					if (fulfilled.message) {
-						return console.error(fulfilled.message);
-					};
-					var present = fulfilled.map(function(i) {return i.username});
-					var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
-					displayPledgesPast(absent, present);
-				});
-			}
-			else {
-				displayPledgesFuture(pledged);
-			}
-		});
-	};
-});
-
-$(function() {
-	if (typeof(initPickers) == 'function') {
-		initPickers();
-	}
-});

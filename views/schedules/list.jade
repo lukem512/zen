@@ -8,6 +8,7 @@ block content
 	#calendar
 
 	script.
+		
 		// Retrieve the date to display
 		var date = moment($.urlParam('date'), dateFormat);
 		if (!date.isValid())
@@ -96,7 +97,7 @@ block content
 			defaultDate: date,	
 			events: calendarApiUrl,
 			eventAfterAllRender: function(view) {
-				// TODO - make the title a link!
+				// Make the title a link!
 				var titleSelector = '.fc-left h2';
 
 				// Go to month view

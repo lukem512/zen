@@ -1,7 +1,7 @@
 extends ../../layout
 
 block content
-	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/admin/pledges.js')
 	h1= title
 	form#formAddPledge(name="addpledge",role="form",method="post",action="/api/pledges/new")
