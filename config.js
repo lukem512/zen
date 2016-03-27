@@ -11,7 +11,7 @@ var config = {
 
 	database: {
 		// The URI used to connect to your mongo database.
-		uri: process.env.zenDatabaseUri || 'mongodb://zen:79U679h2PCRh1Os@ds051873.mlab.com:51873/heroku_w9g4jnr3'
+		uri: process.env.zenDatabaseUri || 'zen:password@localhost:27017/zen'
 	},
 
 	token: {
