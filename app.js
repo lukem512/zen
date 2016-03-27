@@ -9,9 +9,9 @@ var auth = require('./routes/auth');
 var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var api = require('./routes/api');
-var users = require('./routes/users');
-var schedules = require('./routes/schedules');
-var fulfilments = require('./routes/fulfilments');
+var users = require('./routes/users/index');
+var schedules = require('./routes/schedules/index');
+var fulfilments = require('./routes/fulfilments/index');
 
 var config = require('./config');
 

@@ -3,14 +3,14 @@ var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
 
-var Schedule = require('../models/schedules');
+var Schedule = require('../../models/schedules');
 
-var response = require('./response');
+var response = require('../response');
 var error = response.error;
 
-var config = require('../config');
+var config = require('../../config');
 
-var m = require('./middlewares');
+var m = require('../middlewares');
 
 var moment = require('moment');
 moment.locale(config.locale);
@@ -26,7 +26,8 @@ router.get('/', function(req, res, next) {
     organisation: config.organisation,
     nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    locale: config.locale
   });
 });
 
@@ -38,7 +39,8 @@ router.get('/new', function(req, res, next) {
       organisation: config.organisation,
       nav: config.nav(),
       user: req.user,
-      dictionary: config.dictionary
+      dictionary: config.dictionary,
+      locale: config.locale
     });
 });
 
@@ -54,7 +56,7 @@ router.get('/edit/:id', function(req, res, next) {
 
     // Check the user is the owner, or admin
     if (schedule.owner !== req.user.username && !req.user.admin) {
-      return error.invalid(res);
+      return error.prohibited(req, res);
     }
 
     // Format the schedule date
@@ -77,7 +79,8 @@ router.get('/edit/:id', function(req, res, next) {
         start_time: startDate.format('HH:mm'),
         end_date: endDate.format('DD-MM-YYYY'),
         end_time: endDate.format('HH:mm'),
-        schedule: schedule
+        schedule: schedule,
+        locale: config.locale
     });
   });
 });
@@ -113,7 +116,8 @@ router.get('/view/:id', function(req, res, next) {
           schedule: schedule,
           past: past,
           soon: soon,
-          ongoing: ongoing
+          ongoing: ongoing,
+          locale: config.locale
         });
       }
       else {

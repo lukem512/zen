@@ -4,16 +4,16 @@ var router = express.Router();
 var sanitize = require('mongo-sanitize');
 var async = require('async');
 
-var User = require('../models/users');
-var Schedule = require('../models/schedules');
-var Pledge = require('../models/pledges');
+var User = require('../../models/users');
+var Schedule = require('../../models/schedules');
+var Pledge = require('../../models/pledges');
 
-var response = require('./response');
+var response = require('../response');
 var error = response.error;
 
-var config = require('../config');
+var config = require('../../config');
 
-var m = require('./middlewares');
+var m = require('../middlewares');
 
 var moment = require('moment');
 moment.locale(config.locale);
@@ -41,7 +41,8 @@ var userPage = function(req, res, username) {
       nav: config.nav(),
       user: req.user,
       dictionary: config.dictionary,
-      _user: user
+      _user: user,
+      locale: config.locale
     });
   })
 };

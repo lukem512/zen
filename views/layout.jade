@@ -39,6 +39,8 @@ html
     script.
         var dictionary = JSON.parse('!{JSON.stringify(dictionary)}');
 
+        moment.locale('#{locale}');
+
         $(document).ready(function(){
             $.cookieBar({
                 acceptText: 'OK',

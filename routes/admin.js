@@ -14,6 +14,8 @@ var middlewares = require('./middlewares');
 
 var config = require('../config');
 
+var response = require('./response');
+
 moment.locale(config.locale);
 
 // Middleware to require authorisation for all admin routes
@@ -28,43 +30,33 @@ router.get('/', function(req, res) {
         nav: config.nav(),
         user: req.user,
         dictionary: config.dictionary,
-        dictionary: config.dictionary
+        locale: config.locale
     });
 });
 
 // Generic list template
 var listModel = function(req, res, params) {
     params.model.find(function(err, objs){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else {
-            res.render('admin/list', {
-                title: params.title,
-                objects: objs,
-                keys: {
-                    model: params.keys.model,
-                    route: params.keys.route || '/admin/' + params.keys.model,
-                    link: {
-                        id: (params.keys.link) ? (params.keys.link.id || '_id') : '_id',
-                        text: (params.keys.link) ? (params.keys.link.text || '_id') : '_id'
-                    }
-                },
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
+        if (err) return repsonse.error.server(res, req, err);
+        
+        res.render('admin/list', {
+            title: params.title,
+            objects: objs,
+            keys: {
+                model: params.keys.model,
+                route: params.keys.route || '/admin/' + params.keys.model,
+                link: {
+                    id: (params.keys.link) ? (params.keys.link.id || '_id') : '_id',
+                    text: (params.keys.link) ? (params.keys.link.text || '_id') : '_id'
+                }
+            },
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+        });
     })
 };
 
@@ -91,44 +83,23 @@ router.get('/users/list', function(req, res) {
 /* GET user information */
 router.get('/users/view/:username', function(req, res) {
     Group.find(function(err, groups){
-    	if (err) {
-    		console.error(err);
-    		res.send('There was a problem adding the information to the database.');
-    	}
+    	if (err) return response.error.server(req, res, err);
+
         User.findOne({ username: sanitize(req.params.username) }, function(err, user){
-            if (err) {
-                console.error(err);
-                res.render('500', {
-                    title: 'Error 500',
-                    name: config.name,
-                    organisation: config.organisation,
-                    nav: config.nav(),
-                    user: req.user,
-                    dictionary: config.dictionary
-                });
-            }
-            else if (!user) {
-                res.render('404', {
-                    title: 'Error 404',
-                    name: config.name,
-                    organisation: config.organisation,
-                    nav: config.nav(),
-                    user: req.user,
-                    dictionary: config.dictionary
-                });
-            }
-            else {
-                res.render('admin/users/view', {
-                    title: 'View User',
-                    _user: user,
-                    groups: groups,
-                    name: config.name,
-                    organisation: config.organisation,
-                    nav: config.nav(),
-                    user: req.user,
-                    dictionary: config.dictionary
-                });
-            }
+            if (err) return response.error.server(req, res, err);
+            if (!user) return response.error.notfound(req, res);
+
+            res.render('admin/users/view', {
+                title: 'View User',
+                _user: user,
+                groups: groups,
+                name: config.name,
+                organisation: config.organisation,
+                nav: config.nav(),
+                user: req.user,
+                dictionary: config.dictionary,
+                locale: config.locale
+            });
         });
     });
 });
@@ -136,29 +107,18 @@ router.get('/users/view/:username', function(req, res) {
 /* GET new user page. */
 router.get('/users/new', function(req, res) {
 	Group.find(function(err, groups){
-    	if (err) {
-    		console.error(err);
-    		res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-    	}
-        else {
+    	if (err) return response.error.server(req, res, err);
 
-        	res.render('admin/users/new', {
-    	    	title: 'Add New User',
-    	    	groups: groups,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-    	    });
-        }
+    	res.render('admin/users/new', {
+	    	title: 'Add New User',
+	    	groups: groups,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+	    });
     });
 });
 
@@ -185,38 +145,19 @@ router.get('/groups/list', function(req, res) {
 /* GET group information */
 router.get('/groups/view/:name', function(req, res) {
    	Group.findOne({ name: sanitize(req.params.name) }, function(err, group){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-    	else if (!group) {
-    		res.render('404', {
-                title: 'Error 404',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-    	}
-        else {
-        	res.render('admin/groups/view', {
-                title: 'View Group',
-            	group: group,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-        	});
-    	}
+        if (err) return response.error.server(req, res, err);
+        if (!group) return response.error.notfound(req, res);
+
+    	res.render('admin/groups/view', {
+            title: 'View Group',
+        	group: group,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+    	});
     });
 });
 
@@ -228,7 +169,8 @@ router.get('/groups/new', function(req, res) {
         organisation: config.organisation,
         nav: config.nav(),
         user: req.user,
-        dictionary: config.dictionary
+        dictionary: config.dictionary,
+        locale: config.locale
     });
 });
 
@@ -271,82 +213,38 @@ router.get('/pledges/list', function(req, res) {
 /* GET pledge information */
 router.get('/pledges/view/:id', function(req, res) {
     Pledge.findById(sanitize(req.params.id), function(err, pledge){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else if (!pledge) {
-            res.render('404', {
-                title: 'Error 404',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else {
-            res.render('admin/pledges/view', {
-                title: 'View Pledge',
-                pledge: pledge,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
+        if (err) return response.error.server(req, res, err);
+        if (!pledge) return response.error.notfound(req, res);
+
+        res.render('admin/pledges/view', {
+            title: 'View Pledge',
+            pledge: pledge,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+        });
     });
 });
 
 /* GET new pledge page. */
 router.get('/pledges/new', function(req, res) {
     User.find(function(err, users){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else {
-            Schedule.find(function(err, schedules){
-                if (err) {
-                    console.error(err);
-                    res.render('500', {
-                        title: 'Error 500',
-                        name: config.name,
-                        organisation: config.organisation,
-                        nav: config.nav(),
-                        user: req.user,
-                        dictionary: config.dictionary
-                    });
-                } 
-                else {
-                    res.render('admin/pledges/new', { 
-                        title: 'Add New Pledge',
-                        users: users,
-                        schedules: schedules,
-                        name: config.name,
-                        organisation: config.organisation,
-                        nav: config.nav(),
-                        user: req.user,
-                        dictionary: config.dictionary
-                    });
-                }
-            })   
-        }
+        if (err) return response.error.server(req, res, err);
+
+        res.render('admin/pledges/new', { 
+            title: 'Add New Pledge',
+            users: users,
+            schedules: schedules,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+        });
     });
 });
 
@@ -369,66 +267,37 @@ router.get('/fulfilments/list', function(req, res) {
 /* GET new fulfilment page. */
 router.get('/fulfilments/new', function(req, res) {
     User.find(function(err, users){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else {
-            res.render('admin/fulfilments/new', { 
-                title: 'Add New Fulfilment',
-                users: users,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });  
-        }
+        if (err) return response.error.server(req, res, err);
+
+        res.render('admin/fulfilments/new', { 
+            title: 'Add New Fulfilment',
+            users: users,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+        });  
     });
 });
 
 /* GET fulfilment information */
 router.get('/fulfilments/view/:id', function(req, res) {
     Fulfilment.findById(sanitize(req.params.id), function(err, fulfilment){
-        if (err) {
-            console.error(err);
-            res.render('500', {
-                title: 'Error 500',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else if (!fulfilment) {
-            res.render('404', {
-                title: 'Error 404',
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
-        else {
-            res.render('admin/fulfilments/view', {
-                title: 'View Fulfilment',
-                fulfilment: fulfilment,
-                name: config.name,
-                organisation: config.organisation,
-                nav: config.nav(),
-                user: req.user,
-                dictionary: config.dictionary
-            });
-        }
+        if (err) return response.error.server(req, res, err);
+        if (!fulfilment) return response.error.notfound(req, res);
+
+        res.render('admin/fulfilments/view', {
+            title: 'View Fulfilment',
+            fulfilment: fulfilment,
+            name: config.name,
+            organisation: config.organisation,
+            nav: config.nav(),
+            user: req.user,
+            dictionary: config.dictionary,
+            locale: config.locale
+        });
     });
 });
 

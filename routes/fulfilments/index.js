@@ -4,17 +4,17 @@ var router = express.Router();
 var sanitize = require('mongo-sanitize');
 var async = require('async');
 
-var Fulfilment = require('../models/fulfilments');
-var Schedule = require('../models/schedules');
+var Fulfilment = require('../../models/fulfilments');
+var Schedule = require('../../models/schedules');
 
-var response = require('./response');
+var response = require('../response');
 var error = response.error;
 
-var helpers = require('./fulfilments/helpers');
+var helpers = require('./helpers');
 
-var config = require('../config');
+var config = require('../../config');
 
-var m = require('./middlewares');
+var m = require('../middlewares');
 
 var moment = require('moment');
 moment.locale(config.locale);
@@ -115,13 +115,14 @@ var listFulfilments = function(req, res, start, n) {
       var statistics = getStats(fulfilments, schedules);
 
       res.render('fulfilments/list', {
-        title: 'View ' + config.dictionary.action.noun.plural,
+        title: 'Log ' + config.dictionary.action.noun.plural,
         name: config.name,
         organisation: config.organisation,
         nav: config.nav(),
         user: req.user,
         dictionary: config.dictionary,
-        statistics: statistics
+        statistics: statistics,
+        locale: config.locale
       });
     });
   });
@@ -166,7 +167,8 @@ router.get('/view/:id', function(req, res, next) {
             user: req.user,
             dictionary: config.dictionary,
             fulfilment: fulfilment,
-            schedules: schedules
+            schedules: schedules,
+            locale: config.locale
           });
         });
       } else {
@@ -213,7 +215,8 @@ router.get('/edit/:id', function(req, res, next) {
       start_date: startDate.format('DD-MM-YYYY'),
       start_time: startDate.format('HH:mm'),
       end_date: endDate.format('DD-MM-YYYY'),
-      end_time: endDate.format('HH:mm')
+      end_time: endDate.format('HH:mm'),
+      locale: config.locale
     });
   });
 });
@@ -227,7 +230,8 @@ router.get('/log', function(req, res, next) {
     organisation: config.organisation,
     nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    locale: config.locale
   });
 });
 
@@ -239,7 +243,8 @@ router.get('/now', function(req, res, next) {
     organisation: config.organisation,
     nav: config.nav(),
     user: req.user,
-    dictionary: config.dictionary
+    dictionary: config.dictionary,
+    locale: config.locale
   });
 });
 

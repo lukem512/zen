@@ -1,5 +1,7 @@
 var config = require('../../config');
 
+var _sh = require('../schedules/helpers');
+
 var moment = require('moment');
 moment.locale(config.locale);
 
@@ -14,4 +16,8 @@ module.exports.recentFulfilment = function(fulfilment) {
         return true;
 
     return false;
+};
+
+module.exports.fulfilmentFuture = function(fulfilment) {
+    return (!_sh.timePast(fulfilment.start_time));
 };

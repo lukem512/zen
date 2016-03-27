@@ -14,7 +14,8 @@ router.get('/', function(req, res, next) {
     nav: config.nav(),
     user: req.user,
     dictionary: config.dictionary,
-    pages: config.pages
+    pages: config.pages,
+    locale: config.locale
   };
 
   if (!req.user) {
@@ -40,7 +41,8 @@ router.get('/auth', function(req, res, next) {
     	nav: config.nav(),
       user: req.user,
       dictionary: config.dictionary,
-      pages: config.pages
+      pages: config.pages,
+      locale: config.locale
     });
   }
 });
@@ -58,7 +60,8 @@ router.get('/end', function(req, res, next) {
       nav: config.nav(),
       user: req.user,
       dictionary: config.dictionary,
-      pages: config.pages
+      pages: config.pages,
+      locale: config.locale
     });
   }
 });
@@ -72,7 +75,8 @@ router.get('/settings', function(req, res, next) {
     nav: config.nav(),
     user: req.user,
     dictionary: config.dictionary,
-    pages: config.pages
+    pages: config.pages,
+    locale: config.locale
   });
 });
 
@@ -141,7 +145,8 @@ walk(config.pages.directory, function(err, pages){
         email: config.email,
         dictionary: config.dictionary,
         user: req.user,
-        pages: config.pages
+        pages: config.pages,
+        locale: config.locale
       });
     });
   });
