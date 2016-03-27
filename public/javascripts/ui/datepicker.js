@@ -9,6 +9,13 @@ var _setAhead = function(minutes) {
 	$('#inputEndTime').timepicker('setTime', new Date(startTime.getTime() + minutes * 60000));
 };
 
+// http://stackoverflow.com/a/10789415
+var _nextFiveMinutes = function(time) {
+	time = time || new moment();
+	var coeff = 1000 * 60 * 5;
+	return new moment(Math.ceil(time.valueOf() / coeff) * coeff)
+};
+
 var initPickers = function(past) {
 	var dateSet = false;
 
@@ -53,8 +60,10 @@ var initPickers = function(past) {
 		$('#inputEndDate').datepicker('setDate', $.urlParam('enddate'));
 	}
 
+	moment();
+
 	var timeParams = {
-		scrollDefault: 'now',
+		scrollDefault: _nextFiveMinutes(),
 		timeFormat: 'H:i',
 		step: 5
 	};
