@@ -47,14 +47,7 @@ var displayFeed = function(feedArray) {
 	});
 };
 
-var getFeed = function(username) {
-	var url = feedApiUrl;
-
-	if (username)
-		url = url + '/user/' + username;
-
-	url = url + '/from/' + fromTime;
-
+var _getFeed = function(url) {
 	_get(url, function(res) {
 		if (res.message) {
 			// Not authorised
@@ -70,4 +63,24 @@ var getFeed = function(username) {
 		$('#message').addClass('text-danger').removeClass('hidden');
 		console.error(err);
 	});
+};
+
+var getFeed = function(username) {
+	var url = feedApiUrl;
+
+	if (username)
+		url = url + '/user/' + username;
+
+	url = url + '/from/' + fromTime;
+
+	_getFeed(url);
+};
+
+var getFulfilmentFeed = function(username) {
+	var url = feedApiUrl;
+
+	if (username)
+		url = url + '/user/' + username + '/fulfilments';
+
+	_getFeed(url);
 };
