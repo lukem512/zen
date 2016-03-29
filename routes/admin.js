@@ -21,7 +21,7 @@ router.use(middlewares.isLoggedIn);
 router.use(middlewares.isAdmin);
 
 // Set up analysis routes
-app.use('/analysis', analysis);
+router.use('/analysis', analysis);
 
 // Index route
 router.get('/', function(req, res) {
