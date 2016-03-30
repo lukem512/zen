@@ -2,7 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 var sanitize = require('mongo-sanitize');
+var moment = require('moment');
 var async = require('async');
+
+var config = require('../config');
 
 var Fulfilment = require('../models/fulfilments');
 var Schedule = require('../models/schedules');
@@ -10,14 +13,9 @@ var Schedule = require('../models/schedules');
 var response = require('./response');
 var error = response.error;
 
-var helpers = require('./fulfilments/helpers');
-
-var config = require('../config');
+var helpers = require('./fulfilments/helpers')
 
 var m = require('./middlewares');
-
-var moment = require('moment');
-moment.locale(config.locale);
 
 // Middleware to require authorisation for all fulfilments routes
 router.use(m.isLoggedInRedirect);
@@ -94,18 +92,8 @@ var getSchedules = function(fulfilment, username, callback) {
   });
 };
 
-var listFulfilments = function(req, res, start, n) {
-  // Start at page 1 by default
-  if (start)
-    start = Math.max(start, 1);
-  else
-    start = 1;
-
-  // Display 5 by default
-  n = n || 5;
-
-  Fulfilment.find({ username: req.user.username }).sort({ start_time: 'desc' })
-    .skip((start - 1) * n).limit(n).exec(function(err, fulfilments) {
+var listFulfilments = function(req, res) {
+  Fulfilment.find({ username: req.user.username }).sort({ start_time: 'desc' }).exec(function(err, fulfilments) {
     if (err) return error.server(res, req, err);
 
     Schedule.find({ owner: req.user.username }, function(err, schedules) {
@@ -134,11 +122,6 @@ router.get('/', function(req, res) {
 
 router.get('/list', function(req, res) {
   listFulfilments(req, res);
-});
-
-router.get('/list/:start', function(req, res) {
-  var start = sanitize(req.params.start);
-  listFulfilments(req, res, start);
 });
 
 /* GET view fulfilment page */
