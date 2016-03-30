@@ -1,0 +1,86 @@
+extends ../../layout
+
+block content
+	- function formatDuration(t){ return moment.duration(t).hours() + ' hours, ' + moment.duration(t).minutes() + ' minutes and ' + moment.duration(t).seconds() + ' seconds'; }
+
+	h1= title
+	p This page contains an overview of activity on the platform. Select a group or a user to view them in more detail.
+
+	#overview
+		table.table.table-bordered
+			thead
+				tr
+					td Schedules
+					td Pledges
+					td Fulfilments
+			tbody
+				tr
+					td
+						ul
+							li Total time scheduled: 
+								strong #{formatDuration(statistics.schedules.total)}
+							li Number of schedules: 
+								strong #{statistics.schedules.n}
+							if statistics.schedules.meanTotal
+								li Average time scheduled: 
+									strong #{formatDuration(statistics.schedules.meanTotal)}
+							if statistics.schedules.meanN
+								li Average number of schedules: 
+									strong #{statistics.schedules.meanN.toFixed(3)}
+
+					td
+						ul
+							li Total time pledged: 
+								strong #{formatDuration(statistics.pledges.total)}
+							li Number of pledges: 
+								strong #{statistics.pledges.n}
+							li Total time spent fulfilling pledges: 
+								strong #{formatDuration(statistics.pledges.fulfilled)}
+
+					td
+						ul
+							li Total time logged: 
+								strong #{formatDuration(statistics.fulfilments.total)}
+							li Number of logs: 
+								strong #{statistics.fulfilments.n}
+							li Total time logged in real-time: 
+								strong #{formatDuration(statistics.fulfilments.real_time)}
+							li Total time logged in retrospectively: 
+								strong #{formatDuration(statistics.fulfilments.retrospective)}
+
+		if users && groups
+			p 
+				| There are a total of 
+				strong #{users.length}
+				|  users on the platform, comprising of 
+				strong #{groups.length}
+				|  groups.
+
+	hr
+	if users
+		.form-group
+			select#inputUsername.form-control(name="username", onfocus="this.selectedIndex = -1;")
+				for user in users
+					option(value="#{user.username}") #{user.username}
+	if groups
+		.form-group
+			select#inputGroup.form-control(name="group", onfocus="this.selectedIndex = -1;")
+				for group in groups
+					option(value="#{group.name}")  #{group.name}
+
+	if !users && !groups
+		button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
+			i.fa.fa-arrow-circle-left
+			| &nbsp; Overview
+
+	script.
+
+		$(function() {
+			$('#inputUsername').on('change', function() {
+			  location.href = '/admin/analysis/user/' + this.value;
+			});
+
+			$('#inputGroup').on('change', function() {
+			  location.href = '/admin/analysis/group/' + this.value;
+			});
+		});

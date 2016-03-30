@@ -3,6 +3,7 @@ var router = express.Router();
 
 var async = require('async');
 var moment = require('moment');
+var sanitize = require('mongo-sanitize');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -12,6 +13,8 @@ var Fulfilment = require('../../../models/fulfilments');
 
 var m = require('../../middlewares');
 var response = require('../../response');
+
+var config = require('../../../config');
 
 var scheduleStatistics = function(usernames, callback) {
 	var result = {
@@ -146,56 +149,127 @@ var overviewUser = function(username, callback) {
 	});
 };
 
-// Retrieve statistics for groups
-var overviewGroups = function(callback) {
-	var results = {};
-
-	Group.find({}).exec(function(err, groups) {
+var overviewGroup = function(groupName, callback) {
+	Group.members(groupName, function(err, users) {
 		if (err) return callback(err);
 
+		var usernames = users.map(function(u) { return u.username });
+
+		results = {
+			group: groupName,
+			schedules: {},
+			fulfilments: {},
+			pledges: {},
+			users: {
+				usernames: usernames,
+				n: usernames.length
+			}
+		};
+
+		async.each(usernames, function(u, next){
+			overviewUser(u, function(err, result) {
+				// TODO - store this date for making averages
+
+				combineOverviewResults(results, result);
+				next(err);
+			})
+		}, function(err){
+			// Make averages
+			var n = results.users.n;
+			results.schedules.meanN = (results.schedules.n / n);
+			results.schedules.meanTotal = (results.schedules.total / n);
+
+			callback(err, results);
+		});
+	});
+};
+
+// Retrieve statistics for groups
+var overviewGroups = function(callback) {
+	Group.find({}).exec(function(err, groups) {
+		if (err) return callback(err);
 		async.each(groups, function(group, next){
-			Group.members(group.name, function(err, users) {
-				if (err) return callback(err);
-
-				var usernames = users.map(function(u) { return u.username });
-
-				results[group.name] = {
-					schedules: {},
-					fulfilments: {},
-					pledges: {},
-					users: {
-						usernames: usernames,
-						n: usernames.length
-					}
-				};
-
-				async.each(usernames, function(u, _next){
-					overviewUser(u, function(err, result) {
-						// TODO - store this date for making averages
-
-						combineOverviewResults(results[group.name], result);
-						_next(err);
-					})
-				}, function(err){
-					// Make averages
-					var users = results[group.name].users.n;
-					results[group.name].schedules.meanN = (results[group.name].schedules.n / users);
-					results[group.name].schedules.meanTotal = (results[group.name].schedules.total / users);
-
-					next(err);
-				});
-			});
-		}, function done() {
+			overviewGroup(group.name, next);
+		}, function done(err, results) {
 			callback(err, results);
 		});
 	});
 };
 
 router.get('/', function(req, res) {
-    overviewGroups(function(err, data){
-        if (err) return response.JSON.error.server(res, err);
-        res.json(data);
-    });
+	Group.find({}, function(err, groups) {
+		User.find({}, function(err, users) {
+
+			var results = {
+				schedules: {},
+				fulfilments: {},
+				pledges: {},
+				users: {
+					usernames: users.map(function(u){return u.username}),
+					n: users.length
+				}
+			};
+
+			async.each(users, function(u, _next){
+				overviewUser(u.username, function(err, result) {
+					// TODO - store this date for making averages
+
+					combineOverviewResults(results, result);
+					_next(err);
+				})
+			}, function(err){
+				if (err) return response.error.server(req, res, err);
+
+				// Make averages
+				results.schedules.meanN = (results.schedules.n / results.users.n);
+				results.schedules.meanTotal = (results.schedules.total / results.users.n);
+
+				res.render('admin/analysis/overview', {
+			        title: 'Analysis Overview',
+			        name: config.name,
+			        organisation: config.organisation,
+			        nav: config.nav(),
+			        user: req.user,
+			        dictionary: config.dictionary,
+			        statistics: results,
+			        users: users,
+			        groups: groups
+			    });
+			});
+		});
+	});
+});
+
+router.get('/user/:username', function(req, res) {
+	overviewUser(sanitize(req.params.username), function(err, results) {
+		if (err) return response.error.server(req, res, err);
+
+		res.render('admin/analysis/overview', {
+	        title: 'User Analysis > ' + req.params.username,
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        statistics: results,
+	    });
+	});
+});
+
+router.get('/group/:name', function(req, res) {
+	overviewGroup(sanitize(req.params.name), function(err, results) {
+		if (err) return response.error.server(req, res, err);
+
+		res.render('admin/analysis/overview', {
+	        title: 'Group Analysis > ' + req.params.name,
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        statistics: results,
+	    });
+	});
 });
 
 /*
