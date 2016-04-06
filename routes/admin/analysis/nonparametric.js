@@ -20,8 +20,12 @@ var members = function(group, callback) {
 		Group.members(group, callback);
 	}
 	else {
-		// TODO - this doesn't work
-		User.find({ groups: [] }, callback);
+		User.find({
+			$or: [
+				{ groups: { $size: 0}},
+				{ groups: null }
+			]
+		}, callback);
 	}
 };
 
@@ -101,6 +105,10 @@ module.exports.uTest = function(groupA, groupB, callback) {
 		// Store list of members from each group
 		var membersA = members[0].map(function(member) { return member.username });
 		var membersB = members[1].map(function(member) { return member.username });
+
+		// Warn if empty
+		if (membersA.length == 0) console.warn('Running U test on an empty group (' + groupA + ')');
+		if (membersB.length == 0) console.warn('Running U test on an empty group (' + groupB + ')');
 
 		// Combine results
 		var all = membersA.concat(membersB);
