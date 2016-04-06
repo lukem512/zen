@@ -16,6 +16,8 @@ var response = require('../../response');
 
 var config = require('../../../config');
 
+var nonparametric = require('./nonparametric');
+
 var scheduleStatistics = function(usernames, callback) {
 	var result = {
 		total: 0
@@ -270,6 +272,22 @@ router.get('/group/:name', function(req, res) {
 	        statistics: results,
 	    });
 	});
+});
+
+var _nonparametric = function(groupA, groupB, req, res) {
+	nonparametric.uTest(groupA, groupB, function(err, results) {
+		if (err) return response.error.server(req, res, err);
+
+		res.json(results);
+	});
+}
+
+router.get('/nonparametric/:groupA/:groupB', function(req, res) {
+	_nonparametric(sanitize(req.params.groupA), sanitize(req.params.groupB), req, res);
+});
+
+router.get('/nonparametric/:groupA/', function(req, res) {
+	_nonparametric(sanitize(req.params.groupA), null, req, res);
 });
 
 /*
