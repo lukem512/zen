@@ -84,7 +84,7 @@ var groupRank = function(rankedList, members) {
 // Compute the U value of a group.
 var uValue = function(rank, members) {
 	var k = members.length;
-	return rank * ((k * (k+1)) / 2);
+	return rank - ((k * (k+1)) / 2);
 };
 
 // Perform the Mann-Whitney U test.
