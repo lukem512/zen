@@ -23,6 +23,7 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^5.7.0",
     "load-grunt-tasks": "^3.4.0",
+    "mann-whitney-utest": "^1.0.1",
     "moment": "^2.11.2",
     "mongo-sanitize": "^1.0.0",
     "mongoose": "^4.4.4",

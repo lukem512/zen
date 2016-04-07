@@ -1,6 +1,7 @@
 var async = require('async');
 var moment = require('moment');
 var sanitize = require('mongo-sanitize');
+var mwu = require('mann-whitney-utest');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -29,64 +30,6 @@ var members = function(group, callback) {
 	}
 };
 
-// Rank the list.
-// Inspired by https://gist.github.com/gungorbudak/1c3989cc26b9567c6e50
-var rank = function(list, key) {
-	var key = key || 'total';
-
-	// First, sort in ascending order
-	list.sort(function(a, b) {
-		return (a[key] - b[key]);
-	});
-
-	// Second, add the rank to the objects
-	list = list.map(function(item, index) {
-		item.rank = index + 1;
-		return item;
-	});
-
-	// Third, use median values for groups with the same rank
-	for (var i = 0; i < list.length; /* nothing */ ) {
-		var count = 1;
-		var total = list[i].rank;
-		
-		for (var j = 0; list[i + j + 1] && (list[i + j][key] === list[i + j + 1][key]); j++) {
-			total += list[i + j + 1].rank;
-			count++;
-		}
-
-		var rank = (total / count);
-
-		for (var k = 0; k < count; k++) {
-			list[i + k].rank = rank;
-		}
-
-		i = i + count;
-	}
-
-	return list;
-}
-
-// Compute the rank of a group, given a ranked
-// list and a list of members.
-var groupRank = function(rankedList, members) {
-	var rank = 0;
-
-	rankedList.forEach(function(username) {
-		if (members.indexOf(username)) {
-			rank += username.rank;
-		}
-	});
-
-	return rank;
-};
-
-// Compute the U value of a group.
-var uValue = function(rank, members) {
-	var k = members.length;
-	return rank - ((k * (k+1)) / 2);
-};
-
 // Perform the Mann-Whitney U test.
 // groupA and groupB are the names of groups to compare,
 // if a group is null then 'ungrouped' users are used.
@@ -102,62 +45,63 @@ module.exports.uTest = function(groupA, groupB, callback) {
 		if (err) return callback(err);
 		if (!members[0] || !members[1]) return callback('Not found');
 
-		// Store list of members from each group
-		var membersA = members[0].map(function(member) { return member.username });
-		var membersB = members[1].map(function(member) { return member.username });
-
 		// Warn if empty
-		if (membersA.length == 0) console.warn('Running U test on an empty group (' + groupA + ')');
-		if (membersB.length == 0) console.warn('Running U test on an empty group (' + groupB + ')');
+		for (var i = 0; i < 2; i++) {
+			if (members[i].length == 0) {
+				var group = (i == 0 ? groupA : groupB);
+				console.warn('Running U test on an empty group (' + group + ')');
+			}
+		}
 
-		// Combine results
-		var all = membersA.concat(membersB);
+		// Store a list of member usernames
+		var usernames = [];
+		for (var i = 0; i < 2; i++) {
+			usernames[i] = members[i].map(function(member) { return member.username });
+		}
 
-		// Retrieve the fulfilments for all the members
 		var fulfilments = [];
-		async.each(all, function(username, next) {
-			Fulfilment.find({ username: username}, function(err, f){
-				fulfilments.push(f);
-				next(err);
-			});
-		}, function done(err) {
+		async.forEachOf(members, function(sampleMembers, index, outer) {
+			async.each(sampleMembers, function(member, inner) {
+				Fulfilment.find({ username: member.username}, (function(i, username){
+					return function(err, f){
+						fulfilments.push({
+							u: username,
+							f: f
+						});
+						inner(err);
+					};
+				})(index, member.username));
+			}, outer);
+		}, function(err) {
 			if (err) return callback(err);
 
 			// Initial ranking
-			var ranked =[];
+			var samples = [];
 
 			// Compute total time fulfilled
-			fulfilments.forEach(function(schedules, index) {
+			fulfilments.forEach(function(fulfilments) {
 				var total = 0;
-				schedules.forEach(function(s) {
+				fulfilments.f.forEach(function(s) {
 					total += moment.duration(moment(s.end_time).diff(s.start_time));
 				});
-				ranked[index] = {
-					username: all[index],
-					total: total
-				};
+				for (var i = 0; i < 2; i++) {
+					if (usernames[i].indexOf(fulfilments.u) > -1) {
+						if (!samples[i]) samples[i] = [];
+						samples[i].push(total);
+					}
+				}
 			});
 
-			// Rank the list by the total time fulfilled
-			var ranked = rank(ranked);
+			var u = mwu.test(samples);
 
-			// Find the rank of each group
-			var rankA = groupRank(ranked, membersA);
-			var rankB = groupRank(ranked, membersB);
+			if (!mwu.check(u, samples)) {
+				return callback('Mann-Whitney check failed');
+			}
 
-			// Compute the U values
-			var uA = uValue(rankA, membersA);
-			var uB = uValue(rankB, membersB);
-
-			// An optimisation is to use a property of the U test
-			// to calculate the U value of group B based on the value
-			// of group A
-			// var uB = (membersA.length * membersB.length) - uA;
-
-			// Return results object
+			// 	// Return results object
 			var results = {};
-			results[groupA] = uA;
-			results[groupB] = uB;
+			results[groupA] = u[0];
+			results[groupB] = u[1];
 
 			callback(err, results);
 		});
