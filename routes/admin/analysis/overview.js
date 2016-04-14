@@ -17,6 +17,7 @@ var response = require('../../response');
 var config = require('../../../config');
 
 var nonparametric = require('./nonparametric');
+var parametric = require('./parametric');
 
 var scheduleStatistics = function(usernames, callback) {
 	var result = {
@@ -288,6 +289,22 @@ router.get('/nonparametric/:groupA/:groupB', function(req, res) {
 
 router.get('/nonparametric/:groupA/', function(req, res) {
 	_nonparametric(sanitize(req.params.groupA), null, req, res);
+});
+
+var _parametric = function(groupA, groupB, req, res) {
+	parametric.anova(groupA, groupB, function(err, results) {
+		if (err) return response.error.server(req, res, err);
+
+		res.json(results);
+	});
+}
+
+router.get('/parametric/:groupA/:groupB', function(req, res) {
+	_parametric(sanitize(req.params.groupA), sanitize(req.params.groupB), req, res);
+});
+
+router.get('/parametric/:groupA/', function(req, res) {
+	_parametric(sanitize(req.params.groupA), null, req, res);
 });
 
 /*
