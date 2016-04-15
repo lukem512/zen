@@ -83,8 +83,28 @@ block content
 				i.fa.fa-copy
 				| &nbsp; Duplicate
 		script.
+			
 			$(function() {
 				var startDate = moment('#{schedule.start_time}');
 				$('#startDate').attr('href', '/#{dictionary.schedule.noun.plural}?date=' + startDate.format('DD-MM-YYYY') + '&view=day');
 				$('#startDate').text(startDate.calendar());
+
+				var __id = window.__id || false;
+				if (__id) {
+					pledgedUsers(__id, function(pledged) {
+						if (window.__past || window.__ongoing) {
+							fulfilledUsers(__id, function(fulfilled) {
+								if (fulfilled.message) {
+									return console.error(fulfilled.message);
+								};
+								var present = fulfilled.map(function(i) {return i.username});
+								var absent = pledged.filter(function(i) {return present.indexOf(i) < 0;});
+								displayPledgesPast(absent, present);
+							});
+						}
+						else {
+							displayPledgesFuture(pledged);
+						}
+					});
+				};
 			});

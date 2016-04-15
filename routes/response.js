@@ -13,7 +13,8 @@ module.exports.error = {
           organisation: config.organisation,
           nav: config.nav(),
           dictionary: config.dictionary,
-          user: req.user
+          user: req.user,
+          locale: config.locale
         });
     },
     deleted: function(req, res) {
@@ -23,7 +24,8 @@ module.exports.error = {
           organisation: config.organisation,
           nav: config.nav(),
           dictionary: config.dictionary,
-          user: req.user
+          user: req.user,
+          locale: config.locale
         });
     },
     notfound: function(req, res) {
@@ -33,18 +35,20 @@ module.exports.error = {
           organisation: config.organisation,
           nav: config.nav(),
           dictionary: config.dictionary,
-          user: req.user
+          user: req.user,
+          locale: config.locale
         });
     },
     server: function(req, res, err) {
-        console.error(err);
+        console.error('Internal server error',err);
         return res.status(404).render('500', {
           title: 'Error 500',
           name: config.name,
           organisation: config.organisation,
           nav: config.nav(),
           dictionary: config.dictionary,
-          user: req.user
+          user: req.user,
+          locale: config.locale
       });
     }
 };
@@ -66,7 +70,17 @@ module.exports.JSON.error = {
         res.status(404).json({error: 'Resource not found'});
     },
     server: function(res, err) {
-        console.error(err);
+        console.error('Internal server error',err);
         res.status(500).json({error: 'Server error'});
     }
+};
+
+/*
+ * Response strings.
+*/
+
+module.exports.strings = {
+    pastScheduleError: 'Cannot delete past schedules',
+    notAuthorisedError: 'Not authorised',
+    notFoundError: 'Not found'
 };

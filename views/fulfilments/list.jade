@@ -32,6 +32,9 @@ block content
 		a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
 		|  coming up.
 
+	br
+	#feed
+
 	hr
 	form
 		.form-group
@@ -42,3 +45,22 @@ block content
 			button#btnLog.btn.btn-primary.text-capitalize(type="button", title="Log a previously completed #{dictionary.action.noun.singular}", onclick="window.location='/#{dictionary.action.noun.plural}/log'")
 				i.fa.fa-file-o
 				| &nbsp; Log #{dictionary.action.noun.singular}
+
+	script.
+
+		$(document).ready(function(){
+			// Display the loading spinner
+			$('#feed').html('<p>Loading... <i class=\"fa fa-refresh fa-spin\"></p>');
+
+			// Function to retrieve fulfilment feed for the current user
+			var __getFeed = function() {
+				getFulfilmentFeed(user);
+			};
+
+			// Refresh every 60s
+			feedTimeInterval = 60;
+
+			// Retrieve the feed
+			__getFeed();
+			setInterval(__getFeed, feedTimeInterval * 1000);
+		});

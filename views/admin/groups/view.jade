@@ -1,12 +1,12 @@
 extends ../../layout
 
 block content
-	script(src='/javascripts/admin/generic.js')
+	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/admin/groups.js')
 	h1.
 		Details for #{group.name}
 	p#groupId= group._id
-	form#formAddGroup(name="addgroup",role="form",method="post",action="/api/groups/update")
+	form#formAddGroup(name="viewgroup",role="form",method="post",action="/api/groups/update")
 		.form-group
 			input#inputGroupName.form-control(type="text", placeholder="Name", name="name", value="#{group.name}")
 		.form-group

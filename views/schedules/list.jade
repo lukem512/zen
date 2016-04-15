@@ -4,10 +4,12 @@ block content
 	h1 #{dictionary.schedule.noun.plural}
 	script(src='/javascripts/ui/generic.js')
 	script(src='/javascripts/ui/calendar.js')
+	script(src='/javascripts/ui/datepicker.js')
 	hr
 	#calendar
 
 	script.
+		
 		// Retrieve the date to display
 		var date = moment($.urlParam('date'), dateFormat);
 		if (!date.isValid())
@@ -33,7 +35,7 @@ block content
 							date = new moment();
 						}
 
-						window.location = newScheduleUrl(date);
+						window.location = newScheduleUrl(_nextFiveMinutes(date));
 					}
 				},
 				_today: {
@@ -96,7 +98,7 @@ block content
 			defaultDate: date,	
 			events: calendarApiUrl,
 			eventAfterAllRender: function(view) {
-				// TODO - make the title a link!
+				// Make the title a link!
 				var titleSelector = '.fc-left h2';
 
 				// Go to month view

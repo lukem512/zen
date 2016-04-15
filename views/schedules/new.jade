@@ -35,10 +35,15 @@ block content
 				| &nbsp; Cancel
 
 	script.
-		if ($.urlParam('title')) {
-			$('#inputTitle').val(decodeURIComponent($.urlParam('title')));
-		}
 
-		if ($.urlParam('description')) {
-			$('#inputDescription').val(decodeURIComponent($.urlParam('description')));
-		}
+		$(function() {
+			initPickers();
+
+			if ($.urlParam('title')) {
+				$('#inputTitle').val(decodeURIComponent($.urlParam('title')));
+			}
+
+			if ($.urlParam('description')) {
+				$('#inputDescription').val(decodeURIComponent($.urlParam('description')));
+			}
+		});
