@@ -8,6 +8,7 @@
     "postinstall": "grunt"
   },
   "dependencies": {
+    "anova": "^1.0.0",
     "async": "^1.5.2",
     "bcryptjs": "^2.3.0",
     "body-parser": "~1.13.2",
@@ -23,6 +24,7 @@
     "jade": "~1.11.0",
     "jsonwebtoken": "^5.7.0",
     "load-grunt-tasks": "^3.4.0",
+    "mann-whitney-utest": "^1.0.1",
     "moment": "^2.11.2",
     "mongo-sanitize": "^1.0.0",
     "mongoose": "^4.4.4",

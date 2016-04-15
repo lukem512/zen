@@ -4,6 +4,8 @@ var router = express.Router();
 var sanitize = require('mongo-sanitize');
 var moment = require('moment');
 
+var analysis = require('./admin/analysis/overview');
+
 var User = require('../models/users');
 var Group = require('../models/groups');
 var Schedule = require('../models/schedules');
@@ -20,6 +22,10 @@ moment.locale(config.locale);
 router.use(middlewares.isLoggedIn);
 router.use(middlewares.isAdmin);
 
+// Set up analysis routes
+router.use('/analysis', analysis);
+
+// Index route
 router.get('/', function(req, res) {
     res.render('admin/index', {
         title: 'Control panel',
