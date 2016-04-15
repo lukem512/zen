@@ -1,45 +1,47 @@
 nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
-	.container
-		.navbar-header.page-scroll
-			button.navbar-toggle(type="button", data-toggle="collapse", data-target="#page-list")
-				span.sr-only Toggle navigation
-				span.icon-bar
-				span.icon-bar
-				span.icon-bar
-			a.navbar-brand(href="/")= name
+    .container
+        .navbar-header.page-scroll
+            button.navbar-toggle(type="button", data-toggle="collapse", data-target="#page-list")
+                span.sr-only Toggle navigation
+                span.icon-bar
+                span.icon-bar
+                span.icon-bar
+            a.navbar-brand(href="/")= name
 
-		#page-list.collapse.navbar-collapse
-			ul.nav.navbar-nav.navbar-right
-				each page, i in nav
-					if page.nav == null || page.nav
-						if page.guestOnly == null || (page.guestOnly && !user)
-							li
-								if page.popup
-									a(href="#{page.href}", target="_blank")= page.title
-								else
-									a(href="#{page.href}")= page.title
-				if user
-					li
-						a(href="/#{dictionary.action.noun.plural}") Log #{dictionary.action.noun.plural}
-					li
-						a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
-				li
-					if user && user.admin
-							a.active(href="/admin")
-								b.text-warning Control Panel
-				
-				if user
-						li
-							a.active(href="/settings")
-								b.text-success= user.username
-						li
-							a(href="/end")
-								i.fa.fa-power-off
-				else
-					li
-						a(href="/auth") Sign in
+        #page-list.collapse.navbar-collapse
+            ul.nav.navbar-nav.navbar-right
+                each page, i in nav
+                    if page.nav == null || page.nav
+                        if page.guestOnly == null || (page.guestOnly && !user)
+                            li
+                                if page.popup
+                                    a(href="#{page.href}", target="_blank")= page.title
+                                else
+                                    a(href="#{page.href}")= page.title
+                if user
+                    li
+                        a(href="/#{dictionary.action.noun.plural}") Log #{dictionary.action.noun.plural}
+                    li
+                        a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
+                li
+                    if user && user.admin
+                            a.active(href="/admin")
+                                b.text-warning Control Panel
+                
+                if user
+                        li
+                            a.active(href="/settings")
+                                b.text-success= user.username
+                        li
+                            a(href="/end")
+                                i.fa.fa-power-off
+                else
+                    li
+                        a(href="/auth") Sign in
 
 if header
-	header
-		.container
-			!= header.content
+    header
+        .container
+            != header.content
+
+

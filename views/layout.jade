@@ -60,9 +60,21 @@ html
     
     // The portfolio ID is theme-specific. It may need changing if you replace the stylesheet.
     section#portfolio
+        noscript
+            div#noscript-warning
+                div#noscript-warning-box.bg-primary
+                    table
+                        tr
+                            td#icon
+                                i.fa.fa-exclamation-triangle.fa-3x
+                            td#text
+                                p#title.text-danger JavaScript is required!
+                                div#message
+                                    | Please 
+                                    a(href="http://enable-javascript.com/", target="_blank") enable JavaScript
+                                    |  to continue using the website. 
+
         .container
-            noscript
-                p.text-danger You need JavaScript enabled to use this website.
             block content
     
     include ./footer.jade
