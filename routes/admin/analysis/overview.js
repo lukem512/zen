@@ -4,6 +4,7 @@ var router = express.Router();
 var async = require('async');
 var moment = require('moment');
 var sanitize = require('mongo-sanitize');
+var sm = require('statistical-methods');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -26,10 +27,20 @@ var scheduleStatistics = function(usernames, callback) {
 
 	Schedule.find({owner: { $in: usernames }}).exec(function(err, schedules) {
 		if (err) return callback(err);
-		schedules.forEach(function(schedule) {
-			result.total += moment.duration(moment(schedule.end_time).diff(schedule.start_time));
+
+		var durations = schedules.map(function(s) {
+			return moment(s.end_time).diff(s.start_time);
 		});
+
+		result.total = sm.sum(durations);
+		result.range = sm.range(durations);
+		result.min = sm.min(durations);
+		result.max = sm.max(durations);
+		result.mean = sm.mean(durations);
+		result.mode = sm.mode(durations);
+		result.median = sm.median(durations);
 		result.n = schedules.length;
+
 		callback(err, result);
 	});
 };
@@ -43,6 +54,7 @@ var fulfilmentStatistics = function(usernames, callback) {
 
 	Fulfilment.find({username: { $in: usernames }}).exec(function(err, fulfilments) {
 		if (err) return callback(err);
+
 		fulfilments.forEach(function(fulfilment) {
 			var duration = moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time));
 			if (fulfilment.real_time) {
@@ -51,6 +63,18 @@ var fulfilmentStatistics = function(usernames, callback) {
 				result.retrospective += duration;
 			}
 		});
+
+		var durations = fulfilments.map(function(f) {
+			return moment(f.end_time).diff(f.start_time);
+		});
+
+		result.range = sm.range(durations);
+		result.min = sm.min(durations);
+		result.max = sm.max(durations);
+		result.mean = sm.mean(durations);
+		result.mode = sm.mode(durations);
+		result.median = sm.median(durations);
+
 		result.total = result.real_time + result.retrospective;
 		result.n = fulfilments.length;
 		callback(err, result);
@@ -63,6 +87,8 @@ var pledgeStatistics = function(usernames, callback) {
 		fulfilled: 0
 	};
 
+	var durations = [];
+
 	Pledge.find({username: { $in: usernames }}).exec(function(err, pledges) {
 		if (err) return callback(err);
 
@@ -73,7 +99,7 @@ var pledgeStatistics = function(usernames, callback) {
 				if (err || !schedule) return next(err);
 
 				// Add time to object
-				result.total += moment.duration(moment(schedule.end_time).diff(schedule.start_time));
+				durations.push(moment(schedule.end_time).diff(schedule.start_time));
 
 				// Add fulfilment information
 				Fulfilment.overlaps(schedule.start_time, schedule.end_time, function(err, fulfilments) {
@@ -91,6 +117,13 @@ var pledgeStatistics = function(usernames, callback) {
 				});
 			});
 		}, function done(err) {
+			result.range = sm.range(durations);
+			result.min = sm.min(durations);
+			result.max = sm.max(durations);
+			result.mean = sm.mean(durations);
+			result.mode = sm.mode(durations);
+			result.median = sm.median(durations);
+			result.total = sm.sum(durations);
 			callback(err, result);
 		});
 	});
@@ -173,7 +206,7 @@ var overviewGroup = function(groupName, callback) {
 
 		async.each(usernames, function(u, next){
 			overviewUser(u, function(err, result) {
-				// TODO - store this date for making averages
+				// TODO - store this data for making averages
 
 				combineOverviewResults(results, result);
 				next(err);

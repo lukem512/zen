@@ -1,7 +1,20 @@
 extends ../../layout
 
 block content
-	- function formatDuration(t){ return moment.duration(t).hours() + ' hours, ' + moment.duration(t).minutes() + ' minutes and ' + moment.duration(t).seconds() + ' seconds'; }
+	- function formatDuration(t) {
+		- var str = "";
+		- var days = moment.duration(t).days();
+		- if (days > 0) str += days + ' days, ';
+		-
+		- var hours = moment.duration(t).hours();
+		- if (hours > 0) str += hours + ' hours, ';
+		-
+		- var minutes = moment.duration(t).minutes();
+		- if (minutes > 0) str += minutes + ' minutes, ';
+		- str += moment.duration(t).seconds() + ' seconds';
+		-
+		- return str;
+		- }
 
 	h1= title
 	p This page contains an overview of activity on the platform. Select a group or a user to view them in more detail.
@@ -22,11 +35,26 @@ block content
 							li Number of schedules: 
 								strong #{statistics.schedules.n}
 							if statistics.schedules.meanTotal
-								li Average time scheduled: 
+								li Average time scheduled (mean): 
 									strong #{formatDuration(statistics.schedules.meanTotal)}
 							if statistics.schedules.meanN
-								li Average number of schedules: 
+								li Average number of schedules (mean): 
 									strong #{statistics.schedules.meanN.toFixed(3)}
+
+							if statistics.schedules.mean
+								li Average time scheduled (mean): 
+									strong #{formatDuration(statistics.schedules.mean)}
+							if statistics.schedules.mode
+								li Most common time scheduled (mode): 
+									strong #{formatDuration(statistics.schedules.mode)}
+							if statistics.schedules.median
+								li Median time scheduled: 
+									strong #{formatDuration(statistics.schedules.median)}
+							if statistics.schedules.range
+								li Range: 
+									strong #{formatDuration(statistics.schedules.range)}
+									if statistics.schedules.min && statistics.schedules.max
+											|  (min: #{formatDuration(statistics.schedules.min)}, max: #{formatDuration(statistics.schedules.max)})
 
 					td
 						ul
@@ -36,6 +64,20 @@ block content
 								strong #{statistics.pledges.n}
 							li Total time spent fulfilling pledges: 
 								strong #{formatDuration(statistics.pledges.fulfilled)}
+							if statistics.pledges.mean
+								li Average time pledged (mean): 
+									strong #{formatDuration(statistics.pledges.mean)}
+							if statistics.pledges.mode
+								li Most common time pledged (mode): 
+									strong #{formatDuration(statistics.pledges.mode)}
+							if statistics.pledges.median
+								li Median time pledged: 
+									strong #{formatDuration(statistics.pledges.median)}
+							if statistics.pledges.range
+								li Range: 
+									strong #{formatDuration(statistics.pledges.range)}
+									if statistics.pledges.min && statistics.pledges.max
+											|  (min: #{formatDuration(statistics.pledges.min)}, max: #{formatDuration(statistics.pledges.max)})
 
 					td
 						ul
@@ -47,6 +89,20 @@ block content
 								strong #{formatDuration(statistics.fulfilments.real_time)}
 							li Total time logged in retrospectively: 
 								strong #{formatDuration(statistics.fulfilments.retrospective)}
+							if statistics.fulfilments.mean
+								li Average time logged (mean): 
+									strong #{formatDuration(statistics.fulfilments.mean)}
+							if statistics.fulfilments.mode
+								li Most common time logged (mode): 
+									strong #{formatDuration(statistics.fulfilments.mode)}
+							if statistics.fulfilments.median
+								li Median time logged: 
+									strong #{formatDuration(statistics.fulfilments.median)}
+							if statistics.fulfilments.range
+								li Range: 
+									strong #{formatDuration(statistics.fulfilments.range)}
+									if statistics.fulfilments.min && statistics.fulfilments.max
+											|  (min: #{formatDuration(statistics.fulfilments.min)}, max: #{formatDuration(statistics.fulfilments.max)})
 
 		if users && groups
 			p 
