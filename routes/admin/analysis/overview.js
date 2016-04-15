@@ -45,13 +45,13 @@ var fulfilmentStatistics = function(usernames, callback) {
 		if (err) return callback(err);
 		fulfilments.forEach(function(fulfilment) {
 			var duration = moment.duration(moment(fulfilment.end_time).diff(fulfilment.start_time));
-			result.total += duration;
 			if (fulfilment.real_time) {
 				result.real_time += duration;
 			} else {
 				result.retrospective += duration;
 			}
 		});
+		result.total = result.real_time + result.retrospective;
 		result.n = fulfilments.length;
 		callback(err, result);
 	});
@@ -156,7 +156,9 @@ var overviewGroup = function(groupName, callback) {
 	Group.members(groupName, function(err, users) {
 		if (err) return callback(err);
 
-		var usernames = users.map(function(u) { return u.username });
+		var usernames = [];
+		if (users.length > 0)
+			usernames = users.map(function(u) { return u.username });
 
 		results = {
 			group: groupName,
@@ -201,6 +203,7 @@ var overviewGroups = function(callback) {
 
 router.get('/', function(req, res) {
 	Group.find({}, function(err, groups) {
+
 		User.find({}, function(err, users) {
 
 			var results = {
@@ -213,12 +216,12 @@ router.get('/', function(req, res) {
 				}
 			};
 
-			async.each(users, function(u, _next){
+			async.each(users, function(u, next){
 				overviewUser(u.username, function(err, result) {
-					// TODO - store this date for making averages
+					// TODO - store this data for making averages
 
 					combineOverviewResults(results, result);
-					_next(err);
+					next(err);
 				})
 			}, function(err){
 				if (err) return response.error.server(req, res, err);
@@ -259,12 +262,13 @@ router.get('/user/:username', function(req, res) {
 	});
 });
 
-router.get('/group/:name', function(req, res) {
-	overviewGroup(sanitize(req.params.name), function(err, results) {
+var _group = function (name, req, res) {
+	overviewGroup(name, function(err, results) {
 		if (err) return response.error.server(req, res, err);
+		if (!name) name = 'Ungrouped';
 
 		res.render('admin/analysis/overview', {
-	        title: 'Group Analysis > ' + req.params.name,
+	        title: 'Group Analysis > ' + name,
 	        name: config.name,
 	        organisation: config.organisation,
 	        nav: config.nav(),
@@ -273,6 +277,14 @@ router.get('/group/:name', function(req, res) {
 	        statistics: results,
 	    });
 	});
+};
+
+router.get('/group/:name', function(req, res) {
+	_group(sanitize(req.params.name), req, res);
+});
+
+router.get('/group/', function(req, res) {
+	_group(null, req, res);
 });
 
 var _nonparametric = function(groupA, groupB, req, res) {

@@ -14,32 +14,16 @@ var response = require('../../response');
 
 var config = require('../../../config');
 
-// Retrieve a list of members from a group,
-// use 'ungrouped' users is the group name is null.
-var members = function(group, callback) {
-	if (group) {
-		Group.members(group, callback);
-	}
-	else {
-		User.find({
-			$or: [
-				{ groups: { $size: 0}},
-				{ groups: null }
-			]
-		}, callback);
-	}
-};
-
 // Perform the Mann-Whitney U test.
 // groupA and groupB are the names of groups to compare,
 // if a group is null then 'ungrouped' users are used.
 module.exports.uTest = function(groupA, groupB, callback) {
 	async.parallel([
 		function(next) {
-			members(groupA, next);
+			Group.members(groupA, next);
 		},
 		function(next) {
-			members(groupB, next);
+			Group.members(groupB, next);
 		}
 	], function done(err, members) {
 		if (err) return callback(err);
