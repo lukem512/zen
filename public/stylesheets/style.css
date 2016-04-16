@@ -1,5 +1,9 @@
+body {
+  padding-top: 50px;
+}
+
 .vdivide > [class*='col-']:before {
-	background: #fff;
+	background: #000;
 	bottom: 0;
 	content: " ";
 	left: 0;
