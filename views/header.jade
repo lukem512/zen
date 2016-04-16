@@ -1,4 +1,4 @@
-nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
+nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink(role="navigation")
     .container
         .navbar-header.page-scroll
             button.navbar-toggle(type="button", data-toggle="collapse", data-target="#page-list")
@@ -15,29 +15,29 @@ nav.navbar.navbar-default.navbar-fixed-top.navbar-shrink
                         if page.guestOnly == null || (page.guestOnly && !user)
                             li
                                 if page.popup
-                                    a(href="#{page.href}", target="_blank")= page.title
+                                    a(href="#{page.href}", target="_blank").text-capitalize= page.title
                                 else
-                                    a(href="#{page.href}")= page.title
+                                    a(href="#{page.href}").text-capitalize= page.title
                 if user
                     li
-                        a(href="/#{dictionary.action.noun.plural}") Log #{dictionary.action.noun.plural}
+                        a(href="/#{dictionary.action.noun.plural}").text-capitalize Log #{dictionary.action.noun.plural}
                     li
-                        a(href="/#{dictionary.schedule.noun.plural}") #{dictionary.schedule.noun.plural}
+                        a(href="/#{dictionary.schedule.noun.plural}").text-capitalize #{dictionary.schedule.noun.plural}
                 li
                     if user && user.admin
                             a.active(href="/admin")
-                                b.text-warning Control Panel
+                                b.text-warning.text-capitalize Control Panel
                 
                 if user
                         li
                             a.active(href="/settings")
-                                b.text-success= user.username
+                                b.text-success.text-capitalize= user.username
                         li
                             a(href="/end")
                                 i.fa.fa-power-off
                 else
                     li
-                        a(href="/auth") Sign in
+                        a(href="/auth").text-capitalize Sign In
 
 if header
     header
