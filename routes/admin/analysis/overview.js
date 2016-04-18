@@ -383,7 +383,8 @@ var _nonparametric = function(groupA, groupB, trim, req, res) {
 	        nav: config.nav(),
 	        user: req.user,
 	        dictionary: config.dictionary,
-			statistics: results
+			statistics: results,
+			trim: trim
 		});
 	}, trim);
 }
@@ -397,7 +398,7 @@ router.get('/nonparametric/:groupA/:groupB', function(req, res) {
 });
 
 router.get('/nonparametric/:groupA/', function(req, res) {
-	_nonparametric(sanitize(req.params.groupA), null, false, req, res);
+	res.redirect(req.originalUrl + 'null');
 });
 
 var _parametric = function(groupA, groupB, trim, req, res) {
@@ -414,7 +415,8 @@ var _parametric = function(groupA, groupB, trim, req, res) {
 	        user: req.user,
 	        dictionary: config.dictionary,
 	        groups: [groupA, groupB],
-			statistics: results
+			statistics: results,
+			trim: trim
 		});
 	}, trim);
 }
@@ -428,7 +430,7 @@ router.get('/parametric/:groupA/:groupB', function(req, res) {
 });
 
 router.get('/parametric/:groupA/', function(req, res) {
-	_parametric(sanitize(req.params.groupA), null, false, req, res);
+	res.redirect(req.originalUrl + 'null');
 });
 
 /*

@@ -88,3 +88,11 @@ block content
 	button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
 		i.fa.fa-arrow-circle-left
 		| &nbsp; Overview
+
+	
+	if !trim
+		| &nbsp;
+		
+		button#btnTrim.btn.btn-warning(title="Trim participants with no fulfilments", onClick="location.href=location.href+\"/trim\"")
+			i.fa.fa-scissors
+			| &nbsp; Trim
