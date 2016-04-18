@@ -1,0 +1,90 @@
+extends ../../layout
+
+block content
+	- function groupName(g) {
+		- if (!g || g == "null") return "Ungrouped";
+		- return g;
+		- }
+
+	h1= title
+	p This page contains the parametric analysis of the platform data. The analysis has been performed using the Analysis of Variance (ANOVA) method.
+
+	#parametric
+		table.table.table-bordered
+			thead
+				tr
+					td Group
+					td Sum of Squares (SS)
+					td Degrees of Freedom (DF)
+					td Mean Squared (MS)
+					td Score (F-value)
+			tbody
+				tr
+					td Between Samples
+					td= statistics.treatment.SS
+					td= statistics.treatment.DF
+					td= statistics.treatment.MS
+					td= statistics.treatment.F
+
+				
+				tr
+					td Within Samples
+					td= statistics.residual.SS
+					td= statistics.residual.DF
+					
+				tr
+					td Total
+					td= statistics.total.SS
+					td= statistics.total.DF
+
+	p
+		| ANOVA partitions the variability into two components: one between the groups and one within the groups. The assumptions when performing ANOVA are that all samples are independent, that the variances are equal and that the populations are 
+		a(href="https://en.wikipedia.org/wiki/Normal_distribution", target="_blank") normally distributed
+		| . The null hypothesis, 
+		code 
+			| H
+			sub 0
+		| , states that all groups are equal:
+
+	code
+		| H
+		sub 0
+		|  : 
+		for group, i in groups
+			if i > 0 && i < groups.length
+				|  = 
+			| &mu;
+			sub= groupName(group)
+
+	//- New line under code block
+	p
+
+	p
+		| The F-value, 
+		code F
+		| ,  is the ratio of the variances of these components and, when null hypothesis is true, the F-value should be close to 1. A large F-value indicates that the variation among groups is greater than you'd expect by chance and suggestive that the null hypothesis is incorrect.
+
+	p
+		| The p-value, 
+		code p
+		| , is the significance value and is computed using the 
+		a(href="https://en.wikipedia.org/wiki/Brown%E2%80%93Forsythe_test", target="_blank") Brown–Forsythe test
+		| . If the p-value is less than your chosen significance threshold (i.e. 0.05 or 95%) the result can be considered statistically significant.
+
+	#report
+		p To report this statistic, you should include the following text in your report: 
+		code
+			| F(#{statistics.treatment.DF}, #{statistics.residual.DF}) = #{statistics.treatment.F.toFixed(3)}, 
+			| p = XXX, 
+			for group, i in groups
+				if i > 0 && i < groups.length
+					| ,  
+				| &mu;
+				sub= groupName(group)
+				|  = #{statistics[group].mean.toFixed(3)} &plusmn; #{statistics[group].sd.toFixed(3)}
+
+	hr
+
+	button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
+		i.fa.fa-arrow-circle-left
+		| &nbsp; Overview

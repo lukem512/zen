@@ -104,40 +104,35 @@ block content
 									if statistics.fulfilments.min && statistics.fulfilments.max
 											|  (min: #{formatDuration(statistics.fulfilments.min)}, max: #{formatDuration(statistics.fulfilments.max)})
 
-		if users && groups
+		if statistics.users
 			p 
-				| There are a total of 
-				strong #{users.length}
-				|  users on the platform, comprising of 
-				strong #{groups.length}
-				|  groups.
+				| This data is taken from 
+				strong #{statistics.users.usernames.length}
+				|  users.
 
 	hr
-	if users
-		.form-group
-			select#inputUsername.form-control(name="username", onfocus="this.selectedIndex = -1;")
-				for user in users
-					option(value="#{user.username}") #{user.username}
-	if groups
-		.form-group
-			select#inputGroup.form-control(name="group", onfocus="this.selectedIndex = -1;")
-				for group in groups
-					option(value="#{group.name}") #{group.name}
-				option(value="") Ungrouped
 
-	if !users && !groups
+	if view
 		button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
 			i.fa.fa-arrow-circle-left
 			| &nbsp; Overview
+	else
+		button#btnControl.btn.btn-primary(onClick="location.href=\"/admin/\"")
+			i.fa.fa-arrow-circle-left
+			| &nbsp; Control Panel
 
-	script.
+		button#btnCompare.btn.btn-success(onClick="location.href=\"/admin/analysis/compare\"")
+				i.fa.fa-arrow-circle-right
+				| &nbsp; Compare
 
-		$(function() {
-			$('#inputUsername').on('change', function() {
-			  location.href = '/admin/analysis/user/' + this.value;
-			});
+		| &nbsp;
 
-			$('#inputGroup').on('change', function() {
-			  location.href = '/admin/analysis/group/' + this.value;
-			});
-		});
+		button#btnUser.btn.btn-success(onClick="location.href=\"/admin/analysis/users\"")
+			i.fa.fa-user
+			| &nbsp; Users
+
+		| &nbsp;
+
+		button#btnGroup.btn.btn-success(onClick="location.href=\"/admin/analysis/groups\"")
+			i.fa.fa-users
+			| &nbsp; Group

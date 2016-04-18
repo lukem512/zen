@@ -279,6 +279,22 @@ router.get('/', function(req, res) {
 	});
 });
 
+router.get('/compare', function(req, res) {
+	Group.find({}, function(err, groups) {
+		if (err) return response.error.server(req, res, err);
+
+		res.render('admin/analysis/compare', {
+	        title: 'Compare Groups',
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        groups: groups
+	    });
+	});
+});
+
 router.get('/user/:username', function(req, res) {
 	overviewUser(sanitize(req.params.username), function(err, results) {
 		if (err) return response.error.server(req, res, err);
@@ -291,6 +307,23 @@ router.get('/user/:username', function(req, res) {
 	        user: req.user,
 	        dictionary: config.dictionary,
 	        statistics: results,
+	        view: true
+	    });
+	});
+});
+
+router.get('/users', function(req, res) {
+	User.find({}, function(err, users) {
+		if (err) return response.error.server(req, res, err);
+
+		res.render('admin/analysis/user', {
+	        title: 'View User',
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        users: users
 	    });
 	});
 });
@@ -308,6 +341,7 @@ var _group = function (name, req, res) {
 	        user: req.user,
 	        dictionary: config.dictionary,
 	        statistics: results,
+	        view: true
 	    });
 	});
 };
@@ -320,36 +354,81 @@ router.get('/group/', function(req, res) {
 	_group(null, req, res);
 });
 
-var _nonparametric = function(groupA, groupB, req, res) {
+router.get('/groups', function(req, res) {
+	Group.find({}, function(err, groups) {
+		if (err) return response.error.server(req, res, err);
+
+		res.render('admin/analysis/group', {
+	        title: 'View Group',
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        groups: groups
+	    });
+	});
+});
+
+var _nonparametric = function(groupA, groupB, trim, req, res) {
+	if (groupB == 'null') groupB = null;
+
 	nonparametric.uTest(groupA, groupB, function(err, results) {
 		if (err) return response.error.server(req, res, err);
 
-		res.json(results);
-	});
+		res.render('admin/analysis/nonparametric', {
+			title: 'Nonparametric Analysis',
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+			statistics: results
+		});
+	}, trim);
 }
 
+router.get('/nonparametric/:groupA/:groupB/trim', function(req, res) {
+	_nonparametric(sanitize(req.params.groupA), sanitize(req.params.groupB), true, req, res);
+});
+
 router.get('/nonparametric/:groupA/:groupB', function(req, res) {
-	_nonparametric(sanitize(req.params.groupA), sanitize(req.params.groupB), req, res);
+	_nonparametric(sanitize(req.params.groupA), sanitize(req.params.groupB), false, req, res);
 });
 
 router.get('/nonparametric/:groupA/', function(req, res) {
-	_nonparametric(sanitize(req.params.groupA), null, req, res);
+	_nonparametric(sanitize(req.params.groupA), null, false, req, res);
 });
 
-var _parametric = function(groupA, groupB, req, res) {
+var _parametric = function(groupA, groupB, trim, req, res) {
+	if (groupB == 'null') groupB = null;
+
 	parametric.anova(groupA, groupB, function(err, results) {
 		if (err) return response.error.server(req, res, err);
 
-		res.json(results);
-	});
+		res.render('admin/analysis/parametric', {
+			title: 'Parametric Analysis',
+	        name: config.name,
+	        organisation: config.organisation,
+	        nav: config.nav(),
+	        user: req.user,
+	        dictionary: config.dictionary,
+	        groups: [groupA, groupB],
+			statistics: results
+		});
+	}, trim);
 }
 
+router.get('/parametric/:groupA/:groupB/trim', function(req, res) {
+	_parametric(sanitize(req.params.groupA), sanitize(req.params.groupB), true, req, res);
+});
+
 router.get('/parametric/:groupA/:groupB', function(req, res) {
-	_parametric(sanitize(req.params.groupA), sanitize(req.params.groupB), req, res);
+	_parametric(sanitize(req.params.groupA), sanitize(req.params.groupB), false, req, res);
 });
 
 router.get('/parametric/:groupA/', function(req, res) {
-	_parametric(sanitize(req.params.groupA), null, req, res);
+	_parametric(sanitize(req.params.groupA), null, false, req, res);
 });
 
 /*

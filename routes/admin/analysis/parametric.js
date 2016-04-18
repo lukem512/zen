@@ -2,6 +2,7 @@ var async = require('async');
 var moment = require('moment');
 var sanitize = require('mongo-sanitize');
 var anova = require('anova');
+var sm = require('statistical-methods');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -17,7 +18,7 @@ var config = require('../../../config');
 // Perform the ANOVA analysis.
 // groupA and groupB are the names of groups to compare,
 // if a group is null then 'ungrouped' users are used.
-module.exports.anova = function(groupA, groupB, callback) {
+module.exports.anova = function(groupA, groupB, callback, trim) {
 	async.parallel([
 		function(next) {
 			Group.members(groupA, next);
@@ -68,6 +69,7 @@ module.exports.anova = function(groupA, groupB, callback) {
 				fulfilments.f.forEach(function(s) {
 					total += moment.duration(moment(s.end_time).diff(s.start_time));
 				});
+				if (trim && total <= 0) { return };
 				for (var i = 0; i < 2; i++) {
 					if (usernames[i].indexOf(fulfilments.u) > -1) {
 						if (!samples[i]) samples[i] = [];
@@ -76,7 +78,17 @@ module.exports.anova = function(groupA, groupB, callback) {
 				}
 			});
 
-			callback(err, anova.table(samples));
+			var results = anova.table(samples);
+
+			results[groupA] = {};
+			results[groupA].mean = sm.mean(samples[0]);
+			results[groupA].sd = sm.stddev(samples[0]);
+
+			results[groupB] = {};
+			results[groupB].mean = sm.mean(samples[1]);
+			results[groupB].sd = sm.stddev(samples[1]);
+
+			callback(err, results);
 		});
 	});
 };

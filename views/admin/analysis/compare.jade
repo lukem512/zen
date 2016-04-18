@@ -1,0 +1,63 @@
+extends ../../layout
+
+block content
+
+	h1= title
+	p Select two groups to compare and click a comparison method to proceed.
+
+	script(src='/javascripts/ui/generic.js')
+	p#message.hidden
+
+	.form-group
+		select#inputGroupA.form-control(name="group", onfocus="this.selectedIndex = -1;")
+			for group in groups
+				option(value="#{group.name}") #{group.name}
+			option(value="") Ungrouped
+
+	.form-group
+		select#inputGroupB.form-control(name="group", onfocus="this.selectedIndex = -1;")
+			for group in groups
+				option(value="#{group.name}") #{group.name}
+			option(value="") Ungrouped
+
+	hr
+
+	button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
+		i.fa.fa-arrow-circle-left
+		| &nbsp; Overview
+
+	| &nbsp;
+
+	button#btnNonparametric.btn.btn-success
+		i.fa.fa-bar-chart
+		| &nbsp; Nonparametric
+
+	| &nbsp;
+
+	button#btnParametric.btn.btn-success
+		i.fa.fa-area-chart
+		| &nbsp; Parametric
+
+	script.
+
+		var _compare = function(slug) {
+			var groupA = $('#inputGroupA').val();
+			var groupB = $('#inputGroupB').val();
+
+			if (groupA == groupB) {
+				_message('You cannot compare a group with itself, please select another group.', true);
+			}
+			else {
+				location.href = '/admin/analysis/' + slug + '/' + groupA + '/' + groupB;
+			}
+		};
+
+		$(function() {
+			$('#btnNonparametric').on('click', function() {
+				_compare('nonparametric');
+			});
+
+			$('#btnParametric').on('click', function() {
+				_compare('parametric');
+			});
+		});

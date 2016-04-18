@@ -1,0 +1,31 @@
+extends ../../layout
+
+block content
+
+	h1= title
+	p Select a user to view.
+
+	.form-group
+		select#inputUsername.form-control(name="username", onfocus="this.selectedIndex = -1;")
+			for user in users
+				option(value="#{user.username}") #{user.username}
+
+	hr
+
+	button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
+		i.fa.fa-arrow-circle-left
+		| &nbsp; Overview
+
+	| &nbsp;
+
+	button#btnView.btn.btn-success
+		i.fa.fa-arrow-circle-right
+		| &nbsp; View
+
+	script.
+		$(function() {
+			$('#btnView').on('click', function() {
+				var user = $('#inputUsername').val();
+				location.href = '/admin/analysis/user/' + user;
+			});
+		});

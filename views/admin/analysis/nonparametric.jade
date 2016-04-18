@@ -1,0 +1,85 @@
+extends ../../layout
+
+block content
+	- function formatDuration(t) {
+		- var str = "";
+		- var days = moment.duration(t).days();
+		- if (days > 0) str += days + ' days, ';
+		-
+		- var hours = moment.duration(t).hours();
+		- if (hours > 0) str += hours + ' hours, ';
+		-
+		- var minutes = moment.duration(t).minutes();
+		- if (minutes > 0) str += minutes + ' minutes, ';
+		- str += moment.duration(t).seconds() + ' seconds';
+		-
+		- return str;
+		- }
+
+	- function groupName(g) {
+		- if (g == "null") return "Ungrouped";
+		- return g;
+		- }
+
+	- function ugroup() {
+		- var g1 = statistics[Object.keys(statistics)[0]];
+		- var g2 = statistics[Object.keys(statistics)[1]];
+		- return (g1 < g2) ? Object.keys(statistics)[0] : Object.keys(statistics)[1];
+		- }
+
+	- function uvalue() {
+		- var g1 = statistics[Object.keys(statistics)[0]].u;
+		- var g2 = statistics[Object.keys(statistics)[1]].u;
+		- return (g1 < g2) ? g1 : g2;
+		- }
+
+	h1= title
+	p
+		| This page contains the nonparametric analysis of the platform data. The analysis has been performed using the 
+		a(href="https://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U_test", target="_blank") Mann-Whitney U-test
+		| .
+
+	#nonparametric
+		table.table.table-bordered
+			thead
+				tr
+					td Group
+					td Size
+					td Average value (Mean)
+					td Central value (Median)
+					td Rank (U-value)
+			tbody
+				tr
+					- var groupA = Object.keys(statistics)[0]
+					td= groupName(groupA)
+					td= statistics[groupA].n
+					td= formatDuration(statistics[groupA].mean)
+					td= formatDuration(statistics[groupA].median)
+					td= statistics[groupA].u
+				
+				tr
+					- var groupB = Object.keys(statistics)[1]
+					td= groupName(groupB)
+					td= statistics[groupB].n
+					td= formatDuration(statistics[groupB].mean)
+					td= formatDuration(statistics[groupB].median)
+					td= statistics[groupB].u
+
+	p The rank, also known as the U-value, is the smaller of the two group ranks.
+
+	#uvalue
+		table.table.table-bordered
+			thead
+				tr
+					td Group
+					td Rank (U-value)
+			tbody
+				tr
+					td= groupName(ugroup())
+					td= uvalue()
+
+	hr
+
+	button#btnBack.btn.btn-primary(onClick="location.href=\"/admin/analysis/\"")
+		i.fa.fa-arrow-circle-left
+		| &nbsp; Overview

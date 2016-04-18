@@ -2,6 +2,7 @@ var async = require('async');
 var moment = require('moment');
 var sanitize = require('mongo-sanitize');
 var mwu = require('mann-whitney-utest');
+var sm = require('statistical-methods');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -17,7 +18,7 @@ var config = require('../../../config');
 // Perform the Mann-Whitney U test.
 // groupA and groupB are the names of groups to compare,
 // if a group is null then 'ungrouped' users are used.
-module.exports.uTest = function(groupA, groupB, callback) {
+module.exports.uTest = function(groupA, groupB, callback, trim) {
 	async.parallel([
 		function(next) {
 			Group.members(groupA, next);
@@ -68,6 +69,8 @@ module.exports.uTest = function(groupA, groupB, callback) {
 				fulfilments.f.forEach(function(s) {
 					total += moment.duration(moment(s.end_time).diff(s.start_time));
 				});
+				if (trim && total <= 0) { return };
+				
 				for (var i = 0; i < 2; i++) {
 					if (usernames[i].indexOf(fulfilments.u) > -1) {
 						if (!samples[i]) samples[i] = [];
@@ -84,8 +87,18 @@ module.exports.uTest = function(groupA, groupB, callback) {
 
 			// 	// Return results object
 			var results = {};
-			results[groupA] = u[0];
-			results[groupB] = u[1];
+
+			results[groupA] = {};
+			results[groupA].u = u[0];
+			results[groupA].mean = sm.mean(samples[0]);
+			results[groupA].median = sm.median(samples[0]);
+			results[groupA].n = samples[0].length;
+
+			results[groupB] = {};
+			results[groupB].u = u[1];
+			results[groupB].mean = sm.mean(samples[1]);
+			results[groupB].median = sm.median(samples[1]);
+			results[groupB].n = samples[1].length;
 
 			callback(err, results);
 		});
