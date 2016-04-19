@@ -81,8 +81,6 @@ module.exports.anova = function(groupA, groupB, callback, trim) {
 
 			var results = anova.table(samples);
 
-			console.log(results.treatment.F, results.treatment.DF, results.residual.DF);
-
 			// Compute the p-value by sampling an F-distribution
 			// and finding the probability that a value is lower than F
 			var nValues = 10000;

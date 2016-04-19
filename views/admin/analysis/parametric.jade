@@ -1,6 +1,21 @@
 extends ../../layout
 
 block content
+	- function formatDuration(t) {
+		- var str = "";
+		- var days = moment.duration(t).days();
+		- if (days > 0) str += days + ' days, ';
+		-
+		- var hours = moment.duration(t).hours();
+		- if (hours > 0) str += hours + ' hours, ';
+		-
+		- var minutes = moment.duration(t).minutes();
+		- if (minutes > 0) str += minutes + ' minutes, ';
+		- str += moment.duration(t).seconds() + ' seconds';
+		-
+		- return str;
+		- }
+
 	- function groupName(g) {
 		- if (!g || g == "null") return "Ungrouped";
 		- return g;
@@ -83,7 +98,7 @@ block content
 					| ,  
 				| &mu;
 				sub= groupName(group)
-				|  = #{statistics[group].mean.toFixed(3)} &plusmn; #{statistics[group].sd.toFixed(3)}
+				|  = #{formatDuration(statistics[group].mean)} &plusmn; #{formatDuration(statistics[group].sd)}
 
 	hr
 
