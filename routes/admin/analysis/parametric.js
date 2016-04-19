@@ -3,6 +3,7 @@ var moment = require('moment');
 var sanitize = require('mongo-sanitize');
 var anova = require('anova');
 var sm = require('statistical-methods');
+var pd = require('probability-distributions');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -79,6 +80,17 @@ module.exports.anova = function(groupA, groupB, callback, trim) {
 			});
 
 			var results = anova.table(samples);
+
+			console.log(results.treatment.F, results.treatment.DF, results.residual.DF);
+
+			// Compute the p-value by sampling an F-distribution
+			// and finding the probability that a value is lower than F
+			var nValues = 10000;
+			var distribution = pd.rexp(nValues, results.treatment.DF, results.residual.DF);
+			var lessThan = distribution.filter(function(val) {
+				return (val < results.treatment.F);
+			});
+			results.treatment.p = lessThan.length / nValues;
 
 			results[groupA] = {};
 			results[groupA].mean = sm.mean(samples[0]);

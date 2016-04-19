@@ -18,6 +18,7 @@ block content
 					td Degrees of Freedom (DF)
 					td Mean Squared (MS)
 					td Score (F-value)
+					td Significance (p-value)
 			tbody
 				tr
 					td Between Samples
@@ -25,6 +26,7 @@ block content
 					td= statistics.treatment.DF
 					td= statistics.treatment.MS
 					td= statistics.treatment.F
+					td= statistics.treatment.p
 
 				
 				tr
@@ -67,15 +69,15 @@ block content
 	p
 		| The p-value, 
 		code p
-		| , is the significance value and is computed using the 
-		a(href="https://en.wikipedia.org/wiki/Brown%E2%80%93Forsythe_test", target="_blank") Brown–Forsythe test
-		| . If the p-value is less than your chosen significance threshold (i.e. 0.05 or 95%) the result can be considered statistically significant.
+		| , is the significance value and is computed by looking at the probability that a random value, sampled from the 
+		a(href="https://en.wikipedia.org/wiki/F-distribution", target="_blank") F-distribution
+		| , is less than the F-value. If the p-value is less than your chosen significance threshold (i.e. 0.05 or 95%) the result can be considered statistically significant.
 
 	#report
 		p To report this statistic, you should include the following text in your report: 
 		code
 			| F(#{statistics.treatment.DF}, #{statistics.residual.DF}) = #{statistics.treatment.F.toFixed(3)}, 
-			| p = XXX, 
+			| p = #{statistics.treatment.p}, 
 			for group, i in groups
 				if i > 0 && i < groups.length
 					| ,  
