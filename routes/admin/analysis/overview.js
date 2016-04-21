@@ -540,7 +540,7 @@ router.get('/data/counts', function(req, res) {
 });
 
 router.get('/view/data/fulfilments', function(req, res) {
-	res.sendFile(path.join(__dirname+'/../../../public/static/scatter.html'));
+	res.sendFile(path.join(__dirname+'/../../../public/static/fulfilments.html'));
 });
 
 router.get('/view/data/counts', function(req, res) {

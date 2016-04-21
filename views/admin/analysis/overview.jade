@@ -16,6 +16,10 @@ block content
 		- return str;
 		- }
 
+	script(src='/vendor/d3/d3.v3.min.js')
+	script(src='/javascripts/admin/analysis/fulfilments.js')
+	script(src='/javascripts/admin/analysis/counts.js')
+
 	h1= title
 	p This page contains an overview of activity on the platform. Select a group or a user to view them in more detail.
 
@@ -30,85 +34,91 @@ block content
 				tr
 					td
 						ul
-							li Total time scheduled: 
+							li Total time scheduled:
 								strong #{formatDuration(statistics.schedules.total)}
-							li Number of schedules: 
+							li Number of schedules:
 								strong #{statistics.schedules.n}
 							if statistics.schedules.meanTotal
-								li Average time scheduled (mean): 
+								li Average time scheduled (mean):
 									strong #{formatDuration(statistics.schedules.meanTotal)}
 							if statistics.schedules.meanN
-								li Average number of schedules (mean): 
+								li Average number of schedules (mean):
 									strong #{statistics.schedules.meanN.toFixed(3)}
 
 							if statistics.schedules.mean
-								li Average time scheduled (mean): 
+								li Average time scheduled (mean):
 									strong #{formatDuration(statistics.schedules.mean)}
 							if statistics.schedules.mode
-								li Most common time scheduled (mode): 
+								li Most common time scheduled (mode):
 									strong #{formatDuration(statistics.schedules.mode)}
 							if statistics.schedules.median
-								li Median time scheduled: 
+								li Median time scheduled:
 									strong #{formatDuration(statistics.schedules.median)}
 							if statistics.schedules.range
-								li Range: 
+								li Range:
 									strong #{formatDuration(statistics.schedules.range)}
 									if statistics.schedules.min && statistics.schedules.max
 											|  (min: #{formatDuration(statistics.schedules.min)}, max: #{formatDuration(statistics.schedules.max)})
 
 					td
 						ul
-							li Total time pledged: 
+							li Total time pledged:
 								strong #{formatDuration(statistics.pledges.total)}
-							li Number of pledges: 
+							li Number of pledges:
 								strong #{statistics.pledges.n}
-							li Total time spent fulfilling pledges: 
+							li Total time spent fulfilling pledges:
 								strong #{formatDuration(statistics.pledges.fulfilled)}
 							if statistics.pledges.mean
-								li Average time pledged (mean): 
+								li Average time pledged (mean):
 									strong #{formatDuration(statistics.pledges.mean)}
 							if statistics.pledges.mode
-								li Most common time pledged (mode): 
+								li Most common time pledged (mode):
 									strong #{formatDuration(statistics.pledges.mode)}
 							if statistics.pledges.median
-								li Median time pledged: 
+								li Median time pledged:
 									strong #{formatDuration(statistics.pledges.median)}
 							if statistics.pledges.range
-								li Range: 
+								li Range:
 									strong #{formatDuration(statistics.pledges.range)}
 									if statistics.pledges.min && statistics.pledges.max
 											|  (min: #{formatDuration(statistics.pledges.min)}, max: #{formatDuration(statistics.pledges.max)})
 
 					td
 						ul
-							li Total time logged: 
+							li Total time logged:
 								strong #{formatDuration(statistics.fulfilments.total)}
-							li Number of logs: 
+							li Number of logs:
 								strong #{statistics.fulfilments.n}
-							li Total time logged in real-time: 
+							li Total time logged in real-time:
 								strong #{formatDuration(statistics.fulfilments.real_time)}
-							li Total time logged in retrospectively: 
+							li Total time logged in retrospectively:
 								strong #{formatDuration(statistics.fulfilments.retrospective)}
 							if statistics.fulfilments.mean
-								li Average time logged (mean): 
+								li Average time logged (mean):
 									strong #{formatDuration(statistics.fulfilments.mean)}
 							if statistics.fulfilments.mode
-								li Most common time logged (mode): 
+								li Most common time logged (mode):
 									strong #{formatDuration(statistics.fulfilments.mode)}
 							if statistics.fulfilments.median
-								li Median time logged: 
+								li Median time logged:
 									strong #{formatDuration(statistics.fulfilments.median)}
 							if statistics.fulfilments.range
-								li Range: 
+								li Range:
 									strong #{formatDuration(statistics.fulfilments.range)}
 									if statistics.fulfilments.min && statistics.fulfilments.max
 											|  (min: #{formatDuration(statistics.fulfilments.min)}, max: #{formatDuration(statistics.fulfilments.max)})
 
-		if statistics.users
-			p 
-				| This data is taken from 
-				strong #{statistics.users.usernames.length}
-				|  users.
+	if !view
+		#graphs.d3.row
+			.col-xs-6
+				a(href="/admin/analysis/view/data/fulfilments", title="Click to explore the graph")
+					#fulfilments
+				script drawFulfilmentsGraph('#fulfilments', $('#graphs').width() / 2);
+
+			.col-xs-6
+				a(href="/admin/analysis/view/data/counts", title="Click to explore the graph")
+					#counts
+				script drawCountsGraph('#counts', true, true, $('#graphs').width() / 2);
 
 	hr
 

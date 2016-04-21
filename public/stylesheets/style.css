@@ -22,7 +22,7 @@ body {
     float: none;
 }
 
-.dotted { 
+.dotted {
 	border-bottom: 1px black dotted;
 }
 
@@ -78,4 +78,34 @@ hr {
 
 #noscript-warning-box #text {
 	padding: 1em;
+}
+
+.d3 {
+  font: 11px serif;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
 }

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
   <meta charset="utf-8">
-  <title>Counts Graph</title>
+  <title>Fulfiments Graph</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
 
   <script src="/vendor/d3/d3.v3.min.js"></script>
   <script src="/vendor/jQuery/jQuery.js"></script>
-  <script src="/javascripts/admin/analysis/counts.js"></script>
+  <script src="/vendor/moment/moment.js"></script>
+  <script src="/javascripts/admin/analysis/fulfilments.js"></script>
 
   <!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
   <!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
@@ -15,7 +16,7 @@
   <div id="graph" class="d3">
   </div>
   <script>
-    drawCountsGraph('#graph', true, true, $(window).width());
+    drawFulfilmentsGraph('#graph', $(window).width());
   </script>
 </body>
 </html>
