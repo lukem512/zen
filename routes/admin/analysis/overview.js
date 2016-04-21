@@ -6,6 +6,7 @@ var moment = require('moment');
 var sanitize = require('mongo-sanitize');
 var sm = require('statistical-methods');
 var csv = require('express-csv');
+var path = require('path');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -461,15 +462,17 @@ var defaultRange = function(start_time, end_time) {
 
 // Return all fulfilments in the form: username, groups, timestamp, duration
 var getFulfilmentsCSV = function (start_time, end_time, callback) {
-	var result = ['Username', 'Groups', 'Timestamp', 'Duration'];
+	var result = [];
 	var range = defaultRange(start_time, end_time);
 
-	User.find({}, function(err, users) {
+	result.push(["Username", "Groups", "Timestamp", "Duration"]);
+
+	User.find({}).sort({ groups: 'desc' }).exec(function(err, users) {
 		if (err) return callback(err);
 
 		var groups = {};
 		users.forEach(function(u) {
-			groups[u.username] = u.groups;
+			groups[u.username] = (u.groups && u.groups.length > 0) ? u.groups : 'CONTROL';
 		});
 
 		Fulfilment.overlaps(range.start_time, range.end_time, function(err, fulfilments) {
@@ -486,15 +489,17 @@ var getFulfilmentsCSV = function (start_time, end_time, callback) {
 
 // Return all counts in the form: username, groups, total
 var getCountsCSV = function (start_time, end_time, callback) {
-	var result = ['Username', 'Groups', 'Count'];
+	var result = [];
 	var range = defaultRange(start_time, end_time);
 
-	User.find({}, function(err, users) {
+	result.push(["Username", "Groups", "Count"]);
+
+	User.find({}).sort({ groups: 'desc' }).exec(function(err, users) {
 		if (err) return callback(err);
 
 		var groups = {};
 		async.each(users, function(u, next) {
-			groups[u.username] = u.groups;
+			groups[u.username] = (u.groups && u.groups.length > 0) ? u.groups : 'CONTROL';
 			Fulfilment.count({
 				username: u.username,
 				start_time: { $lt: range.end_time },
@@ -527,21 +532,19 @@ router.get('/data/fulfilments/:from/:to', function(req, res) {
 		})
 });
 
-router.get('/data/totals', function(req, res) {
+router.get('/data/counts', function(req, res) {
 	getCountsCSV(null, null, function(err, data) {
 		if (err) return response.error.server(req, res, err);
 		return res.csv(data);
 	})
 });
 
-router.get('/data/totals/:from/:to', function(req, res) {
-	getCountsCSV(
-		sanitize(req.params.from),
-		sanitize(req.params.to),
-		function(err, data) {
-			if (err) return response.error.server(req, res, err);
-			return res.csv(data);
-		})
+router.get('/view/data/fulfilments', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/scatter.html'));
+});
+
+router.get('/view/data/counts', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/counts.html'));
 });
 
 /*
