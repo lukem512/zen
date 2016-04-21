@@ -56,7 +56,7 @@ block content
 					td= formatDuration(statistics[groupA].mean)
 					td= formatDuration(statistics[groupA].median)
 					td= statistics[groupA].u
-				
+
 				tr
 					- var groupB = Object.keys(statistics)[1]
 					td= groupName(groupB)
@@ -65,18 +65,57 @@ block content
 					td= formatDuration(statistics[groupB].median)
 					td= statistics[groupB].u
 
-	p The rank, also known as the U-value, is the smaller of the two group ranks.
+	p
+		| The rank, also known as the U-value, is the smaller of the two group ranks. This is compared against a critical value, found in a 
+		a(href="http://ocw.umb.edu/psychology/psych-270/other-materials/RelativeResourceManager.pdf", target="_blank") U-table
+		|  or using an approximation. If the approximate critical value is much lower than expected it may be because your sample size is not large enough to be approximated as a normal distribution. If it is close to 20 then use the maximum value in the U-table.
 
 	#uvalue
 		table.table.table-bordered
 			thead
 				tr
-					td Group
 					td Rank (U-value)
+					td Approximate Critical Value
 			tbody
 				tr
-					td= groupName(ugroup())
 					td= uvalue()
+					td= statistics[groupA].critical
+
+	p
+		| To report the statistic, include the following text in your report:
+
+		blockquote The Mann-Whitney U Test was performed on samples of size 
+			= statistics[groupA].n
+			|  and 
+			= statistics[groupB].n
+			|. The reported U-value, 
+			code U
+			| , was 
+			= uvalue()
+			| . Using the approximated critical value, 
+			code CRIT
+			| , of 
+			= statistics[groupA].critical.toFixed(3)
+			| , computed using a correction for tied ranks, the test indicates that the result is 
+			if uvalue() > statistics[groupA].critical
+				|  not
+			|  statistically significant as 
+			if uvalue() > statistics[groupA].critical
+				code U > CRIT
+			else
+				code U < CRIT
+			| .
+
+		code
+			| U(
+			= statistics[groupA].n
+			| , 
+			= statistics[groupB].n
+			| ) = 
+			= uvalue()
+			| , CRIT = 
+			= statistics[groupA].critical
+			| , p = 0.05
 
 	hr
 
@@ -86,7 +125,7 @@ block content
 
 	if !trim
 		| &nbsp;
-		
+
 		button#btnTrim.btn.btn-warning(title="Trim participants with no fulfilments", onClick="location.href=location.href+\"/trim\"")
 			i.fa.fa-scissors
 			| &nbsp; Trim

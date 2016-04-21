@@ -70,7 +70,7 @@ module.exports.uTest = function(groupA, groupB, callback, trim) {
 					total += moment.duration(moment(s.end_time).diff(s.start_time));
 				});
 				if (trim && total <= 0) { return };
-				
+
 				for (var i = 0; i < 2; i++) {
 					if (usernames[i].indexOf(fulfilments.u) > -1) {
 						if (!samples[i]) samples[i] = [];
@@ -87,12 +87,13 @@ module.exports.uTest = function(groupA, groupB, callback, trim) {
 
 			// 	// Return results object
 			var results = {};
-
 			results[groupA] = {};
 			results[groupA].u = u[0];
 			results[groupA].mean = sm.mean(samples[0]);
 			results[groupA].median = sm.median(samples[0]);
 			results[groupA].n = samples[0].length;
+			
+			results[groupA].critical = mwu.criticalValue(u, samples);
 
 			results[groupB] = {};
 			results[groupB].u = u[1];
