@@ -1,11 +1,11 @@
 <!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
 <!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
 
-function drawFulfilmentsGraph(selector, width, height) {
+function drawFulfilmentsAltGraph(selector, width, height) {
   width = width || 960;
   height = height || 500;
 
-  var margin = {top: 20, right: 40, bottom: 100, left: 40},
+  var margin = {top: 20, right: 40, bottom: 100, left: 80},
       width = width - margin.left - margin.right,
       height = height - margin.top - margin.bottom;
 
@@ -23,10 +23,15 @@ function drawFulfilmentsGraph(selector, width, height) {
       xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
   // setup y
-  var yValue = function(d) { return d.Duration / 1000 / 60 }, // data -> value
-      yScale = d3.scale.linear().range([height, 0]), // value -> display
+  var yValue = function(d) { return d.Username; }, // data -> value
+      yScale = d3.scale.ordinal().rangeRoundBands([0, height], .1), // value -> display
       yMap = function(d) { return yScale(yValue(d));}, // data -> display
       yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+  // dot sizes
+  var dotValue = function(d) { return d.Duration }, // data -> value
+      dotScale = d3.scale.linear().range([3, 10]), // value -> display
+      dotMap = function(d) { return dotScale(dotValue(d)); }; // data -> display
 
   // setup fill colors
   var cValue = function(d) { return d.Groups; },
@@ -50,13 +55,14 @@ function drawFulfilmentsGraph(selector, width, height) {
 
     // change string (from CSV) into correct format
     data.forEach(function(d) {
-      d.unix = +moment(d.Timestamp).format('X'); // Format as Unix Timestamp
       d.Duration = +d.Duration; // Format as number
+      d.unix = +moment(d.Timestamp).format('X'); // Format as Unix Timestamp
     });
 
     // don't want dots overlapping axis, so add in buffer to data domain
     xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-    yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+    yScale.domain(data.map(function(d) { return d.Username; }));
+    dotScale.domain([d3.min(data, dotValue), d3.max(data, dotValue)]);
 
     // x-axis
     svg.append("g")
@@ -85,14 +91,19 @@ function drawFulfilmentsGraph(selector, width, height) {
         .attr("y", 6)
         .attr("dy", ".71em")
         .style("text-anchor", "end")
-        .text("Fulfilment Duration (minutes)");
+        .text("Participant Username")
+      .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)" );
 
     // draw dots
     svg.selectAll(".dot")
         .data(data)
       .enter().append("circle")
         .attr("class", "dot")
-        .attr("r", 3.5)
+        .attr("r", dotMap)
         .attr("cx", xMap)
         .attr("cy", yMap)
         .style("fill", function(d) { return color(cValue(d));})
@@ -101,7 +112,7 @@ function drawFulfilmentsGraph(selector, width, height) {
             tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-            tooltip.html(d.Username + "<br/> (" + d.Timestamp
+            tooltip.html(d.Username + " logged a fulfilment of " + (d.Duration / 1000 / 60) + " minutes<br/> (" + d.Timestamp
   	        + ", " + yValue(d) + ")")
                  .style("left", (d3.event.pageX + 5) + "px")
                  .style("top", (d3.event.pageY - 28) + "px");

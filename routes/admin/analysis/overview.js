@@ -441,8 +441,16 @@ router.get('/view/data/fulfilments', function(req, res) {
 	res.sendFile(path.join(__dirname+'/../../../public/static/fulfilments.html'));
 });
 
+router.get('/view/data/fulfilments/alt', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/fulfilments-alt.html'));
+});
+
 router.get('/view/data/counts', function(req, res) {
 	res.sendFile(path.join(__dirname+'/../../../public/static/counts.html'));
+});
+
+router.get('/view/data/frequency', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/frequency.html'));
 });
 
 /*

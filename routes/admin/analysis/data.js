@@ -92,6 +92,36 @@ var getCountsCSV = function (start_time, end_time, callback) {
 	});
 };
 
+// Return the frequency of fulfilment times in the form: duration, groups, frequency
+var getFrequencyCSV = function (start_time, end_time, callback) {
+	getFulfilmentsCSV(start_time, end_time, function(err, data) {
+		if (err) return callback(err);
+
+		// Remove the CSV heading line
+		data.splice(0, 1)
+
+		var result = [];
+		result.push(['Duration', 'Groups', 'Frequency']);
+
+		var Duration = 3, Groups = 1;
+
+		var frequencies = {};
+		data.forEach(function(d) {
+			if (!frequencies[d[Duration]]) frequencies[d[Duration]] = {};
+			if (!frequencies[d[Duration]][d[Groups]]) frequencies[d[Duration]][d[Groups]] = 1;
+			else frequencies[d[Duration]][d[Groups]]++;
+		});
+
+		Object.keys(frequencies).forEach(function(duration) {
+			Object.keys(frequencies[duration]).forEach(function(group) {
+				result.push([duration, group, frequencies[duration][group]])
+			});
+		});
+
+		callback(err, result);
+	})
+};
+
 router.get('/fulfilments', function(req, res) {
 	getFulfilmentsCSV(null, null, function(err, data) {
 		if (err) return response.error.server(req, res, err);
@@ -111,6 +141,13 @@ router.get('/fulfilments/:from/:to', function(req, res) {
 
 router.get('/counts', function(req, res) {
 	getCountsCSV(null, null, function(err, data) {
+		if (err) return response.error.server(req, res, err);
+		return res.csv(data);
+	})
+});
+
+router.get('/frequency', function(req, res) {
+	getFrequencyCSV(null, null, function(err, data) {
 		if (err) return response.error.server(req, res, err);
 		return res.csv(data);
 	})

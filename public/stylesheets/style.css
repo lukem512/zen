@@ -84,6 +84,11 @@ hr {
   font: 11px serif;
 }
 
+#graph-title {
+  font: 14px serif;
+  text-align: center;
+}
+
 .bar {
   fill: steelblue;
 }

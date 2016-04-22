@@ -29,8 +29,8 @@ function drawFulfilmentsGraph(selector, width, height) {
       yAxis = d3.svg.axis().scale(yScale).orient("left");
 
   // setup fill colors
-  var cValue = function(d) { return d.Groups; },
-      color = d3.scale.category10();
+  var cValue = function(d) { return d.Username; },
+      color = d3.scale.category20();
 
   // add the graph canvas to the body of the webpage
   var svg = d3.select(selector).append("svg")
@@ -87,9 +87,29 @@ function drawFulfilmentsGraph(selector, width, height) {
         .style("text-anchor", "end")
         .text("Fulfilment Duration (minutes)");
 
+    var SOCIAL = data.filter(function(d) {
+      return d.Groups == "SOCIAL";
+    });
+
+    var CONTROL = data.filter(function(d) {
+      return d.Groups == "CONTROL";
+    });
+
+    var SOCIALcolours = ["#fff7ec","#fee8c8","#fdd49e","#fdbb84","#fc8d59","#ef6548","#d7301f","#b30000","#7f0000"];
+
+    var CONTROLcolours = ["#f7fcfd","#e5f5f9","#ccece6","#99d8c9","#66c2a4","#41ae76","#238b45","#006d2c","#00441b"];
+
+    SOCIALcolours = d3.scale.ordinal()
+      .domain(SOCIAL)
+      .range(colorbrewer.OrRd[9]);
+
+    CONTROLcolours = d3.scale.ordinal()
+      .domain(CONTROL)
+      .range(colorbrewer.BuGn[9]);
+
     // draw dots
     svg.selectAll(".dot")
-        .data(data)
+        .data(SOCIAL)
       .enter().append("circle")
         .attr("class", "dot")
         .attr("r", 3.5)
@@ -112,26 +132,28 @@ function drawFulfilmentsGraph(selector, width, height) {
                  .style("opacity", 0);
         });
 
-    // draw legend
-    var legend = svg.selectAll(".legend")
-        .data(color.domain())
-      .enter().append("g")
-        .attr("class", "legend")
-        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-    // draw legend colored rectangles
-    legend.append("rect")
-        .attr("x", width - 18)
-        .attr("width", 18)
-        .attr("height", 18)
-        .style("fill", color);
-
-    // draw legend text
-    legend.append("text")
-        .attr("x", width - 24)
-        .attr("y", 9)
-        .attr("dy", ".35em")
-        .style("text-anchor", "end")
-        .text(function(d) { return d;})
-  });
+    svg.selectAll(".rect")
+        .data(CONTROL)
+      .enter().append("rect")
+        .attr("class", "rect")
+        .attr("x", xMap)
+        .attr("y", yMap)
+        .attr("width", 7)
+        .attr("height", 7)
+        .style("fill", function(d) { return color(cValue(d));})
+        .style("opacity", 0.85)
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+            tooltip.html(d.Username + "<br/> (" + d.Timestamp
+  	        + ", " + yValue(d) + ")")
+                 .style("left", (d3.event.pageX + 5) + "px")
+                 .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+        });
 }
