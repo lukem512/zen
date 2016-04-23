@@ -16,11 +16,18 @@ function drawFulfilmentsGraph(selector, width, height) {
    * axis - sets up axis
    */
 
+  // Human-readable time
+  var timeFormat = function(d) {
+    var date = new Date(d);
+    console.log(d, date);
+    return d3.time.format('%x')(date);
+  };
+
   // setup x
   var xValue = function(d) { return d.unix; }, // data -> value
       xScale = d3.scale.linear().range([0, width]), // value -> display
       xMap = function(d) { return xScale(xValue(d));}, // data -> display
-      xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+      xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(timeFormat).ticks(34);
 
   // setup y
   var yValue = function(d) { return d.Duration / 1000 / 60 }, // data -> value
@@ -37,7 +44,7 @@ function drawFulfilmentsGraph(selector, width, height) {
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
   // add the tooltip area to the webpage
   var tooltip = d3.select(selector).append("div")
@@ -50,7 +57,7 @@ function drawFulfilmentsGraph(selector, width, height) {
 
     // change string (from CSV) into correct format
     data.forEach(function(d) {
-      d.unix = +moment(d.Timestamp).format('X'); // Format as Unix Timestamp
+      d.unix = +moment(d.Timestamp).format('x'); // Format as Unix Timestamp
       d.Duration = +d.Duration; // Format as number
     });
 

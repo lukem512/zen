@@ -16,11 +16,18 @@ function drawFulfilmentsAltGraph(selector, width, height) {
    * axis - sets up axis
    */
 
+   // Human-readable time
+   var timeFormat = function(d) {
+     var date = new Date(d);
+     console.log(d, date);
+     return d3.time.format('%x')(date);
+   };
+
   // setup x
   var xValue = function(d) { return d.unix; }, // data -> value
       xScale = d3.scale.linear().range([0, width]), // value -> display
       xMap = function(d) { return xScale(xValue(d));}, // data -> display
-      xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+      xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(timeFormat).ticks(34);
 
   // setup y
   var yValue = function(d) { return d.Username; }, // data -> value
@@ -58,6 +65,15 @@ function drawFulfilmentsAltGraph(selector, width, height) {
       d.Duration = +d.Duration; // Format as number
       d.unix = +moment(d.Timestamp).format('X'); // Format as Unix Timestamp
     });
+
+    var sort = true;
+    if (sort) {
+      data = data.sort(function(a, b){
+          if (a.Groups > b.Groups) return -1;
+          if (a.Groups < b.Groups) return 1;
+          return 0;
+      });
+    }
 
     // don't want dots overlapping axis, so add in buffer to data domain
     xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
