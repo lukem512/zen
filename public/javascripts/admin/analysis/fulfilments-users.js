@@ -56,7 +56,7 @@ function drawFulfilmentsUsersGraph(selector, width, height) {
 
     // change string (from CSV) into correct format
     data.forEach(function(d) {
-      d.unix = +moment(d.Timestamp).format('X'); // Format as Unix Timestamp
+      d.unix = +moment(d.Timestamp).format('x'); // Format as Unix Timestamp
       d.Duration = +d.Duration; // Format as number
     });
 
