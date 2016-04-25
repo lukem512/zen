@@ -1,7 +1,7 @@
 <!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
 <!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
 
-function drawFulfilmentsGraph(selector, width, height) {
+function drawFulfilmentsUsersGraph(selector, width, height) {
   width = width || 960;
   height = height || 500;
 
@@ -16,11 +16,17 @@ function drawFulfilmentsGraph(selector, width, height) {
    * axis - sets up axis
    */
 
+   // Human-readable time
+   var timeFormat = function(d) {
+     var date = new Date(d);
+     return d3.time.format('%x')(date);
+   };
+
   // setup x
   var xValue = function(d) { return d.unix; }, // data -> value
       xScale = d3.scale.linear().range([0, width]), // value -> display
       xMap = function(d) { return xScale(xValue(d));}, // data -> display
-      xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+      xAxis = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(timeFormat).ticks(34);
 
   // setup y
   var yValue = function(d) { return d.Duration / 1000 / 60 }, // data -> value

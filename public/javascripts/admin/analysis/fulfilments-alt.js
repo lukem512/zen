@@ -19,7 +19,6 @@ function drawFulfilmentsAltGraph(selector, width, height) {
    // Human-readable time
    var timeFormat = function(d) {
      var date = new Date(d);
-     console.log(d, date);
      return d3.time.format('%x')(date);
    };
 
