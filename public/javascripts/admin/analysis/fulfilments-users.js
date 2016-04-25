@@ -162,5 +162,5 @@ function drawFulfilmentsUsersGraph(selector, width, height) {
                  .duration(500)
                  .style("opacity", 0);
         });
-  }
+  });
 }
