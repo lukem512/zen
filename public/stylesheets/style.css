@@ -104,10 +104,6 @@ hr {
   shape-rendering: crispEdges;
 }
 
-.x.axis path {
-  display: none;
-}
-
 .tooltip {
   position: absolute;
   width: 200px;
