@@ -445,6 +445,10 @@ router.get('/view/data/fulfilments/alt', function(req, res) {
 	res.sendFile(path.join(__dirname+'/../../../public/static/fulfilments-alt.html'));
 });
 
+router.get('/view/data/fulfilments/users', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/fulfilments-users.html'));
+});
+
 router.get('/view/data/counts', function(req, res) {
 	res.sendFile(path.join(__dirname+'/../../../public/static/counts.html'));
 });
