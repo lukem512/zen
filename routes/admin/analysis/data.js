@@ -5,6 +5,7 @@ var async = require('async');
 var moment = require('moment');
 var sanitize = require('mongo-sanitize');
 var csv = require('express-csv');
+var sm = require('statistical-methods');
 
 var User = require('../../../models/users');
 var Group = require('../../../models/groups');
@@ -92,6 +93,95 @@ var getCountsCSV = function (start_time, end_time, callback) {
 	});
 };
 
+// Return the total fulfilment times of participants in the form:
+// username, groups, total duration
+var getDurationsCSV = function (start_time, end_time, callback) {
+	getFulfilmentsCSV(start_time, end_time, function(err, data) {
+		if (err) return callback(err);
+
+		// Remove the CSV heading line
+		data.splice(0, 1)
+
+		var result = [];
+		result.push(['Username', 'Groups', 'Total Duration']);
+
+		var Username = 0, Groups = 1, Duration = 3;
+
+		var durations = {};
+		data.forEach(function(d) {
+			if (!durations[d[Groups]]) durations[d[Groups]] = {};
+			if (!durations[d[Groups]][d[Username]]) durations[d[Groups]][d[Username]] = 0;
+			durations[d[Groups]][d[Username]] += d[Duration];
+		});
+
+		Object.keys(durations).forEach(function(group) {
+			Object.keys(durations[group]).forEach(function(username) {
+				result.push([username, group, durations[group][username]])
+			});
+		});
+
+		callback(err, result);
+	})
+};
+
+// Return the regularity of frequency of fulfilment times in the form:
+// username, groups, variance
+var getRegularityCSV = function (start_time, end_time, callback) {
+	getFulfilmentsCSV(start_time, end_time, function(err, data) {
+		if (err) return callback(err);
+
+		// Remove the CSV heading line
+		data.splice(0, 1)
+
+		var result = [];
+		result.push(['Username', 'Groups', 'Variance']);
+
+		var Username = 0, Groups = 1, Timestamp = 2, Duration = 3;
+
+		var fulfilments = [];
+		data.forEach(function(d) {
+			if (!fulfilments[d[Username]]) {
+				fulfilments[d[Username]] = {
+					data: [],
+					groups: d[Groups]
+				};
+			}
+
+			var start = moment(d[Timestamp]);
+			var end = moment(d[Timestamp]).add(moment.duration(d[Duration]));
+
+			fulfilments[d[Username]].data.push({
+				start: start,
+				end: end
+			});
+		});
+
+		Object.keys(fulfilments).forEach(function(username) {
+			// Sort by start time
+			var sorted = fulfilments[username].data.sort(function(a, b) {
+				if (a.start.isBefore(b.start)) return -1;
+				if (a.start.isAfter(b.start)) return 1;
+				return 0;
+			});
+
+			// Find time between fulfilments
+			var differences = [];
+			for(var i = 0; i < sorted.length - 1; i++) {
+				differences.push(sorted[i + 1].start.diff(sorted[i].end, 'minutes'));
+			}
+
+			var variance = 0;
+			if (differences.length > 1) {
+				variance = sm.variance(differences);
+			}
+
+			result.push([username, fulfilments[username].groups, variance]);
+		});
+
+		callback(err, result);
+	})
+};
+
 // Return the frequency of fulfilment times in the form: duration, groups, frequency
 var getFrequencyCSV = function (start_time, end_time, callback) {
 	getFulfilmentsCSV(start_time, end_time, function(err, data) {
@@ -116,6 +206,52 @@ var getFrequencyCSV = function (start_time, end_time, callback) {
 			Object.keys(frequencies[duration]).forEach(function(group) {
 				result.push([duration, group, frequencies[duration][group]])
 			});
+		});
+
+		callback(err, result);
+	})
+};
+
+// Return the frequency of fulfilment times in the form:
+// groups, mean, median, mode, range, stddev
+var getGroupTotalsCSV = function (start_time, end_time, callback) {
+	getFulfilmentsCSV(start_time, end_time, function(err, data) {
+		if (err) return callback(err);
+
+		// Remove the CSV heading line
+		data.splice(0, 1)
+
+		var result = [];
+		result.push(['Groups', 'Participant Count',
+								 'Mean', 'Median', 'Mode', 'Range',
+								 'Minimum', 'Maximum', 'Standard Deviation']);
+
+	  var Username = 0, Groups = 1, Timestamp = 2, Duration = 3;
+
+		var totals = {};
+		data.forEach(function(d) {
+			if (!totals[d[Groups]]) totals[d[Groups]] = {};
+			if (!totals[d[Groups]][d[Username]]) totals[d[Groups]][d[Username]] = [];
+			totals[d[Groups]][d[Username]].push(d[Duration]);
+		});
+
+		Object.keys(totals).forEach(function(group) {
+			var durations = [];
+			Object.keys(totals[group]).forEach(function(username) {
+				durations.push(sm.sum(totals[group][username]));
+			});
+
+			result.push([
+				group,
+				Object.keys(totals[group]).length,
+				sm.mean(durations),
+				sm.median(durations),
+				sm.mode(durations),
+				sm.range(durations),
+				sm.min(durations),
+				sm.max(durations),
+				sm.stddev(durations)
+			]);
 		});
 
 		callback(err, result);
@@ -148,6 +284,27 @@ router.get('/counts', function(req, res) {
 
 router.get('/frequency', function(req, res) {
 	getFrequencyCSV(null, null, function(err, data) {
+		if (err) return response.error.server(req, res, err);
+		return res.csv(data);
+	})
+});
+
+router.get('/regularity', function(req, res) {
+	getRegularityCSV(null, null, function(err, data) {
+		if (err) return response.error.server(req, res, err);
+		return res.csv(data);
+	})
+});
+
+router.get('/group', function(req, res) {
+	getGroupTotalsCSV(null, null, function(err, data) {
+		if (err) return response.error.server(req, res, err);
+		return res.csv(data);
+	})
+});
+
+router.get('/durations', function(req, res) {
+	getDurationsCSV(null, null, function(err, data) {
 		if (err) return response.error.server(req, res, err);
 		return res.csv(data);
 	})

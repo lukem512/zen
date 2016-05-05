@@ -457,6 +457,14 @@ router.get('/view/data/frequency', function(req, res) {
 	res.sendFile(path.join(__dirname+'/../../../public/static/frequency.html'));
 });
 
+router.get('/view/data/regularity', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/regularity.html'));
+});
+
+router.get('/view/data/duration', function(req, res) {
+	res.sendFile(path.join(__dirname+'/../../../public/static/durations.html'));
+});
+
 /*
  * Export the routes.
 */

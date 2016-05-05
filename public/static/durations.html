@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
   <meta charset="utf-8">
-  <title>Counts Graph</title>
+  <title>Participant Fulfilment Times Graph</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
 
   <script src="/vendor/jquery/jquery.js"></script>
   <script src="/vendor/d3/d3.v3.min.js"></script>
-  <script src="/javascripts/admin/analysis/counts.js"></script>
+  <script src="/javascripts/admin/analysis/durations.js"></script>
 
   <!-- Example based on http://bl.ocks.org/mbostock/3887118 -->
   <!-- Tooltip example from http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html -->
 
 <body>
-  <div id="graph-title">Fulfilment Count of Participants from Different Groups</div>
+  <div id="graph-title">Participant Fulfilment Times</div>
   <div id="graph" class="d3">
   </div>
   <script>
-    drawCountsGraph('#graph', true, true, $(window).width());
+    drawDurationsGraph('#graph', true, true, $(window).width());
   </script>
 </body>
 </html>
